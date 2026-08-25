@@ -427,15 +427,15 @@ basketball-platform/
 
 ---
 
-## 6. Open Decisions Before Scaffolding
+## 6. Open Decisions — resolved with proposed defaults (2026-08-25)
 
-1. **Player/Coach account provisioning.** The PRD gives Admin and Coach the "add/remove players from team" capability but doesn't specify signup flow. Proposed default: **no public self-registration** — Admin creates Coach accounts, Admin/Coach creates Player accounts (name + email), and the new user sets their own password via a first-login link. Since email sending is explicitly post-MVP in the PRD (§9), that link would need to be relayed manually (shown to the admin to copy) unless we bring in a transactional-email provider now — **please confirm which you want for MVP.**
-2. **Attendance % formula.** Does "Excused" count toward, against, or get excluded from the attendance percentage denominator? Not specified in the PRD — affects `lib/` business logic and how the stat is displayed on both dashboards.
-3. **Overall weekly/monthly score**: auto-computed as the average of that period's category scores, or entered separately by the coach? Affects whether `PerformanceEvaluation.overallScore` is a stored/computed column or free input.
-4. **Minors' data.** Several players are likely minors (jersey/position/contact fields, plus a `guardianContact` field I've added pre-emptively). The PRD doesn't mention consent handling, and "Parent accounts" is explicitly post-MVP — worth a decision now on whether any interim safeguard (e.g., admin-only visibility of a minor's contact info) is needed before launch, even without full parent accounts.
-5. **One team per player** is assumed for MVP (matches the PRD's data-relationships diagram). Confirm this holds — a player never needs to appear on two rosters simultaneously (e.g. varsity + travel team) in year one.
-6. **Video storage budget.** R2 has no egress fees but still bills storage/operations — if video volume is expected to be large from day one, worth deciding now vs. defaulting to R2 and revisiting.
-7. **Multi-club readiness**: the schema above has no `Club` entity yet (single implicit organization). Adding one later is additive (a nullable `clubId` on `Team` and `User`), not a breaking change — flagging only so it's not assumed to be in MVP scope.
+1. **Player/Coach account provisioning** → **No public self-registration.** Admin creates Coach accounts; Admin/Coach creates Player accounts (name + email). New users set their own password via a first-login link, relayed manually by the admin for now (no transactional-email provider in MVP, consistent with the PRD marking email as post-MVP). Revisit once volume makes manual relay painful.
+2. **Attendance % formula** → Present and Late count as attended; Absent counts against; **Excused is excluded from both numerator and denominator** (doesn't help or hurt the percentage). Implemented as a single function in `lib/attendance.ts` so the rule lives in one place.
+3. **Overall weekly/monthly score** → **Auto-computed** as the average of that period's category scores (rounded to 1 decimal), not a separate coach input. Simpler data entry, consistent scoring, one fewer field for a non-technical coach to fill in. `overallScore` is stored (denormalized) at write time for fast dashboard/trend queries, recomputed whenever category scores change.
+4. **Minors' data** → `PlayerProfile` contact fields (`contactPhone`, `guardianName`, `guardianContact`) are visible only to Admin and the player's own assigned Coach(es) — never to other coaches/players. No consent-collection flow in MVP (matches PRD scope); this access restriction is the interim safeguard until Parent accounts (post-MVP) exist.
+5. **One team per player** → confirmed for MVP, as modeled.
+6. **Video storage** → Cloudflare R2, as proposed, revisit only if volume/budget changes.
+7. **Multi-club readiness** → no `Club` entity in MVP; deferred as planned (additive later).
 
 ---
 
