@@ -1,0 +1,372 @@
+/*
+ * Data model at a glance (see ARCHITECTURE.md §2 for the full ERD + rationale):
+ *   User             — every account (ADMIN/COACH/PLAYER), auth lives here
+ *   CoachProfile     — 1:1 extension of a COACH user
+ *   PlayerProfile    — 1:1 extension of a PLAYER user; belongs to one Team
+ *   Team             — roster + owning entity for sessions/videos/announcements
+ *   TeamCoach        — many-to-many: a team can have several coaches, a
+ *                       coach can manage several teams
+ *   TrainingSession  — created/managed by a coach, scoped to a team
+ *   AttendanceRecord — one row per (session, player)
+ *   Video            — uploaded by a coach/admin, assigned via VideoAssignment
+ *   PerformanceEvaluation — weekly/monthly, one per (player, coach, period)
+ *   PerformanceCategoryScore — one row per scored category per evaluation
+ *   Feedback         — written note, optionally tied to a session or evaluation
+ *   Notification     — in-app only for MVP
+ *   Announcement     — platform-wide (admin) or team-scoped (coach/admin)
+ */
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Pooled connection, used for normal queries — point this at your
+  // provider's pooled connection string in production (e.g. Neon).
+  url       = env("DATABASE_URL")
+  // Unpooled connection, used only for running migrations.
+  directUrl = env("DIRECT_URL")
+}
+
+// ENUMS
+
+enum UserRole {
+  ADMIN
+  COACH
+  PLAYER
+}
+
+enum PlayerPosition {
+  PG
+  SG
+  SF
+  PF
+  C
+}
+
+enum PlayerStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TeamStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum VideoCategory {
+  SHOOTING
+  BALL_HANDLING
+  DEFENSE
+  PASSING
+  FINISHING
+  FITNESS
+  FOOTWORK
+  CONDITIONING
+  GAME_ANALYSIS
+  OTHER
+}
+
+enum EvaluationPeriod {
+  WEEKLY
+  MONTHLY
+}
+
+enum PerformanceCategory {
+  SHOOTING
+  DEFENSE
+  PASSING
+  BALL_HANDLING
+  FITNESS
+  TEAMWORK
+  EFFORT
+  DISCIPLINE
+}
+
+enum NotificationType {
+  TRAINING_CHANGE
+  NEW_VIDEO
+  NEW_EVALUATION
+  NEW_FEEDBACK
+  ANNOUNCEMENT
+}
+
+enum AnnouncementScope {
+  PLATFORM
+  TEAM
+}
+
+// USERS
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  passwordHash String?
+  role         UserRole
+  isActive     Boolean  @default(true)
+  /// Set when Admin/Coach provisions this account with a temporary
+  /// password (ARCHITECTURE.md §6.1 — no public self-registration).
+  /// Cleared once the user sets their own password.
+  mustChangePassword Boolean @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  coachProfile  CoachProfile?
+  playerProfile PlayerProfile?
+
+  uploadedVideos Video[]        @relation("VideoUploader")
+  notifications  Notification[]
+  announcements  Announcement[] @relation("AnnouncementAuthor")
+}
+
+// COACH
+
+model CoachProfile {
+  id      Int     @id @default(autoincrement())
+  userId  Int     @unique
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone   String?
+  bio     String?
+
+  teams                TeamCoach[]
+  sessionsCreated      TrainingSession[]        @relation("SessionCreatedBy")
+  attendanceRecorded   AttendanceRecord[]       @relation("AttendanceRecordedBy")
+  evaluationsGiven     PerformanceEvaluation[]  @relation("EvaluationCoach")
+  feedbackGiven        Feedback[]               @relation("FeedbackCoach")
+}
+
+// PLAYER
+
+model PlayerProfile {
+  id              Int            @id @default(autoincrement())
+  userId          Int            @unique
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId          Int?
+  team            Team?          @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  photoUrl        String?
+  position        PlayerPosition?
+  jerseyNumber    Int?
+  dateOfBirth     DateTime?
+  /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
+  contactPhone    String?
+  /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
+  guardianName    String?
+  /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
+  guardianContact String?
+  status          PlayerStatus   @default(ACTIVE)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  attendanceRecords AttendanceRecord[]
+  evaluations       PerformanceEvaluation[]
+  feedback          Feedback[]
+  videoAssignments  VideoAssignment[]
+
+  @@index([teamId])
+}
+
+// TEAM
+
+model Team {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  ageGroup    String?
+  status      TeamStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  coaches          TeamCoach[]
+  players          PlayerProfile[]
+  trainingSessions TrainingSession[]
+  videoAssignments VideoAssignment[]
+  announcements    Announcement[]
+}
+
+model TeamCoach {
+  id             Int          @id @default(autoincrement())
+  teamId         Int
+  team           Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  coachProfileId Int
+  coach          CoachProfile @relation(fields: [coachProfileId], references: [id], onDelete: Cascade)
+  isPrimary      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@unique([teamId, coachProfileId])
+  @@index([coachProfileId])
+}
+
+// TRAINING SESSIONS
+
+model TrainingSession {
+  id               Int           @id @default(autoincrement())
+  teamId           Int
+  team             Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  title            String
+  notes            String?
+  date             DateTime
+  startTime        String
+  endTime          String
+  location         String
+  status           SessionStatus @default(SCHEDULED)
+  createdByCoachId Int
+  createdBy        CoachProfile  @relation("SessionCreatedBy", fields: [createdByCoachId], references: [id])
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  attendanceRecords AttendanceRecord[]
+  feedback          Feedback[]
+
+  @@index([teamId, date])
+}
+
+// ATTENDANCE
+
+model AttendanceRecord {
+  id                 Int              @id @default(autoincrement())
+  sessionId          Int
+  session            TrainingSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  playerId           Int
+  player             PlayerProfile    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  status             AttendanceStatus
+  note               String?
+  recordedByCoachId  Int
+  recordedBy         CoachProfile     @relation("AttendanceRecordedBy", fields: [recordedByCoachId], references: [id])
+  recordedAt         DateTime         @default(now())
+
+  @@unique([sessionId, playerId])
+  @@index([playerId])
+}
+
+// VIDEOS
+
+model Video {
+  id               Int           @id @default(autoincrement())
+  title            String
+  description      String?
+  category         VideoCategory
+  storageProvider  String        @default("r2")
+  url              String
+  thumbnailUrl     String?
+  uploadedByUserId Int
+  uploadedBy       User          @relation("VideoUploader", fields: [uploadedByUserId], references: [id])
+  createdAt        DateTime      @default(now())
+
+  assignments VideoAssignment[]
+}
+
+model VideoAssignment {
+  id         Int            @id @default(autoincrement())
+  videoId    Int
+  video      Video          @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  teamId     Int?
+  team       Team?          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  playerId   Int?
+  player     PlayerProfile? @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  assignedAt DateTime       @default(now())
+
+  @@index([teamId])
+  @@index([playerId])
+}
+
+// PERFORMANCE
+
+model PerformanceEvaluation {
+  id               Int              @id @default(autoincrement())
+  playerId         Int
+  player           PlayerProfile    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  coachId          Int
+  coach            CoachProfile     @relation("EvaluationCoach", fields: [coachId], references: [id])
+  periodType       EvaluationPeriod
+  periodStart      DateTime
+  periodEnd        DateTime
+  /// Auto-computed average of this evaluation's category scores — see
+  /// ARCHITECTURE.md §6.3. Recomputed whenever category scores change.
+  overallScore     Decimal          @db.Decimal(3, 1)
+  /// Monthly evaluations only.
+  strengths        String?
+  /// Monthly evaluations only.
+  developmentAreas String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  categoryScores PerformanceCategoryScore[]
+  feedback       Feedback[]
+
+  @@index([playerId, periodType, periodStart])
+}
+
+model PerformanceCategoryScore {
+  id           Int                    @id @default(autoincrement())
+  evaluationId Int
+  evaluation   PerformanceEvaluation  @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  category     PerformanceCategory
+  score        Int
+
+  @@unique([evaluationId, category])
+}
+
+// FEEDBACK
+
+model Feedback {
+  id           Int                     @id @default(autoincrement())
+  playerId     Int
+  player       PlayerProfile           @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  coachId      Int
+  coach        CoachProfile            @relation("FeedbackCoach", fields: [coachId], references: [id])
+  evaluationId Int?
+  evaluation   PerformanceEvaluation?  @relation(fields: [evaluationId], references: [id], onDelete: SetNull)
+  sessionId    Int?
+  session      TrainingSession?        @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  message      String
+  createdAt    DateTime                @default(now())
+
+  @@index([playerId])
+}
+
+// NOTIFICATIONS
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String
+  linkPath  String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+}
+
+// ANNOUNCEMENTS
+
+model Announcement {
+  id           Int               @id @default(autoincrement())
+  authorUserId Int
+  author       User              @relation("AnnouncementAuthor", fields: [authorUserId], references: [id])
+  scope        AnnouncementScope
+  teamId       Int?
+  team         Team?             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  title        String
+  body         String
+  createdAt    DateTime          @default(now())
+
+  @@index([scope, teamId])
+}
