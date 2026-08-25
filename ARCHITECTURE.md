@@ -351,36 +351,42 @@ Key points this diagram is making:
 
 **Single Next.js app, not a multi-package monorepo**, for the same reason as the backend choice: one team, one client, no shared-package problem to solve yet. A full monorepo (Turborepo/pnpm workspaces with `apps/` + `packages/`) earns its complexity once there's a second consumer of the domain logic — e.g. a native mobile app post-MVP. To keep that migration cheap *if/when* it happens, domain logic (validation schemas, authorization rules, business rules like attendance-% calculation) is isolated in `lib/` rather than scattered through route handlers, so it can be lifted into a shared package later with minimal rewrite.
 
+Route groups (`(admin)`, `(coach)`, `(player)`) don't appear in the URL, so three groups all defining a `dashboard/` segment would collide on the same `/dashboard` path — Next.js rejects that at build time. The tree below uses real top-level segments (`/admin`, `/coach`, `/player`) instead, each with its own `layout.tsx` that re-checks the caller's role server-side (defense-in-depth alongside `middleware.ts` — see §3.2) and renders that role's `NavBar`.
+
 ```
 basketball-platform/
 ├── ARCHITECTURE.md
 ├── prisma/
 │   ├── schema.prisma
+│   ├── seed.ts
 │   └── migrations/
+├── middleware.ts
 ├── app/
-│   ├── (auth)/
-│   │   ├── login/
-│   │   └── set-password/
-│   ├── (admin)/
+│   ├── login/
+│   ├── set-password/
+│   ├── admin/
+│   │   ├── layout.tsx       # role guard + Admin NavBar
 │   │   ├── dashboard/
 │   │   ├── users/
-│   │   ├── teams/
+│   │   ├── teams/[id]/
 │   │   ├── coaches/
 │   │   ├── players/
 │   │   ├── training/
 │   │   ├── attendance/
 │   │   ├── performance/
 │   │   └── settings/
-│   ├── (coach)/
+│   ├── coach/
+│   │   ├── layout.tsx
 │   │   ├── dashboard/
-│   │   ├── my-teams/
+│   │   ├── my-teams/[id]/
 │   │   ├── players/
-│   │   ├── training/
+│   │   ├── training/[id]/
 │   │   ├── attendance/
 │   │   ├── videos/
 │   │   ├── performance/
 │   │   └── announcements/
-│   ├── (player)/
+│   ├── player/
+│   │   ├── layout.tsx
 │   │   ├── dashboard/
 │   │   ├── my-team/
 │   │   ├── training/
@@ -391,39 +397,49 @@ basketball-platform/
 │   │   ├── notifications/
 │   │   └── profile/
 │   ├── api/
-│   │   ├── auth/[...nextauth]/
-│   │   ├── users/
-│   │   ├── teams/
-│   │   ├── players/
-│   │   ├── coaches/
-│   │   ├── sessions/
-│   │   ├── videos/
-│   │   ├── evaluations/
+│   │   ├── auth/[...nextauth]/, auth/set-password/
+│   │   ├── users/, users/[id]/
+│   │   ├── teams/, teams/[id]/, teams/[id]/coaches/, teams/[id]/players/, teams/[id]/sessions/
+│   │   ├── players/[id]/, players/[id]/attendance|evaluations|feedback/
+│   │   ├── coaches/[id]/
+│   │   ├── sessions/[id]/, sessions/[id]/attendance/
+│   │   ├── videos/, videos/upload-url/, videos/[id]/, videos/[id]/assign/
+│   │   ├── evaluations/, evaluations/[id]/
 │   │   ├── feedback/
-│   │   ├── notifications/
-│   │   ├── announcements/
+│   │   ├── notifications/, notifications/[id]/read/, notifications/read-all/
+│   │   ├── announcements/, announcements/[id]/
 │   │   └── dashboard/
 │   ├── manifest.ts
+│   ├── providers.tsx        # client-side SessionProvider wrapper
 │   └── layout.tsx
 ├── components/
-│   ├── ui/                 # shadcn primitives
-│   ├── dashboard/          # stat cards, activity feed, per-role widgets
-│   ├── calendar/
-│   ├── attendance/
-│   ├── video/
-│   └── performance/        # trend charts, score cards
+│   ├── admin/, coach/, player/, shared/   # role-scoped forms/widgets
+│   ├── NavBar.tsx, StatTile.tsx, StatusBadge.tsx, LogoutButton.tsx
+│   └── ServiceWorkerRegistration.tsx
 ├── lib/
 │   ├── auth.ts             # Auth.js config
 │   ├── authorization.ts    # requireRole / requireTeamAccess / requirePlayerAccess
+│   ├── api.ts              # withApi() route wrapper — turns thrown errors into HTTP responses
 │   ├── prisma.ts
+│   ├── password.ts         # temp-password generation + hashing
 │   ├── storage.ts          # R2 presigned URL helpers
 │   ├── notify.ts           # notification fan-out on write
+│   ├── attendance.ts       # attendance % rule (§6.2)
+│   ├── performance.ts      # overall-score averaging (§6.3)
+│   ├── dashboard.ts        # per-role dashboard queries — called directly by both
+│   │                       # the dashboard pages (Server Components) and
+│   │                       # /api/dashboard, so pages never fetch their own API
+│   │                       # (see the tournament-app sibling project's
+│   │                       # self-referential-HTTP-call bug for why that matters)
 │   └── validation/         # Zod schemas, one per resource
 ├── types/
+│   └── next-auth.d.ts      # session shape: role, teamIds, playerId, mustChangePassword
 ├── public/
 │   └── icons/
 └── middleware.ts
 ```
+
+**One deviation worth flagging:** pages fetch their own data by calling `lib/` (Prisma) directly rather than hitting `/api/*` from Server Components — REST endpoints exist for client-side mutations (forms) and any future non-web client, not for the pages' own reads.
 
 ---
 
@@ -439,4 +455,4 @@ basketball-platform/
 
 ---
 
-*Once this is signed off, next step is `prisma/schema.prisma`, then the auth + RBAC scaffold, then feature-by-feature route handlers and pages — no application code will be written before that sign-off.*
+*Scaffolded 2026-08-25: schema, auth/RBAC, all API routes, and every page listed above are implemented and verified end-to-end locally (see README.md for setup). Remaining before production: swap the placeholder SVG icon for real PNGs, configure R2 credentials, and decide on a hosting/DB provider (Vercel + Neon per §1).*

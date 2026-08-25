@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 import Providers from "./providers";
@@ -35,8 +33,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <NavBar />
           {children}
         </Providers>
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );
