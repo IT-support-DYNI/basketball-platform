@@ -34,6 +34,15 @@ function getClient() {
     region: process.env.STORAGE_REGION || "auto",
     endpoint,
     credentials: { accessKeyId, secretAccessKey },
+    // The SDK's newer default (WHEN_SUPPORTED) bakes an x-amz-checksum-* /
+    // x-amz-sdk-checksum-algorithm claim into every request — including
+    // presigned URLs — which is an AWS-S3-specific extension most
+    // S3-compatible providers (B2, R2, MinIO) don't honor the same way,
+    // and rejects the request with a bare 403 that browsers then
+    // misreport as a CORS failure (no CORS headers on error responses).
+    // WHEN_REQUIRED only adds a checksum when an operation mandates one.
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
   });
 }
 
