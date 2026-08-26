@@ -7,3 +7,8 @@ npm-debug.log*
 *.log
 .DS_Store
 *.tsbuildinfo
+
+# Claude Code tooling artifacts (skill caching) — not part of the app
+.agents/
+.claude/skills/
+skills-lock.json
