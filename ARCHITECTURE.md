@@ -455,4 +455,4 @@ basketball-platform/
 
 ---
 
-*Scaffolded 2026-08-25: schema, auth/RBAC, all API routes, and every page listed above are implemented and verified end-to-end locally (see README.md for setup). Remaining before production: swap the placeholder SVG icon for real PNGs, configure R2 credentials, and decide on a hosting/DB provider (Vercel + Neon per §1).*
+*Scaffolded 2026-08-25: schema, auth/RBAC, all API routes, and every page listed above are implemented and verified end-to-end locally (see README.md for setup). Platform-wide settings (§ "Settings" under Admin) now covers announcement management — the one Admin capability from the PRD's permission matrix that had no UI until 2026-08-26. Vercel Web Analytics and Speed Insights are wired into `app/layout.tsx` and `middleware.ts` is confirmed to exclude their `/_vercel/*` beacon endpoints from the auth check (see README.md's Deploying to Vercel section for the one remaining manual step — enabling both in the Vercel dashboard). Remaining before production: swap the placeholder SVG icon for real PNGs, configure R2 credentials, and decide on a hosting/DB provider (Vercel + Neon per §1).*
