@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { withApi } from "@/lib/api";
 import { requireAuth, requireRole } from "@/lib/authorization";
+import { getPlaybackUrl } from "@/lib/storage";
 import { prisma } from "@/lib/prisma";
 
 export const GET = withApi<{ params: { id: string } }>(async (_req, { params }) => {
@@ -15,7 +16,7 @@ export const GET = withApi<{ params: { id: string } }>(async (_req, { params }) 
   });
 
   if (!video) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(video);
+  return NextResponse.json({ ...video, playbackUrl: await getPlaybackUrl(video.key) });
 });
 
 export const DELETE = withApi<{ params: { id: string } }>(async (_req, { params }) => {

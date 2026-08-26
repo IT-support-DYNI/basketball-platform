@@ -14,8 +14,8 @@
 | Backend | **Next.js Route Handlers (REST)**, same codebase | No separate service to deploy, version, or CORS-configure. Scales to "multiple teams/clubs/coaches" fine on Vercel's serverless functions; if a workload later needs to run outside the request/response cycle (video transcoding, AI analytics), it can be split out as a standalone worker without touching the rest of the app. |
 | Auth | **Auth.js (NextAuth) v5**, credentials provider, JWT session | Battle-tested, free, and self-hosted (no per-user pricing as the platform grows across clubs). Session JWT is enriched with `role` and team/player scope so authorization checks don't need a DB round-trip on every request. |
 | Database | **PostgreSQL via Prisma ORM**, hosted on **Neon** | Relational fits this domain well — teams, rosters, sessions, and evaluations are all foreign-key-heavy. Neon's branching (a full DB copy per PR/preview) and generous free tier keep costs at zero pre-revenue; pooled connections handle serverless's higher concurrent-connection count. Prisma gives type-safe queries and painless migrations for a small team. |
-| Photo storage | **Cloudflare R2** (S3-compatible object storage) | Player photos and video thumbnails are small; R2 has no egress fees, which matters once players are regularly loading photos/videos on mobile data. |
-| Video storage | **Cloudflare R2** for MVP, with **Mux** flagged as the upgrade path | Coaches uploading and players streaming video is exactly the workload Vercel's serverless functions are wrong for (execution time limits, payload size limits, bandwidth cost). R2 + browser-to-storage presigned uploads sidesteps all three cheaply. The trade-off: no adaptive bitrate, no per-second view analytics, no automatic thumbnails — R2 stores whatever file the coach uploads and the browser plays it directly. **Video progress tracking** and **AI performance analytics** (both post-MVP) are exactly the features a service like Mux is built for (watch-time webhooks, thumbnail generation, adaptive streaming) — moving to Mux later means swapping the storage adapter behind one interface, not a schema change, because `Video.url`/`Video.provider` already abstracts over "wherever the file lives." |
+| Photo storage | **S3-compatible object storage** (Backblaze B2, or Cloudflare R2) — see §6.6 | Player photos and video thumbnails are small; a private bucket with no egress fees matters once players are regularly loading photos/videos on mobile data. |
+| Video storage | Same private S3-compatible bucket for MVP, with **Mux** flagged as the upgrade path | Coaches uploading and players streaming video is exactly the workload Vercel's serverless functions are wrong for (execution time limits, payload size limits, bandwidth cost). Browser-to-storage presigned uploads sidesteps all three cheaply. **The bucket is always private** — playback uses signed URLs generated on demand (`lib/storage.ts`'s `getPlaybackUrl`), never a stored public link, both because that's better practice for a youth org's videos and because several providers gate *public* bucket access behind payment info while private buckets stay free everywhere (§6.6 has the story). The trade-off vs. a dedicated video host: no adaptive bitrate, no per-second view analytics, no automatic thumbnails — the bucket stores whatever file the coach uploads and the browser plays it directly. **Video progress tracking** and **AI performance analytics** (both post-MVP) are exactly the features a service like Mux is built for (watch-time webhooks, thumbnail generation, adaptive streaming) — moving to Mux later means swapping the storage adapter behind one interface, not a schema change, because `Video.key`/`Video.storageProvider` already abstract over "wherever the file lives." |
 | Hosting / CI-CD | **Vercel** | Git-push deploys, preview environments per PR (paired with a Neon DB branch, same pattern as the existing tournament-app scaffold), zero server ops. |
 | PWA | **Manifest + service worker** (installable, offline app shell) | Satisfies "responsive, usable on mobile" without building a native app now, and is a real stepping stone to the post-MVP "native mobile apps" item — the same Next.js app can later be wrapped (Capacitor) or have a React Native client built against the same REST API. |
 
@@ -134,8 +134,8 @@ erDiagram
         text description
         enum category "SHOOTING|BALL_HANDLING|DEFENSE|PASSING|FINISHING|FITNESS|FOOTWORK|CONDITIONING|GAME_ANALYSIS|OTHER"
         string storageProvider
-        string url
-        string thumbnailUrl
+        string key "private bucket object key, not a public URL"
+        string thumbnailKey
         int uploadedByUserId FK
         datetime createdAt
     }
@@ -325,14 +325,14 @@ flowchart TB
         DB[("PostgreSQL\nvia Prisma Client")]
     end
 
-    subgraph R2["Cloudflare R2"]
-        Storage[("Object storage\nvideos, thumbnails, player photos")]
+    subgraph Storage_["Object Storage (private bucket)"]
+        Storage[("Videos, thumbnails, player photos\n— B2 or R2, always private")]
     end
 
     Browser <--"HTTPS (pages + fetch)"--> NextApp
     AuthLib --"verify credentials / read user"--> DB
     NextApp --"Prisma queries"--> DB
-    NextApp --"issue presigned PUT/GET URL"--> Storage
+    NextApp --"issue presigned PUT (upload) / GET (playback) URL"--> Storage
     Browser --"direct upload / stream\n(bypasses the Next.js function)"--> Storage
 
     classDef ext fill:#f3f4f6,stroke:#9ca3af;
@@ -341,7 +341,7 @@ flowchart TB
 
 Key points this diagram is making:
 
-- The browser talks to the Next.js app for everything except the actual video/photo bytes — uploads and playback go **directly between the browser and R2** via short-lived presigned URLs the API issues, so large media never passes through (and doesn't count against) the serverless function.
+- The browser talks to the Next.js app for everything except the actual video/photo bytes — uploads *and* playback go **directly between the browser and the storage bucket** via short-lived presigned URLs the API issues, so large media never passes through (and doesn't count against) the serverless function. The bucket itself is never public — every URL is signed and expires.
 - Auth.js and the authorization helpers sit inside the same Next.js deployment — there's no separate auth service to keep in sync.
 - The service worker only wraps the client shell (installability, basic offline resilience for cached pages); it does not cache or synchronize application data — per the PRD's reliability requirement, all real data is server-persisted, never trusted from browser state alone.
 
@@ -422,7 +422,7 @@ basketball-platform/
 │   ├── api.ts              # withApi() route wrapper — turns thrown errors into HTTP responses
 │   ├── prisma.ts
 │   ├── password.ts         # temp-password generation + hashing
-│   ├── storage.ts          # R2 presigned URL helpers
+│   ├── storage.ts          # S3-compatible presigned upload/playback URL helpers (private bucket)
 │   ├── notify.ts           # notification fan-out on write
 │   ├── attendance.ts       # attendance % rule (§6.2)
 │   ├── performance.ts      # overall-score averaging (§6.3)
@@ -450,9 +450,9 @@ basketball-platform/
 3. **Overall weekly/monthly score** → **Auto-computed** as the average of that period's category scores (rounded to 1 decimal), not a separate coach input. Simpler data entry, consistent scoring, one fewer field for a non-technical coach to fill in. `overallScore` is stored (denormalized) at write time for fast dashboard/trend queries, recomputed whenever category scores change.
 4. **Minors' data** → `PlayerProfile` contact fields (`contactPhone`, `guardianName`, `guardianContact`) are visible only to Admin and the player's own assigned Coach(es) — never to other coaches/players. No consent-collection flow in MVP (matches PRD scope); this access restriction is the interim safeguard until Parent accounts (post-MVP) exist.
 5. **One team per player** → confirmed for MVP, as modeled.
-6. **Video storage** → Cloudflare R2, as proposed, revisit only if volume/budget changes.
+6. **Video storage** → **Update 2026-08-26:** switched from Cloudflare R2 to a provider-agnostic S3-compatible setup, defaulting to **Backblaze B2** — R2 requires a card on file even to enable its free tier, which ruled it out. The bigger change: the bucket is **always private** now regardless of provider, with playback served through signed URLs generated on demand rather than a stored public link (`lib/storage.ts`'s `getPlaybackUrl`) — several providers (B2 included) gate *public* bucket access behind payment info or a one-time fee, while private buckets are free everywhere. This is also arguably the right default anyway for a youth org's training videos. `Video.url` was renamed to `Video.key` (object key, not a URL) to make that explicit.
 7. **Multi-club readiness** → no `Club` entity in MVP; deferred as planned (additive later).
 
 ---
 
-*Scaffolded 2026-08-25: schema, auth/RBAC, all API routes, and every page listed above are implemented and verified end-to-end locally (see README.md for setup). Platform-wide settings (§ "Settings" under Admin) now covers announcement management — the one Admin capability from the PRD's permission matrix that had no UI until 2026-08-26. Vercel Web Analytics and Speed Insights are wired into `app/layout.tsx` and `middleware.ts` is confirmed to exclude their `/_vercel/*` beacon endpoints from the auth check. As of 2026-08-26 the app is live on Vercel + Neon, and Web Push notifications are built (see README.md's "Push notifications" and "Deploying to Vercel" sections for the env vars each needs). Still deferred, per §8: multi-club configuration, configurable performance categories, and email/SMS notification channels. Remaining before production polish: swap the placeholder SVG icon for real PNGs, and configure R2 credentials for video upload (README.md has the exact steps).*
+*Scaffolded 2026-08-25: schema, auth/RBAC, all API routes, and every page listed above are implemented and verified end-to-end locally (see README.md for setup). Platform-wide settings (§ "Settings" under Admin) now covers announcement management — the one Admin capability from the PRD's permission matrix that had no UI until 2026-08-26. Vercel Web Analytics and Speed Insights are wired into `app/layout.tsx` and `middleware.ts` is confirmed to exclude their `/_vercel/*` beacon endpoints from the auth check. As of 2026-08-26 the app is live on Vercel + Neon, and Web Push notifications are built (see README.md's "Push notifications" and "Deploying to Vercel" sections for the env vars each needs). Still deferred, per §8: multi-club configuration, configurable performance categories, and email/SMS notification channels. Object storage moved off Cloudflare R2 to a provider-agnostic private-bucket setup (Backblaze B2 recommended) — see §6.6 and README.md's "Video/photo storage" section for setup steps. Remaining before production polish: swap the placeholder SVG icon for real PNGs, and configure storage credentials for video upload.*

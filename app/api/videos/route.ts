@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { withApi } from "@/lib/api";
 import { requireAuth, requireRole } from "@/lib/authorization";
 import { createVideoSchema } from "@/lib/validation/video";
+import { getPlaybackUrl } from "@/lib/storage";
 import { prisma } from "@/lib/prisma";
 
 /** Admin: every video. Coach: videos for their teams (+ ones they uploaded). Player: videos assigned to their team or to them personally. */
@@ -46,10 +47,15 @@ export const GET = withApi(async (req: NextRequest) => {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(videos);
+  // The bucket is private (ARCHITECTURE.md / lib/storage.ts) — playback URLs are signed fresh per request, never stored.
+  const withPlaybackUrls = await Promise.all(
+    videos.map(async (v) => ({ ...v, playbackUrl: await getPlaybackUrl(v.key) }))
+  );
+
+  return NextResponse.json(withPlaybackUrls);
 });
 
-/** Records a video already uploaded to R2 (see /api/videos/upload-url) — Coach only. */
+/** Records a video already uploaded to storage (see /api/videos/upload-url) — Coach only. */
 export const POST = withApi(async (req: NextRequest) => {
   const session = requireRole(await getServerSession(authOptions), ["COACH"]);
   const body = createVideoSchema.parse(await req.json());
@@ -59,8 +65,8 @@ export const POST = withApi(async (req: NextRequest) => {
       title: body.title,
       description: body.description,
       category: body.category,
-      url: body.url,
-      thumbnailUrl: body.thumbnailUrl,
+      key: body.key,
+      thumbnailKey: body.thumbnailKey,
       uploadedByUserId: Number(session.user.id),
     },
   });

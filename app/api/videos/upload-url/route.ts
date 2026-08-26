@@ -7,7 +7,7 @@ import { requireRole } from "@/lib/authorization";
 import { requestUploadSchema } from "@/lib/validation/video";
 import { createPresignedUpload } from "@/lib/storage";
 
-/** Step 1 of uploading a video: get a short-lived URL to PUT the file straight to R2, then POST /api/videos with the resulting publicUrl. */
+/** Step 1 of uploading a video: get a short-lived URL to PUT the file straight to storage, then POST /api/videos with the resulting key. */
 export const POST = withApi(async (req: NextRequest) => {
   requireRole(await getServerSession(authOptions), ["COACH"]);
   const body = requestUploadSchema.parse(await req.json());

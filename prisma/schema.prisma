@@ -278,8 +278,12 @@ model Video {
   description      String?
   category         VideoCategory
   storageProvider  String        @default("r2")
-  url              String
-  thumbnailUrl     String?
+  /// Object key in the storage bucket — the bucket is always private;
+  /// playback URLs are signed on demand via lib/storage.ts's getPlaybackUrl,
+  /// never stored, since several free-tier providers gate public bucket
+  /// access behind payment info. See lib/storage.ts's file comment.
+  key              String
+  thumbnailKey     String?
   uploadedByUserId Int
   uploadedBy       User          @relation("VideoUploader", fields: [uploadedByUserId], references: [id])
   createdAt        DateTime      @default(now())

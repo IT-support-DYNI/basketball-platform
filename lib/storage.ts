@@ -1,30 +1,38 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
 
 /*
- * Cloudflare R2 (S3-compatible) — see ARCHITECTURE.md §1 and §4.
- * The browser uploads directly to R2 using a short-lived presigned
- * URL issued here; the file itself never passes through the Next.js
- * function. Swapping this file for a different provider (e.g. Mux,
- * post-MVP) doesn't require changing any callers — they only ever
- * see { uploadUrl, publicUrl }.
+ * S3-compatible object storage — see ARCHITECTURE.md §1 and §4. Works
+ * against Cloudflare R2, Backblaze B2, or any other S3-compatible
+ * provider without code changes; only STORAGE_ENDPOINT (and the
+ * R2_ACCOUNT_ID fallback below, kept for anyone already on R2) differ.
+ *
+ * The bucket is treated as private, always — playback goes through
+ * short-lived signed GET URLs (getPlaybackUrl) rather than a public
+ * bucket URL. Several free-tier providers gate public buckets behind
+ * a payment method or a one-time fee; a private bucket has no such
+ * requirement anywhere, and it's the better default for a youth
+ * sports org's videos regardless — nothing sits at a guessable
+ * permanent public URL.
  */
 
 function getClient() {
-  const accountId = process.env.R2_ACCOUNT_ID;
+  const endpoint = process.env.STORAGE_ENDPOINT || (
+    process.env.R2_ACCOUNT_ID ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : undefined
+  );
   const accessKeyId = process.env.R2_ACCESS_KEY_ID;
   const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
 
-  if (!accountId || !accessKeyId || !secretAccessKey) {
+  if (!endpoint || !accessKeyId || !secretAccessKey) {
     throw new Error(
-      "R2 storage isn't configured — set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY (see .env.example)."
+      "Object storage isn't configured — set STORAGE_ENDPOINT (or R2_ACCOUNT_ID for R2), R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY (see .env.example)."
     );
   }
 
   return new S3Client({
-    region: "auto",
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    region: process.env.STORAGE_REGION || "auto",
+    endpoint,
     credentials: { accessKeyId, secretAccessKey },
   });
 }
@@ -35,16 +43,9 @@ function getBucket() {
   return bucket;
 }
 
-function getPublicBase() {
-  const base = process.env.R2_PUBLIC_BASE_URL;
-  if (!base) throw new Error("R2_PUBLIC_BASE_URL is not set (see .env.example).");
-  return base.replace(/\/$/, "");
-}
-
 export interface PresignedUpload {
   key: string;
   uploadUrl: string;
-  publicUrl: string;
 }
 
 /** folder is e.g. "videos" or "player-photos" — kept out of the caller's control to avoid arbitrary paths. */
@@ -62,7 +63,14 @@ export async function createPresignedUpload(
     { expiresIn: 300 }
   );
 
-  return { key, uploadUrl, publicUrl: `${getPublicBase()}/${key}` };
+  return { key, uploadUrl };
+}
+
+/** A short-lived signed GET URL for playback/download — generated fresh on every request, never stored. */
+export async function getPlaybackUrl(key: string, expiresInSeconds = 3600): Promise<string> {
+  const client = getClient();
+  const command = new GetObjectCommand({ Bucket: getBucket(), Key: key });
+  return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
 }
 
 export async function deleteObject(key: string): Promise<void> {

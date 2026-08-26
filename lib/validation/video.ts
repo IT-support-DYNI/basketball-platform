@@ -21,8 +21,8 @@ export const createVideoSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   category: videoCategory,
-  url: z.string().url(),
-  thumbnailUrl: z.string().url().optional(),
+  key: z.string().min(1),
+  thumbnailKey: z.string().min(1).optional(),
 });
 
 export const assignVideoSchema = z

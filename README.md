@@ -4,7 +4,7 @@ Team management and player development platform for basketball coaches and playe
 
 ## Stack
 
-Next.js (App Router) + TypeScript + Tailwind CSS · Prisma + PostgreSQL · NextAuth (Auth.js) · Cloudflare R2 for video/photo storage. See ARCHITECTURE.md §1 for rationale.
+Next.js (App Router) + TypeScript + Tailwind CSS · Prisma + PostgreSQL · NextAuth (Auth.js) · S3-compatible object storage (Backblaze B2 or Cloudflare R2) for video/photo storage. See ARCHITECTURE.md §1 for rationale.
 
 ## Local setup
 
@@ -44,9 +44,26 @@ Next.js (App Router) + TypeScript + Tailwind CSS · Prisma + PostgreSQL · NextA
 
    To re-run the seed manually: `npm run prisma:seed`.
 
-## Video/photo storage (Cloudflare R2)
+## Video/photo storage
 
-Video upload (`/coach/videos`) needs R2 credentials in `.env` (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_BASE_URL`) — see `.env.example`. Without them, every other feature works; only video upload will show a clear "storage isn't configured" error.
+Video upload (`/coach/videos`) needs object-storage credentials in `.env` — see `.env.example`. Without them, every other feature works; only video upload will show a clear "storage isn't configured" error.
+
+**The bucket must be PRIVATE**, not public. Playback goes through short-lived signed URLs generated on demand (`lib/storage.ts`'s `getPlaybackUrl`) rather than a permanent public bucket link — nothing about a video's URL is ever stored. This is a deliberate choice, not just a security nicety: several providers' free tiers gate *public* bucket access behind a payment method or a one-time fee, while a private bucket has no such requirement anywhere.
+
+Recommended: **[Backblaze B2](https://www.backblaze.com/b2/cloud-storage.html)** — 10GB free forever, S3-compatible, no card required at signup, private buckets are free.
+
+1. Sign up, create a bucket (**Private**), then under **App Keys** create a key scoped to that bucket — gives you a Key ID and Application Key.
+2. Note the bucket's S3-compatible endpoint shown on its page (e.g. `s3.us-west-004.backblazeb2.com`).
+3. Set in `.env` (and Vercel → Settings → Environment Variables for production):
+
+   | Key | Value |
+   |---|---|
+   | `STORAGE_ENDPOINT` | `https://` + the endpoint from step 2 |
+   | `R2_ACCESS_KEY_ID` | the Key ID |
+   | `R2_SECRET_ACCESS_KEY` | the Application Key |
+   | `R2_BUCKET_NAME` | your bucket name |
+
+   (Env var names keep the `R2_` prefix for historical reasons — they work identically for B2, R2, or any other S3-compatible provider; only `STORAGE_ENDPOINT` differs. If you use Cloudflare R2 instead, leave `STORAGE_ENDPOINT` blank and set `R2_ACCOUNT_ID` instead — the endpoint is derived from it automatically. R2 also requires a card on file even for its free tier, which is the whole reason B2 is the default recommendation here.)
 
 ## Push notifications (Web Push)
 

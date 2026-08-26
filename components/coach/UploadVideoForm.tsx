@@ -52,7 +52,7 @@ export default function UploadVideoForm() {
       const createRes = await fetch("/api/videos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description: description || undefined, category, url: uploadUrlBody.publicUrl }),
+        body: JSON.stringify({ title, description: description || undefined, category, key: uploadUrlBody.key }),
       });
       const createBody = await createRes.json();
       if (!createRes.ok) {
