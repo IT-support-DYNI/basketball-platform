@@ -39,13 +39,21 @@ export default function UploadVideoForm() {
         return;
       }
 
-      const putRes = await fetch(uploadUrlBody.uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type || "video/mp4" },
-        body: file,
-      });
+      let putRes: Response;
+      try {
+        putRes = await fetch(uploadUrlBody.uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type || "video/mp4" },
+          body: file,
+        });
+      } catch {
+        // A rejected fetch here (as opposed to a non-2xx response) almost always means the storage
+        // bucket's CORS rules don't allow this origin — see README's "Video/photo storage" section.
+        setError("Upload to storage failed — likely a CORS setting on the bucket. Check the browser console for the exact blocked-origin error.");
+        return;
+      }
       if (!putRes.ok) {
-        setError("Upload to storage failed.");
+        setError(`Upload to storage failed (HTTP ${putRes.status}).`);
         return;
       }
 
@@ -65,6 +73,8 @@ export default function UploadVideoForm() {
       setFile(null);
       setOpen(false);
       router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
