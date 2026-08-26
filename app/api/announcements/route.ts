@@ -6,6 +6,7 @@ import { withApi } from "@/lib/api";
 import { requireAuth, requireRole, requireTeamAccess } from "@/lib/authorization";
 import { createAnnouncementSchema } from "@/lib/validation/announcement";
 import { notifyUsers, teamPlayerUserIds } from "@/lib/notify";
+import { sendPushToUsers } from "@/lib/push";
 import { prisma } from "@/lib/prisma";
 
 /** Platform-wide announcements, plus whichever team-scoped ones are relevant to the caller. */
@@ -45,6 +46,8 @@ export const POST = withApi(async (req: NextRequest) => {
     requireTeamAccess(session, body.teamId!);
   }
 
+  let recipientUserIds: number[] = [];
+
   const announcement = await prisma.$transaction(async (tx) => {
     const created = await tx.announcement.create({
       data: {
@@ -56,7 +59,7 @@ export const POST = withApi(async (req: NextRequest) => {
       },
     });
 
-    const recipientUserIds =
+    recipientUserIds =
       body.scope === "TEAM" && body.teamId
         ? await teamPlayerUserIds(tx, body.teamId)
         : (await tx.user.findMany({ where: { role: "PLAYER" }, select: { id: true } })).map((u) => u.id);
@@ -69,6 +72,12 @@ export const POST = withApi(async (req: NextRequest) => {
     });
 
     return created;
+  });
+
+  await sendPushToUsers(recipientUserIds, {
+    title: `Announcement: ${body.title}`,
+    body: body.body.length > 120 ? `${body.body.slice(0, 117)}...` : body.body,
+    url: "/player/notifications",
   });
 
   return NextResponse.json(announcement, { status: 201 });

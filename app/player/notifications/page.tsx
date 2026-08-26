@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import NotificationsList from "@/components/player/NotificationsList";
+import PushNotificationToggle from "@/components/player/PushNotificationToggle";
 
 export default async function PlayerNotificationsPage() {
   const session = await getServerSession(authOptions);
@@ -19,6 +20,7 @@ export default async function PlayerNotificationsPage() {
       <p className="mt-1 text-slate-600">Training changes, new videos, new evaluations, new feedback, and announcements.</p>
 
       <div className="mt-6">
+        <PushNotificationToggle />
         <NotificationsList
           initial={notifications.map((n) => ({
             id: n.id,

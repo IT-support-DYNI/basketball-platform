@@ -6,6 +6,7 @@ import { withApi } from "@/lib/api";
 import { requireRole, requirePlayerAccess } from "@/lib/authorization";
 import { createFeedbackSchema } from "@/lib/validation/feedback";
 import { notifyUser } from "@/lib/notify";
+import { sendPushToUser } from "@/lib/push";
 import { prisma } from "@/lib/prisma";
 
 /** Coach only, per the PRD permission matrix ("Write player feedback"). */
@@ -37,6 +38,12 @@ export const POST = withApi(async (req: NextRequest) => {
     });
 
     return created;
+  });
+
+  await sendPushToUser(player.userId, {
+    title: "New feedback from your coach",
+    body: body.message.length > 120 ? `${body.message.slice(0, 117)}...` : body.message,
+    url: "/player/feedback",
   });
 
   return NextResponse.json(feedback, { status: 201 });

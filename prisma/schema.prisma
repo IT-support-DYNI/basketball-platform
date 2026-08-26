@@ -132,6 +132,23 @@ model User {
   uploadedVideos Video[]        @relation("VideoUploader")
   notifications  Notification[]
   announcements  Announcement[] @relation("AnnouncementAuthor")
+  pushSubscriptions PushSubscription[]
+}
+
+// WEB PUSH
+
+/// One row per browser/device a user has enabled push on. A user can have
+/// several (phone + laptop, etc.) — endpoint is the dedupe/delete key.
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // COACH

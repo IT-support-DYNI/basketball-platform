@@ -7,6 +7,7 @@ import { requireRole, requirePlayerAccess } from "@/lib/authorization";
 import { createEvaluationSchema } from "@/lib/validation/performance";
 import { computeOverallScore } from "@/lib/performance";
 import { notifyUser } from "@/lib/notify";
+import { sendPushToUser } from "@/lib/push";
 import { prisma } from "@/lib/prisma";
 
 /** Coach only, per the PRD permission matrix ("Enter performance evaluations"). */
@@ -45,6 +46,13 @@ export const POST = withApi(async (req: NextRequest) => {
     });
 
     return created;
+  });
+
+  // Outside the transaction: a slow/failed push must never block or roll back the DB write.
+  await sendPushToUser(player.userId, {
+    title: `New ${body.periodType.toLowerCase()} performance evaluation`,
+    body: `Overall score ${overallScore}/10.`,
+    url: "/player/performance",
   });
 
   return NextResponse.json(evaluation, { status: 201 });

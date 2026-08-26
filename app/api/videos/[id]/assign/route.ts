@@ -6,6 +6,7 @@ import { withApi } from "@/lib/api";
 import { requireRole, requireTeamAccess } from "@/lib/authorization";
 import { assignVideoSchema } from "@/lib/validation/video";
 import { notifyUsers, teamPlayerUserIds } from "@/lib/notify";
+import { sendPushToUsers } from "@/lib/push";
 import { prisma } from "@/lib/prisma";
 
 export const POST = withApi<{ params: { id: string } }>(async (req: NextRequest, { params }) => {
@@ -25,7 +26,7 @@ export const POST = withApi<{ params: { id: string } }>(async (req: NextRequest,
   const video = await prisma.video.findUnique({ where: { id: videoId } });
   if (!video) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await prisma.$transaction(async (tx) => {
+  const recipientUserIds = await prisma.$transaction(async (tx) => {
     await tx.videoAssignment.createMany({
       data: [
         ...teamIds.map((teamId) => ({ videoId, teamId })),
@@ -45,12 +46,22 @@ export const POST = withApi<{ params: { id: string } }>(async (req: NextRequest,
         ).map((p) => p.userId)
       : [];
 
-    await notifyUsers(tx, Array.from(new Set([...teamUserIds, ...directPlayerUserIds])), {
+    const recipients = Array.from(new Set([...teamUserIds, ...directPlayerUserIds]));
+
+    await notifyUsers(tx, recipients, {
       type: "NEW_VIDEO",
       title: "New training video",
       message: `"${video.title}" was just added to your video library.`,
       linkPath: "/player/videos",
     });
+
+    return recipients;
+  });
+
+  await sendPushToUsers(recipientUserIds, {
+    title: "New training video",
+    body: `"${video.title}" was just added to your video library.`,
+    url: "/player/videos",
   });
 
   return NextResponse.json({ ok: true }, { status: 201 });

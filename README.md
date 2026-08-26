@@ -48,6 +48,25 @@ Next.js (App Router) + TypeScript + Tailwind CSS · Prisma + PostgreSQL · NextA
 
 Video upload (`/coach/videos`) needs R2 credentials in `.env` (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_BASE_URL`) — see `.env.example`. Without them, every other feature works; only video upload will show a clear "storage isn't configured" error.
 
+## Push notifications (Web Push)
+
+Players can opt in from `/player/notifications` to get browser push notifications for training changes, new videos, evaluations, feedback, and announcements — on top of the in-app notification list, which always works regardless of this. See `lib/push.ts` and `public/sw.js`.
+
+1. Generate a VAPID keypair **once per deployment** (do this again for production — don't reuse the one already in this repo's local `.env`):
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+2. Set four environment variables (locally in `.env`, and in Vercel → Settings → Environment Variables for production):
+
+   | Key | Value |
+   |---|---|
+   | `VAPID_PUBLIC_KEY` | the generated public key |
+   | `VAPID_PRIVATE_KEY` | the generated private key |
+   | `VAPID_SUBJECT` | a contact URI, e.g. `mailto:you@example.com` |
+   | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | **same value as `VAPID_PUBLIC_KEY`** — this one is exposed to the browser bundle (the `NEXT_PUBLIC_` prefix is what does that), so the client can subscribe with the matching key. |
+
+Without these set, the "Enable push notifications" button just tells the user push isn't configured yet — nothing else breaks. A subscription a browser has revoked (uninstalled the PWA, cleared site data) gets cleaned up automatically the next time a push to it fails.
+
 ## Deploying to Vercel
 
 - `@vercel/analytics` and `@vercel/speed-insights` are already installed and rendered in `app/layout.tsx` (`<Analytics />` / `<SpeedInsights />`) — they no-op locally and activate automatically once deployed on Vercel.
