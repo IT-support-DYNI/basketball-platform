@@ -29,7 +29,7 @@ export default async function CoachVideosPage() {
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {videos.map((v) => (
-          <div key={v.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+          <div key={v.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
             <div className="flex items-start justify-between gap-2">
               <p className="font-bold text-slate-900">{v.title}</p>
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">{v.category.replace(/_/g, " ")}</span>

@@ -34,7 +34,7 @@ export default function NotificationsList({ initial }: { initial: NotificationIt
         </button>
       )}
 
-      <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-surface">
         {notifications.map((n) => (
           <li
             key={n.id}

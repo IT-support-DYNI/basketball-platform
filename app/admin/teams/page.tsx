@@ -24,7 +24,7 @@ export default async function AdminTeamsPage() {
           <Link
             key={team.id}
             href={`/admin/teams/${team.id}`}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="rounded-2xl border border-slate-200 bg-surface p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             <div className="flex items-start justify-between gap-3">
               <div>

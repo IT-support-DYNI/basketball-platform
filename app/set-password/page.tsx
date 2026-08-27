@@ -4,6 +4,11 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
+import AuthShell from "@/components/auth/AuthShell";
+import { Button } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/TextField";
+import Alert from "@/components/ui/Alert";
+
 export default function SetPasswordPage() {
   const router = useRouter();
   const { update } = useSession();
@@ -18,7 +23,7 @@ export default function SetPasswordPage() {
     setError("");
 
     if (newPassword !== confirm) {
-      setError("Passwords don't match.");
+      setError("Those two passwords don't match.");
       return;
     }
 
@@ -32,7 +37,7 @@ export default function SetPasswordPage() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        setError(body.error ?? "Something went wrong.");
+        setError(body.error ?? "Something went wrong saving your password.");
         return;
       }
 
@@ -45,61 +50,37 @@ export default function SetPasswordPage() {
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-65px)] items-center justify-center bg-gradient-to-b from-orange-50 via-white to-white px-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="mb-2 text-3xl font-extrabold tracking-tight text-slate-900">Set your password</h1>
-        <p className="mb-6 text-slate-600">
-          You logged in with a temporary password. Choose your own before continuing.
-        </p>
+    <AuthShell
+      title="Set your password"
+      subtitle="You signed in with a temporary password. Choose your own before continuing."
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <TextField
+          label="New password"
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+          minLength={8}
+          autoComplete="new-password"
+          hint="At least 8 characters."
+        />
+        <TextField
+          label="Confirm password"
+          type="password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          required
+          minLength={8}
+          autoComplete="new-password"
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="newPassword" className="mb-2 block text-sm font-semibold text-slate-700">
-              New password
-            </label>
-            <input
-              id="newPassword"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none transition focus:border-court-500 focus:ring-2 focus:ring-court-500/20"
-            />
-          </div>
+        {error && <Alert tone="danger">{error}</Alert>}
 
-          <div>
-            <label htmlFor="confirm" className="mb-2 block text-sm font-semibold text-slate-700">
-              Confirm password
-            </label>
-            <input
-              id="confirm"
-              type="password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none transition focus:border-court-500 focus:ring-2 focus:ring-court-500/20"
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700" role="alert">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-full bg-gradient-to-r from-court-500 to-court-700 px-4 py-2.5 font-bold text-white shadow-sm shadow-court-500/30 transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading ? "Saving..." : "Save and continue"}
-          </button>
-        </form>
-      </div>
-    </main>
+        <Button type="submit" size="lg" fullWidth loading={loading}>
+          {loading ? "Saving" : "Save and continue"}
+        </Button>
+      </form>
+    </AuthShell>
   );
 }

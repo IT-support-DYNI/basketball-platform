@@ -59,7 +59,7 @@ export default function AssignCoachForm({ teamId, options }: { teamId: number; o
           </option>
         ))}
       </select>
-      <button type="submit" disabled={loading || !coachProfileId} className="rounded-full bg-slate-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+      <button type="submit" disabled={loading || !coachProfileId} className="rounded-full bg-flame px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
         {loading ? "Assigning..." : "Assign"}
       </button>
       {error && <p className="text-sm text-rose-700">{error}</p>}

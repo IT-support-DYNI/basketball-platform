@@ -34,7 +34,7 @@ export default async function PlayerPerformancePage() {
       </div>
 
       {monthlyTrend.length > 1 && (
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-surface p-5">
           <h2 className="font-bold text-slate-900">Monthly trend</h2>
           <div className="mt-4 flex items-end gap-3" style={{ height: 100 }}>
             {monthlyTrend.map((m) => (
@@ -49,7 +49,7 @@ export default async function PlayerPerformancePage() {
 
       <section className="mt-6 space-y-4">
         {evaluations.map((e) => (
-          <div key={e.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+          <div key={e.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
             <div className="flex items-center justify-between">
               <p className="font-bold text-slate-900">
                 {e.periodType} · {new Date(e.periodStart).toLocaleDateString()} – {new Date(e.periodEnd).toLocaleDateString()}

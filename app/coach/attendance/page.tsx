@@ -28,7 +28,7 @@ export default async function CoachAttendancePage() {
       <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Attendance</h1>
       <p className="mt-1 text-slate-600">Per-player attendance % across your team(s). Mark attendance from a specific session.</p>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-surface p-5">
         <h2 className="font-bold text-slate-900">By Player</h2>
         <ul className="mt-3 divide-y divide-slate-100">
           {players.map((p) => {
@@ -47,7 +47,7 @@ export default async function CoachAttendancePage() {
         </ul>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-surface p-5">
         <h2 className="font-bold text-slate-900">Recent Sessions</h2>
         <ul className="mt-3 divide-y divide-slate-100">
           {recentSessions.map((s) => (

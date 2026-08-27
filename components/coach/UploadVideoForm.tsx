@@ -89,7 +89,7 @@ export default function UploadVideoForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-surface p-5 space-y-4">
       <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20" />
       <textarea placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20" />
       <select value={category} onChange={(e) => setCategory(e.target.value as typeof category)} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20">

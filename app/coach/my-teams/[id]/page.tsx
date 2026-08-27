@@ -23,7 +23,7 @@ export default async function CoachTeamDetailPage({ params }: { params: { id: st
       <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">{team.name}</h1>
       {team.ageGroup && <p className="mt-1 text-slate-600">{team.ageGroup}</p>}
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-surface p-5">
         <h2 className="font-bold text-slate-900">Roster ({team.players.length})</h2>
 
         <ul className="mt-3 divide-y divide-slate-100">

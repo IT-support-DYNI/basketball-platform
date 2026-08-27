@@ -55,7 +55,7 @@ export default function AddPlayerForm({ teamId }: { teamId: number }) {
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
         <p className="font-semibold text-emerald-900">Player account created for {result.email}</p>
         <p className="mt-1 text-sm text-emerald-800">Temporary password (relay this to them):</p>
-        <code className="mt-2 block rounded-lg bg-white px-3 py-2 font-mono text-sm text-slate-800">{result.tempPassword}</code>
+        <code className="mt-2 block rounded-lg bg-surface px-3 py-2 font-mono text-sm text-slate-800">{result.tempPassword}</code>
         <button type="button" onClick={() => setResult(null)} className="mt-3 text-sm font-semibold text-emerald-700 hover:text-emerald-800">
           Add another
         </button>
@@ -65,14 +65,14 @@ export default function AddPlayerForm({ teamId }: { teamId: number }) {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="rounded-full bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900">
+      <button type="button" onClick={() => setOpen(true)} className="rounded-full bg-flame px-4 py-2 text-sm font-semibold text-white hover:bg-flame">
         + Add Player
       </button>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-surface p-5 space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <input
           type="text"

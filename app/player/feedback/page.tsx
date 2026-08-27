@@ -26,7 +26,7 @@ export default async function PlayerFeedbackPage() {
 
       <ul className="mt-6 space-y-3">
         {feedback.map((f) => (
-          <li key={f.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+          <li key={f.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
             <p className="italic text-slate-700">"{f.message}"</p>
             <p className="mt-2 text-xs text-slate-400">
               — {f.coach.user.name} · {new Date(f.createdAt).toLocaleDateString()}

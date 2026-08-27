@@ -47,7 +47,7 @@ export default function CreateStaffUserForm() {
         <p className="mt-1 text-sm text-emerald-800">
           Temporary password (relay this to them — it won't be shown again):
         </p>
-        <code className="mt-2 block rounded-lg bg-white px-3 py-2 font-mono text-sm text-slate-800">
+        <code className="mt-2 block rounded-lg bg-surface px-3 py-2 font-mono text-sm text-slate-800">
           {result.tempPassword}
         </code>
         <button
@@ -74,7 +74,7 @@ export default function CreateStaffUserForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-surface p-5 space-y-4">
       <div className="flex gap-3">
         <label className="flex items-center gap-2 text-sm font-medium">
           <input type="radio" checked={role === "COACH"} onChange={() => setRole("COACH")} /> Coach

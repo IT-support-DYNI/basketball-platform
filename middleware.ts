@@ -92,5 +92,7 @@ export const config = {
   // beacon requests to /_vercel/insights/* and /_vercel/speed-insights/* on
   // this same origin, and those aren't authenticated — routing them through
   // the auth redirect above would 307 the beacon instead of recording it.
-  matcher: ["/((?!_next/static|_next/image|_vercel|icons|favicon.ico|sw.js).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|_vercel|icons|brand|favicon.ico|icon.png|apple-icon.png|sw.js|manifest.webmanifest).*)",
+  ],
 };

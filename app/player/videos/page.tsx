@@ -26,7 +26,7 @@ export default async function PlayerVideosPage() {
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {assignments.map((a) => (
-          <div key={a.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+          <div key={a.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
             <div className="flex items-start justify-between gap-2">
               <p className="font-bold text-slate-900">{a.video.title}</p>
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">

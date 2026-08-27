@@ -40,7 +40,7 @@ export default async function AdminTeamDetailPage({ params }: { params: { id: st
         <ArchiveTeamButton teamId={team.id} status={team.status} />
       </div>
 
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
+      <section className="mt-8 rounded-2xl border border-slate-200 bg-surface p-5">
         <h2 className="font-bold text-slate-900">Coaches</h2>
         <ul className="mt-3 divide-y divide-slate-100">
           {team.coaches.map((tc) => (
@@ -63,7 +63,7 @@ export default async function AdminTeamDetailPage({ params }: { params: { id: st
         </div>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-surface p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-slate-900">Roster ({team.players.length})</h2>
         </div>

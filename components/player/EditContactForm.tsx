@@ -35,7 +35,7 @@ export default function EditContactForm({ playerId, initialPhone }: { playerId: 
         placeholder="Your phone number"
         className="rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20"
       />
-      <button type="submit" disabled={saving} className="rounded-full bg-slate-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+      <button type="submit" disabled={saving} className="rounded-full bg-flame px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
         {saving ? "Saving..." : "Save"}
       </button>
       {saved && <span className="text-sm text-emerald-700">Saved ✓</span>}

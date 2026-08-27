@@ -4,6 +4,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPlayerDashboard } from "@/lib/dashboard";
 import StatTile from "@/components/StatTile";
+import PageHeader from "@/components/ui/PageHeader";
+import Card from "@/components/ui/Card";
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink">{children}</h2>;
+}
 
 export default async function PlayerDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -11,47 +17,57 @@ export default async function PlayerDashboardPage() {
     await getPlayerDashboard(session!);
 
   return (
-    <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Welcome back, {session?.user?.name} 🏀</h1>
-      <p className="mt-1 text-slate-600">Here's your training and development at a glance.</p>
+    <main className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow="Player"
+        title={`Welcome back, ${session?.user?.name?.split(" ")[0] ?? "player"}`}
+        lead="Your training and development at a glance."
+      />
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatTile
-          label="Next Training"
-          value={nextSession ? `${new Date(nextSession.date).toLocaleDateString()} · ${nextSession.startTime}–${nextSession.endTime}` : "None scheduled"}
-          icon="📅"
-          accent="sky"
+          label="Next training"
+          value={
+            nextSession
+              ? `${new Date(nextSession.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}`
+              : "None scheduled"
+          }
+          sub={nextSession ? `${nextSession.startTime}–${nextSession.endTime}` : undefined}
+          accent="info"
           href="/player/training"
         />
         <StatTile
           label="Attendance"
-          value={attendance?.percentage != null ? `${attendance.percentage}%` : "No data yet"}
-          icon="✅"
-          accent="emerald"
+          value={attendance?.percentage != null ? `${attendance.percentage}%` : "—"}
+          sub={attendance?.percentage != null ? "this season" : "no data yet"}
+          accent="success"
           href="/player/attendance"
         />
         <StatTile
-          label="Weekly Performance"
-          value={weeklyEvaluation ? `${weeklyEvaluation.overallScore} / 10` : "Not scored yet"}
-          icon="📈"
-          accent="orange"
+          label="Weekly form"
+          value={weeklyEvaluation ? `${weeklyEvaluation.overallScore}` : "—"}
+          sub={weeklyEvaluation ? "out of 10" : "not scored yet"}
+          accent="flame"
           href="/player/performance"
         />
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h2 className="font-bold text-slate-900">Monthly Performance</h2>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card as="section">
+          <SectionTitle>Monthly performance</SectionTitle>
           {monthlyEvaluation ? (
             <>
-              <p className="mt-2 text-3xl font-extrabold text-court-700">{Number(monthlyEvaluation.overallScore)} / 10</p>
+              <p className="mt-2 font-condensed text-3xl font-bold tabular text-flame-ink">
+                {Number(monthlyEvaluation.overallScore)}
+                <span className="text-lg text-ink-faint"> / 10</span>
+              </p>
               {monthlyTrend.length > 1 && (
                 <div className="mt-3 flex items-end gap-1.5" style={{ height: 60 }}>
                   {monthlyTrend.map((m, i) => (
                     <div
                       key={i}
                       title={`${Number(m.overallScore)}/10`}
-                      className="w-6 rounded-t bg-court-400"
+                      className="w-6 rounded-t bg-flame/70"
                       style={{ height: `${(Number(m.overallScore) / 10) * 100}%` }}
                     />
                   ))}
@@ -59,53 +75,57 @@ export default async function PlayerDashboardPage() {
               )}
             </>
           ) : (
-            <p className="mt-3 text-sm text-slate-500">No monthly evaluation yet.</p>
+            <p className="mt-3 text-sm text-ink-dim">No monthly evaluation yet.</p>
           )}
-        </section>
+        </Card>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h2 className="font-bold text-slate-900">New Training Video</h2>
+        <Card as="section">
+          <SectionTitle>New training video</SectionTitle>
           {latestVideo ? (
             <>
-              <p className="mt-2 font-semibold text-slate-800">{latestVideo.title}</p>
-              <p className="text-sm text-slate-500">{latestVideo.category.replace(/_/g, " ")}</p>
-              <Link href="/player/videos" className="mt-3 inline-block text-sm font-semibold text-court-700 hover:text-court-800">Watch now →</Link>
+              <p className="mt-2 font-semibold text-ink">{latestVideo.title}</p>
+              <p className="text-sm text-ink-dim">{latestVideo.category.replace(/_/g, " ")}</p>
+              <Link href="/player/videos" className="mt-3 inline-block text-sm font-semibold text-flame-ink hover:underline">
+                Watch now →
+              </Link>
             </>
           ) : (
-            <p className="mt-3 text-sm text-slate-500">No videos assigned yet.</p>
+            <p className="mt-3 text-sm text-ink-dim">No videos assigned yet.</p>
           )}
-        </section>
+        </Card>
       </div>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-bold text-slate-900">Coach Feedback</h2>
+      <Card as="section">
+        <SectionTitle>Coach feedback</SectionTitle>
         {latestFeedback ? (
           <>
-            <p className="mt-2 italic text-slate-700">"{latestFeedback.message}"</p>
-            <p className="mt-1 text-xs text-slate-400">— {latestFeedback.coach.user.name}</p>
+            <p className="mt-2 italic text-ink">&ldquo;{latestFeedback.message}&rdquo;</p>
+            <p className="mt-1 text-xs text-ink-faint">— {latestFeedback.coach.user.name}</p>
           </>
         ) : (
-          <p className="mt-3 text-sm text-slate-500">No feedback yet.</p>
+          <p className="mt-3 text-sm text-ink-dim">No feedback yet.</p>
         )}
-      </section>
+      </Card>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+      <Card as="section">
         <div className="flex items-center justify-between">
-          <h2 className="font-bold text-slate-900">Recent Notifications</h2>
-          <Link href="/player/notifications" className="text-sm font-semibold text-court-700 hover:text-court-800">View all →</Link>
+          <SectionTitle>Recent notifications</SectionTitle>
+          <Link href="/player/notifications" className="text-sm font-semibold text-flame-ink hover:underline">
+            View all →
+          </Link>
         </div>
         {notifications.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">Nothing yet.</p>
+          <p className="mt-3 text-sm text-ink-dim">Nothing yet.</p>
         ) : (
-          <ul className="mt-3 divide-y divide-slate-100">
+          <ul className="mt-3 divide-y divide-line">
             {notifications.map((n) => (
-              <li key={n.id} className={`py-2 text-sm ${n.isRead ? "text-slate-500" : "font-medium text-slate-900"}`}>
+              <li key={n.id} className={`py-2 text-sm ${n.isRead ? "text-ink-dim" : "font-medium text-ink"}`}>
                 {n.title}
               </li>
             ))}
           </ul>
         )}
-      </section>
+      </Card>
     </main>
   );
 }

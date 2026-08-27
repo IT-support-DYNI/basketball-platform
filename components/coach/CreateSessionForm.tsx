@@ -61,7 +61,7 @@ export default function CreateSessionForm({ teams }: { teams: TeamOption[] }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-surface p-5 space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <select value={teamId} onChange={(e) => setTeamId(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20">
           {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}

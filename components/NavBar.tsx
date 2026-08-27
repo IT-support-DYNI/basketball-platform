@@ -3,14 +3,20 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import Brandmark from "./Brandmark";
 import LogoutButton from "./LogoutButton";
+import ThemeToggle from "./theme/ThemeToggle";
 
-/** Nav maps match PRD §5.1 exactly, one per role. */
+/**
+ * Role-aware top nav. Phase 1 keeps the per-role link maps below; the plan's
+ * W1 step folds these into a single permission-keyed menu config once the
+ * expanded role set lands. Nav labels track the DYNI brief §38.
+ */
 const NAV_LINKS: Record<string, { label: string; href: string }[]> = {
   ADMIN: [
     { label: "Dashboard", href: "/admin/dashboard" },
     { label: "Registrations", href: "/admin/registrations" },
-    { label: "Users", href: "/admin/users" },
+    { label: "Members", href: "/admin/users" },
     { label: "Teams", href: "/admin/teams" },
     { label: "Coaches", href: "/admin/coaches" },
     { label: "Players", href: "/admin/players" },
@@ -21,7 +27,7 @@ const NAV_LINKS: Record<string, { label: string; href: string }[]> = {
   ],
   COACH: [
     { label: "Dashboard", href: "/coach/dashboard" },
-    { label: "My Teams", href: "/coach/my-teams" },
+    { label: "Team", href: "/coach/my-teams" },
     { label: "Players", href: "/coach/players" },
     { label: "Training", href: "/coach/training" },
     { label: "Attendance", href: "/coach/attendance" },
@@ -30,22 +36,21 @@ const NAV_LINKS: Record<string, { label: string; href: string }[]> = {
     { label: "Announcements", href: "/coach/announcements" },
   ],
   PLAYER: [
-    { label: "Dashboard", href: "/player/dashboard" },
+    { label: "Home", href: "/player/dashboard" },
     { label: "My Team", href: "/player/my-team" },
     { label: "Training", href: "/player/training" },
     { label: "Attendance", href: "/player/attendance" },
     { label: "Videos", href: "/player/videos" },
     { label: "Performance", href: "/player/performance" },
     { label: "Feedback", href: "/player/feedback" },
-    { label: "Notifications", href: "/player/notifications" },
     { label: "Profile", href: "/player/profile" },
   ],
 };
 
 const ROLE_STYLES: Record<string, string> = {
-  ADMIN: "bg-violet-100 text-violet-700",
-  COACH: "bg-sky-100 text-sky-700",
-  PLAYER: "bg-court-100 text-court-700",
+  ADMIN: "border-info/40 text-info",
+  COACH: "border-ember/40 text-ember",
+  PLAYER: "border-flame/40 text-flame-ink",
 };
 
 function initials(name: string) {
@@ -73,21 +78,14 @@ export default async function NavBar() {
       : 0;
 
   const navLinkClass =
-    "whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900";
+    "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium text-ink-dim transition hover:bg-surface-2 hover:text-ink";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-3">
-        <Link href={homeHref} className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-court-500 to-court-700 text-lg shadow-sm shadow-court-500/30">
-            🏀
-          </span>
-          <span className="text-lg font-extrabold tracking-tight text-slate-900">
-            Hoops<span className="text-court-600">Platform</span>
-          </span>
-        </Link>
+    <header className="sticky top-0 z-50 border-b border-line bg-ground/85 backdrop-blur-md">
+      <nav className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-2.5">
+        <Brandmark size="sm" href={homeHref} className="shrink-0" />
 
-        <div className="flex flex-1 flex-wrap items-center gap-1 overflow-x-auto">
+        <div className="flex flex-1 flex-wrap items-center gap-0.5 overflow-x-auto">
           {links.map((link) => (
             <Link key={link.href} href={link.href} className={navLinkClass}>
               {link.label}
@@ -95,30 +93,36 @@ export default async function NavBar() {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {session.user.role === "PLAYER" && (
             <Link
               href="/player/notifications"
-              aria-label="Notifications"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+              aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-ink-dim transition hover:bg-surface-2 hover:text-ink"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
                 <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
               </svg>
               {unreadCount > 0 && (
-                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-flame px-1 text-[10px] font-bold text-on-flame ring-2 ring-ground">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </Link>
           )}
 
-          <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-2.5 shadow-sm sm:flex">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-xs font-bold text-white">
+          <ThemeToggle />
+
+          <div className="hidden items-center gap-2 rounded-full border border-line bg-surface py-1 pl-1 pr-2.5 sm:flex">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-surface-3 font-condensed text-xs font-bold text-ink">
               {initials(session.user.name ?? "?")}
             </span>
-            <p className="text-sm font-semibold text-slate-800">{session.user.name}</p>
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide ${ROLE_STYLES[session.user.role]}`}>
+            <p className="text-sm font-semibold text-ink">{session.user.name}</p>
+            <span
+              className={`rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide ${
+                ROLE_STYLES[session.user.role] ?? "border-line text-ink-dim"
+              }`}
+            >
               {session.user.role}
             </span>
           </div>

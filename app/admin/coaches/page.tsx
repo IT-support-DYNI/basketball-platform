@@ -18,7 +18,7 @@ export default async function AdminCoachesPage() {
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {coaches.map((c) => (
-          <div key={c.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+          <div key={c.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
             <p className="font-bold text-slate-900">{c.user.name}</p>
             <p className="text-sm text-slate-500">{c.user.email}</p>
             <div className="mt-3 flex flex-wrap gap-2">

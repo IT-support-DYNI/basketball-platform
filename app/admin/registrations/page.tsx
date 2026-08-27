@@ -22,7 +22,7 @@ export default async function AdminRegistrationsPage() {
 
       <div className="mt-6 space-y-4">
         {registrations.map((r) => (
-          <div key={r.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+          <div key={r.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
@@ -54,7 +54,7 @@ export default async function AdminRegistrationsPage() {
         ))}
 
         {registrations.length === 0 && (
-          <p className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+          <p className="rounded-2xl border border-dashed border-slate-300 bg-surface p-8 text-center text-sm text-slate-500">
             No registrations awaiting review.
           </p>
         )}

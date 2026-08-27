@@ -22,7 +22,7 @@ export default async function AdminPerformancePage() {
 
       <div className="mt-6 space-y-6">
         {teams.map((team) => (
-          <section key={team.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+          <section key={team.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
             <Link href={`/admin/teams/${team.id}`} className="font-bold text-slate-900 hover:text-court-700">{team.name}</Link>
             <ul className="mt-3 divide-y divide-slate-100">
               {team.players.map((p) => (
