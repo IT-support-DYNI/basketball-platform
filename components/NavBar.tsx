@@ -9,6 +9,7 @@ import LogoutButton from "./LogoutButton";
 const NAV_LINKS: Record<string, { label: string; href: string }[]> = {
   ADMIN: [
     { label: "Dashboard", href: "/admin/dashboard" },
+    { label: "Registrations", href: "/admin/registrations" },
     { label: "Users", href: "/admin/users" },
     { label: "Teams", href: "/admin/teams" },
     { label: "Coaches", href: "/admin/coaches" },

@@ -26,8 +26,11 @@ export async function middleware(req: NextRequest) {
   const isPublic =
     pathname === "/" ||
     pathname === "/login" ||
+    pathname === "/register" ||
     pathname === "/set-password" ||
-    pathname.startsWith("/api/auth");
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/register") ||
+    pathname.startsWith("/api/public");
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
@@ -41,8 +44,31 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (token.mustChangePassword && pathname !== "/set-password") {
+  // Both gates below redirect PAGE navigation only. Redirecting an API
+  // call would send it into a page render instead of the route handler —
+  // API routes enforce their own auth via lib/authorization.ts regardless,
+  // per this file's own opening comment. (Found via a real bug: the
+  // registration-status gate below was silently breaking a pending
+  // player's own AJAX calls, since a plain pathname check redirected them
+  // too — see git history for the fix.)
+  const isApiRequest = pathname.startsWith("/api/");
+
+  if (!isApiRequest && token.mustChangePassword && pathname !== "/set-password") {
     return NextResponse.redirect(new URL("/set-password", req.url));
+  }
+
+  // DYNI Blazers PRD §6 (Journey A) — a self-registered player is gated to
+  // a status page until an admin approves them, instead of the normal
+  // dashboard/nav. Only PLAYER carries registrationStatus; Admin/Coach/
+  // Guardian are unaffected (undefined skips this check entirely).
+  if (
+    !isApiRequest &&
+    token.role === "PLAYER" &&
+    token.registrationStatus &&
+    token.registrationStatus !== "APPROVED" &&
+    pathname !== "/registration-status"
+  ) {
+    return NextResponse.redirect(new URL("/registration-status", req.url));
   }
 
   const role = token.role as string;

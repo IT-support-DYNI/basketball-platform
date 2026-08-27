@@ -12,12 +12,13 @@ import { prisma } from "./prisma";
  */
 
 export async function getAdminDashboard() {
-  const [totalUsers, totalTeams, totalCoaches, totalPlayers, activeTeams, recentAnnouncements] =
+  const [totalUsers, totalTeams, totalCoaches, totalPlayers, pendingRegistrations, activeTeams, recentAnnouncements] =
     await Promise.all([
       prisma.user.count(),
       prisma.team.count(),
       prisma.coachProfile.count(),
       prisma.playerProfile.count(),
+      prisma.playerProfile.count({ where: { registrationStatus: { not: "APPROVED" } } }),
       prisma.team.findMany({
         orderBy: { name: "asc" },
         include: { _count: { select: { players: true } } },
@@ -30,7 +31,7 @@ export async function getAdminDashboard() {
     ]);
 
   return {
-    stats: { totalUsers, totalTeams, totalCoaches, totalPlayers },
+    stats: { totalUsers, totalTeams, totalCoaches, totalPlayers, pendingRegistrations },
     activeTeams,
     recentAnnouncements,
   };

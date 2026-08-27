@@ -19,11 +19,12 @@ export default async function AdminDashboardPage() {
         Welcome back, {session?.user?.name}. Here's everything going on across the platform.
       </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-4">
+      <div className="mt-8 grid gap-4 sm:grid-cols-5">
         <StatTile label="Total Users" value={stats.totalUsers} icon="👥" accent="violet" href="/admin/users" />
         <StatTile label="Total Teams" value={stats.totalTeams} icon="🗂️" accent="orange" href="/admin/teams" />
         <StatTile label="Total Coaches" value={stats.totalCoaches} icon="🎯" accent="sky" href="/admin/coaches" />
         <StatTile label="Total Players" value={stats.totalPlayers} icon="🏀" accent="emerald" href="/admin/players" />
+        <StatTile label="Pending Registrations" value={stats.pendingRegistrations} icon="📝" accent="amber" href="/admin/registrations" />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">

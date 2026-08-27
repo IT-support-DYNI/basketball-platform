@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -95,7 +96,9 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-slate-500">
-          No public sign-up — accounts are created by your team's admin or coach.
+          New player? <Link href="/register" className="font-semibold text-court-700 hover:text-court-800">Register here</Link> — an
+          administrator reviews every registration before you get full access. Coach and admin accounts are still
+          created directly by the club.
         </p>
       </div>
     </main>

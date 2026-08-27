@@ -80,7 +80,7 @@ export const authOptions: NextAuthOptions = {
             include: { teams: { select: { teamId: true } } },
           },
           playerProfile: {
-            select: { id: true, teamId: true },
+            select: { id: true, teamId: true, registrationStatus: true },
           },
         },
       });
@@ -99,6 +99,10 @@ export const authOptions: NextAuthOptions = {
       token.teamIds = user.coachProfile?.teams.map((t) => t.teamId) ?? undefined;
       token.playerId = user.playerProfile?.id;
       token.teamId = user.playerProfile?.teamId ?? undefined;
+      // Only PlayerProfile carries this — Admin/Coach/Guardian accounts have
+      // no gate here (Guardian's own dashboard is a later increment; the
+      // gate that matters today is on the linked child's PlayerProfile).
+      token.registrationStatus = user.playerProfile?.registrationStatus ?? undefined;
 
       return token;
     },
@@ -113,6 +117,7 @@ export const authOptions: NextAuthOptions = {
         session.user.playerId = token.playerId;
         session.user.teamId = token.teamId;
         session.user.mustChangePassword = token.mustChangePassword;
+        session.user.registrationStatus = token.registrationStatus;
       }
 
       return session;

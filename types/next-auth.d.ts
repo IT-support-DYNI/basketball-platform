@@ -1,5 +1,5 @@
 import { DefaultSession } from "next-auth";
-import { UserRole } from "@prisma/client";
+import { UserRole, RegistrationStatus } from "@prisma/client";
 
 /*
  * The session carries everything the RBAC helpers in
@@ -19,6 +19,8 @@ declare module "next-auth" {
       teamIds?: number[];
       playerId?: number;
       teamId?: number | null;
+      /// Only meaningful for role PLAYER — undefined for Admin/Coach/Guardian.
+      registrationStatus?: RegistrationStatus;
     } & DefaultSession["user"];
   }
 
@@ -38,5 +40,6 @@ declare module "next-auth/jwt" {
     teamIds?: number[];
     playerId?: number;
     teamId?: number | null;
+    registrationStatus?: RegistrationStatus;
   }
 }

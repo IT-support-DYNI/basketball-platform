@@ -35,6 +35,20 @@ enum UserRole {
   ADMIN
   COACH
   PLAYER
+  /// Parent/guardian of one or more players — DYNI Blazers PRD §25.
+  /// Manages linked child accounts via GuardianRelationship.
+  GUARDIAN
+}
+
+/// Self-service registration lifecycle — DYNI Blazers PRD §6 (Journey A).
+/// Every account created by an Admin/Coach directly (the original
+/// basketball-platform flow) is APPROVED immediately; this only gates
+/// accounts that came through public self-registration.
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
 }
 
 enum PlayerPosition {
@@ -103,11 +117,75 @@ enum NotificationType {
   NEW_EVALUATION
   NEW_FEEDBACK
   ANNOUNCEMENT
+  REGISTRATION_UPDATE
 }
 
 enum AnnouncementScope {
   PLATFORM
   TEAM
+}
+
+// CLUB & SEASON
+// DYNI Blazers PRD §5 — "design the database as a multi-tenant platform...
+// support organisations or clubs, multiple seasons." One Club row exists
+// today (DYNI Blazers); Team belongs to a Club so a second club is additive,
+// not a migration. Season is real but not yet used to scope team membership
+// (jerseyNumber/position/status still live on PlayerProfile directly, same
+// as before this pass) — that season-scoped-membership refactor is flagged
+// as follow-up work, not done in this pass, to avoid destabilizing every
+// feature already built on the current PlayerProfile.teamId shape.
+
+model Club {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  description        String?
+  /// Age (in years) at/under which a player must register through a
+  /// guardian rather than themselves — a legal/policy input, not something
+  /// engineering can safely default without the club's own confirmation.
+  /// See docs' Document 6 §19.6 in the dyni-blazers project for why this
+  /// isn't hardcoded.
+  minorAgeThreshold  Int      @default(18)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  teams   Team[]
+  seasons Season[]
+}
+
+model Season {
+  id        Int      @id @default(autoincrement())
+  clubId    Int
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([clubId, isActive])
+}
+
+// AUDIT LOG
+// DYNI Blazers PRD §31 — append-only record of sensitive actions. Starting
+// with registration decisions (the first thing that needs one); extended to
+// other sensitive actions incrementally rather than wired into everything
+// at once.
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  actorUserId Int?
+  actor      User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   Int?
+  /// Free-form context (previous/new value, reason, etc.) — kept as JSON
+  /// rather than a fixed column set since different actions carry different
+  /// shapes of "what changed."
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorUserId])
 }
 
 // USERS
@@ -133,6 +211,11 @@ model User {
   notifications  Notification[]
   announcements  Announcement[] @relation("AnnouncementAuthor")
   pushSubscriptions PushSubscription[]
+  auditLogsActed AuditLog[]
+  /// Populated when role = GUARDIAN — the player(s) this user manages.
+  guardianOf     GuardianRelationship[] @relation("Guardian")
+  /// Populated when role = ADMIN and this admin has reviewed at least one registration.
+  registrationsReviewed PlayerProfile[] @relation("RegistrationReviewer")
 }
 
 // WEB PUSH
@@ -186,6 +269,24 @@ model PlayerProfile {
   /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
   guardianContact String?
   status          PlayerStatus   @default(ACTIVE)
+
+  /// Self-service registration lifecycle (DYNI Blazers PRD §6). Defaults to
+  /// APPROVED so every existing/admin-created player is unaffected — this
+  /// only gates accounts that come through the new public /register flow.
+  registrationStatus     RegistrationStatus @default(APPROVED)
+  /// Admin's reason for a REJECTED or CHANGES_REQUESTED decision — shown
+  /// back to the applicant on their status page.
+  registrationReviewNote String?
+  registrationReviewedByUserId Int?
+  registrationReviewedBy User?         @relation("RegistrationReviewer", fields: [registrationReviewedByUserId], references: [id], onDelete: SetNull)
+  registrationSubmittedAt DateTime?
+  registrationReviewedAt  DateTime?
+  /// Basic consent — a single acceptance timestamp for the club's
+  /// registration terms, captured at sign-up. Full versioned/multi-document
+  /// consent management (DYNI Blazers PRD §24) is a later increment; this
+  /// is the Phase-1-basics slice the roadmap calls for.
+  consentAcceptedAt DateTime?
+
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
@@ -193,14 +294,39 @@ model PlayerProfile {
   evaluations       PerformanceEvaluation[]
   feedback          Feedback[]
   videoAssignments  VideoAssignment[]
+  guardians         GuardianRelationship[] @relation("Player")
 
   @@index([teamId])
+  @@index([registrationStatus])
+}
+
+// GUARDIANS
+// DYNI Blazers PRD §25 — a guardian may manage one or more child accounts.
+
+model GuardianRelationship {
+  id              Int           @id @default(autoincrement())
+  guardianUserId  Int
+  guardian        User          @relation("Guardian", fields: [guardianUserId], references: [id], onDelete: Cascade)
+  playerProfileId Int
+  player          PlayerProfile @relation("Player", fields: [playerProfileId], references: [id], onDelete: Cascade)
+  /// e.g. "Parent", "Legal guardian" — free text, clubs vary in how they describe this.
+  relationshipLabel String
+  createdAt       DateTime      @default(now())
+
+  @@unique([guardianUserId, playerProfileId])
+  @@index([playerProfileId])
 }
 
 // TEAM
 
 model Team {
   id          Int        @id @default(autoincrement())
+  /// Nullable so this migration doesn't need to backfill every existing
+  /// team in a live database with a default club — new teams should set
+  /// it, existing ones are treated as belonging to the platform's implicit
+  /// single club until explicitly assigned. See Club's own comment.
+  clubId      Int?
+  club        Club?      @relation(fields: [clubId], references: [id], onDelete: SetNull)
   name        String
   description String?
   ageGroup    String?

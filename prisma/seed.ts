@@ -36,10 +36,32 @@ async function main() {
     include: { coachProfile: true },
   });
 
+  let club = await prisma.club.findFirst({ where: { name: "DYNI Blazers" } });
+  if (!club) {
+    club = await prisma.club.create({
+      data: { name: "DYNI Blazers", description: "Seeded club for local development.", minorAgeThreshold: 18 },
+    });
+  }
+
+  const now = new Date();
+  let season = await prisma.season.findFirst({ where: { clubId: club.id, isActive: true } });
+  if (!season) {
+    season = await prisma.season.create({
+      data: {
+        clubId: club.id,
+        name: `${now.getFullYear()}–${now.getFullYear() + 1}`,
+        startDate: now,
+        endDate: new Date(now.getFullYear() + 1, now.getMonth(), now.getDate()),
+        isActive: true,
+      },
+    });
+  }
+
   let team = await prisma.team.findFirst({ where: { name: "Thunder U16" } });
   if (!team) {
     team = await prisma.team.create({
       data: {
+        clubId: club.id,
         name: "Thunder U16",
         ageGroup: "U16",
         description: "Seeded sample team for local development.",
