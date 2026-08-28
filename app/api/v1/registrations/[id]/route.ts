@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-import { route } from "@/lib/api";
+import { route, ok, NotFoundError, BadRequestError } from "@/lib/api";
 import { requireRole } from "@/lib/authorization";
 import { reviewRegistrationSchema } from "@/lib/contracts/registration";
 import { logAudit } from "@/lib/audit";
@@ -23,16 +22,24 @@ const DECISION_MESSAGE = {
 } as const;
 
 /** Admin approves, rejects, or requests changes on a pending registration — DYNI Blazers PRD §6 Journey D. */
-export const PATCH = route<{ id: string }>(async (req, { params }) => {
+export const PATCH = route<{ id: string }>(async (req, { params, requestId }) => {
   const session = requireRole(await getServerSession(authOptions), ["ADMIN"]);
   const body = reviewRegistrationSchema.parse(await req.json());
   const playerId = Number(params.id);
 
-  const player = await prisma.playerProfile.findUnique({ where: { id: playerId } });
-  if (!player) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const player = await prisma.playerProfile.findUnique({
+    where: { id: playerId },
+    include: { user: { select: { emailVerifiedAt: true } } },
+  });
+  if (!player) throw new NotFoundError("That registration wasn't found.");
 
   if (body.decision === "APPROVE" && !body.teamId && !player.teamId) {
-    return NextResponse.json({ error: "A team must be assigned to approve this registration." }, { status: 400 });
+    throw new BadRequestError("A team must be assigned to approve this registration.");
+  }
+  if (body.decision === "APPROVE" && !player.user.emailVerifiedAt) {
+    throw new BadRequestError(
+      "This applicant hasn't confirmed their email address yet — they need to click the link before you can approve them.",
+    );
   }
 
   const newStatus = DECISION_TO_STATUS[body.decision];
@@ -75,5 +82,5 @@ export const PATCH = route<{ id: string }>(async (req, { params }) => {
     url: newStatus === "APPROVED" ? "/player/dashboard" : "/registration-status",
   });
 
-  return NextResponse.json(updated);
+  return ok(updated, { requestId });
 });

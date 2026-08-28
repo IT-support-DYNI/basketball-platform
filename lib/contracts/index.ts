@@ -7,6 +7,7 @@
 import type { z } from "zod";
 
 export * from "./common";
+export * from "./auth";
 
 export { createAnnouncementSchema } from "./announcement";
 export { bulkAttendanceSchema } from "./attendance";

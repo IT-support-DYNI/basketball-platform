@@ -15,9 +15,14 @@
 
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
 
 import { prisma } from "./prisma";
+import { verifyPassword } from "./password";
+import { getLockoutState, recordLoginAttempt } from "./login-throttle";
+
+/** A valid bcrypt hash of a random string — compared against when no account
+ *  exists, so a missing account and a wrong password take about the same time. */
+const DUMMY_HASH = "$2b$12$C6UzMDM.H6dfI/f/IKcEeO1kK1r1e5jGZ5g0m3l4vB2cQ8yQ8yQ8y";
 
 /*
  * Vercel preview / branch deployments get a unique URL per push, so a fixed
@@ -43,28 +48,36 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
 
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email.trim().toLowerCase() },
-        });
+        const email = credentials.email.trim().toLowerCase();
+        const forwarded = (req?.headers?.["x-forwarded-for"] as string | undefined) ?? "";
+        const ip = forwarded.split(",")[0]?.trim() || null;
 
-        if (!user || !user.passwordHash || !user.isActive) {
+        // Brute-force lockout: once locked, stay locked until the window clears,
+        // even if the password is now correct. Surfaced to the user by the
+        // login page via GET /api/v1/auth/login-status.
+        const lockout = await getLockoutState(email);
+        if (lockout.locked) {
+          await recordLoginAttempt(email, ip, false);
           return null;
         }
 
-        const passwordIsValid = await bcrypt.compare(
+        const user = await prisma.user.findUnique({ where: { email } });
+        const passwordIsValid = await verifyPassword(
           credentials.password,
-          user.passwordHash
+          user?.passwordHash ?? DUMMY_HASH,
         );
 
-        if (!passwordIsValid) {
+        if (!user || !user.isActive || !user.passwordHash || !passwordIsValid) {
+          await recordLoginAttempt(email, ip, false);
           return null;
         }
 
+        await recordLoginAttempt(email, ip, true);
         return {
           id: user.id.toString(),
           email: user.email,
@@ -109,6 +122,7 @@ export const authOptions: NextAuthOptions = {
       token.role = user.role;
       token.isActive = user.isActive;
       token.mustChangePassword = user.mustChangePassword;
+      token.emailVerified = user.emailVerifiedAt != null;
       token.coachProfileId = user.coachProfile?.id;
       token.teamIds = user.coachProfile?.teams.map((t) => t.teamId) ?? undefined;
       token.playerId = user.playerProfile?.id;
@@ -131,6 +145,7 @@ export const authOptions: NextAuthOptions = {
         session.user.playerId = token.playerId;
         session.user.teamId = token.teamId;
         session.user.mustChangePassword = token.mustChangePassword;
+        session.user.emailVerified = token.emailVerified;
         session.user.registrationStatus = token.registrationStatus;
       }
 

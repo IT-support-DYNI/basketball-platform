@@ -21,6 +21,11 @@ const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/openapi.json", summary: "This document", tag: "Meta", auth: "none" },
 
   { method: "POST", path: "/register", summary: "Submit a player registration", tag: "Auth", auth: "none" },
+  { method: "POST", path: "/auth/forgot-password", summary: "Request a password-reset link", tag: "Auth", auth: "none" },
+  { method: "POST", path: "/auth/reset-password", summary: "Set a new password from a reset token", tag: "Auth", auth: "none" },
+  { method: "POST", path: "/auth/verify-email", summary: "Confirm an email address from its token", tag: "Auth", auth: "none" },
+  { method: "POST", path: "/auth/resend-verification", summary: "Re-send the confirmation email", tag: "Auth", auth: "user" },
+  { method: "GET", path: "/auth/login-status", summary: "Whether an email is currently locked out", tag: "Auth", auth: "none" },
   { method: "GET", path: "/public/teams", summary: "Teams open for registration", tag: "Public", auth: "none" },
 
   { method: "GET", path: "/teams", summary: "List teams in scope", tag: "Teams", auth: "user" },

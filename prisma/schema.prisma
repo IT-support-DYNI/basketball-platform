@@ -188,6 +188,42 @@ model AuditLog {
   @@index([actorUserId])
 }
 
+// AUTH — email verification, password reset, brute-force protection (brief §32).
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+/// Single-use, expiring token for email verification and password reset. Only
+/// the SHA-256 hash is stored — the raw token exists solely in the emailed link,
+/// so a database read can't be used to take over an account.
+model AuthToken {
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      AuthTokenType
+  tokenHash String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  @@index([userId, type])
+}
+
+/// One row per sign-in attempt, for rate limiting / account lockout. `email` is
+/// whatever was submitted (may not be a real account); `ipHash` is hashed so the
+/// table isn't a plaintext IP log.
+model LoginAttempt {
+  id        Int      @id @default(autoincrement())
+  email     String
+  ipHash    String?
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}
+
 // USERS
 
 model User {
@@ -201,6 +237,11 @@ model User {
   /// password (ARCHITECTURE.md §6.1 — no public self-registration).
   /// Cleared once the user sets their own password.
   mustChangePassword Boolean @default(false)
+  /// Set when the user confirms their email via the verification link
+  /// (brief §6, Journey A). Null = unverified. Admin/Coach-provisioned
+  /// accounts are seeded verified; self-registrations must verify before an
+  /// administrator can approve them.
+  emailVerifiedAt DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -211,6 +252,7 @@ model User {
   notifications  Notification[]
   announcements  Announcement[] @relation("AnnouncementAuthor")
   pushSubscriptions PushSubscription[]
+  authTokens    AuthToken[]
   auditLogsActed AuditLog[]
   /// Populated when role = GUARDIAN — the player(s) this user manages.
   guardianOf     GuardianRelationship[] @relation("Guardian")

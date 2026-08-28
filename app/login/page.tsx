@@ -27,6 +27,23 @@ export default function LoginPage() {
       const result = await signIn("credentials", { email, password, redirect: false });
 
       if (!result || result.error) {
+        // Distinguish a lockout from a plain bad password (NextAuth won't carry
+        // that detail through, so ask the status endpoint).
+        try {
+          const status = await fetch(
+            `/api/v1/auth/login-status?email=${encodeURIComponent(email)}`,
+          ).then((r) => r.json());
+          if (status?.locked) {
+            setError(
+              `Too many sign-in attempts. Try again in about ${status.retryAfterMinutes} minute${
+                status.retryAfterMinutes === 1 ? "" : "s"
+              }.`,
+            );
+            return;
+          }
+        } catch {
+          /* fall through to the generic message */
+        }
         setError("That email and password don't match. Check them and try again.");
         return;
       }
@@ -83,7 +100,9 @@ export default function LoginPage() {
         </Button>
 
         <p className="text-center text-xs text-ink-faint">
-          Forgot your password? Ask your club administrator to send a reset link.
+          <Link href="/forgot-password" className="font-semibold text-flame-ink hover:underline">
+            Forgot your password?
+          </Link>
         </p>
       </form>
     </AuthShell>

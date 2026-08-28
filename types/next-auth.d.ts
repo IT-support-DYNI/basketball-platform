@@ -15,6 +15,7 @@ declare module "next-auth" {
       role: UserRole;
       isActive: boolean;
       mustChangePassword: boolean;
+      emailVerified?: boolean;
       coachProfileId?: number;
       teamIds?: number[];
       playerId?: number;
@@ -36,6 +37,7 @@ declare module "next-auth/jwt" {
     role: UserRole;
     isActive: boolean;
     mustChangePassword: boolean;
+    emailVerified?: boolean;
     coachProfileId?: number;
     teamIds?: number[];
     playerId?: number;

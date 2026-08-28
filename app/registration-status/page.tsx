@@ -7,6 +7,7 @@ import Brandmark from "@/components/Brandmark";
 import StatusBadge from "@/components/StatusBadge";
 import Alert from "@/components/ui/Alert";
 import ResubmitRegistrationButton from "@/components/player/ResubmitRegistrationButton";
+import ResendVerificationButton from "@/components/auth/ResendVerificationButton";
 
 export default async function RegistrationStatusPage() {
   const session = await getServerSession(authOptions);
@@ -15,9 +16,11 @@ export default async function RegistrationStatusPage() {
 
   const player = await prisma.playerProfile.findUnique({
     where: { id: session.user.playerId },
-    include: { team: { select: { name: true } } },
+    include: { team: { select: { name: true } }, user: { select: { emailVerifiedAt: true, email: true } } },
   });
   if (!player) redirect("/login");
+
+  const emailVerified = player.user.emailVerifiedAt != null;
 
   if (player.registrationStatus === "APPROVED") redirect("/player/dashboard");
 
@@ -49,6 +52,35 @@ export default async function RegistrationStatusPage() {
 
       <p className="mt-4 text-ink-dim">{body}</p>
 
+      <div className="mt-6 w-full rounded-card border border-line bg-surface p-4 text-left">
+        <p className="font-mono text-[11px] uppercase tracking-wider text-flame">Checklist</p>
+        <ul className="mt-2 space-y-2 text-sm">
+          <li className="flex items-center gap-2 text-success">
+            <Check /> Profile submitted
+          </li>
+          <li className="flex items-center gap-2 text-success">
+            <Check /> Registration terms accepted
+          </li>
+          {emailVerified ? (
+            <li className="flex items-center gap-2 text-success">
+              <Check /> Email address confirmed
+            </li>
+          ) : (
+            <li className="flex flex-col gap-2 text-warning">
+              <span className="flex items-center gap-2">
+                <Dot /> Confirm your email — check {player.user.email} for the link
+              </span>
+              <ResendVerificationButton />
+            </li>
+          )}
+        </ul>
+        {!emailVerified && (
+          <p className="mt-3 text-xs text-ink-faint">
+            An administrator can&apos;t approve your registration until your email is confirmed.
+          </p>
+        )}
+      </div>
+
       {player.registrationReviewNote && (
         <Alert tone="warning" className="mt-5 w-full text-left">
           <p className="font-semibold">Note from the club</p>
@@ -63,4 +95,16 @@ export default async function RegistrationStatusPage() {
       )}
     </main>
   );
+}
+
+function Check() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="h-3.5 w-3.5 flex-none">
+      <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Dot() {
+  return <span className="h-1.5 w-1.5 flex-none rounded-full bg-current" />;
 }

@@ -14,9 +14,10 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@example.com" },
-    update: {},
+    update: { emailVerifiedAt: new Date() },
     create: {
       email: "admin@example.com",
+      emailVerifiedAt: new Date(),
       name: "Ada Admin",
       role: "ADMIN",
       passwordHash,
@@ -25,9 +26,10 @@ async function main() {
 
   const coachUser = await prisma.user.upsert({
     where: { email: "coach@example.com" },
-    update: {},
+    update: { emailVerifiedAt: new Date() },
     create: {
       email: "coach@example.com",
+      emailVerifiedAt: new Date(),
       name: "Casey Coach",
       role: "COACH",
       passwordHash,
@@ -77,9 +79,10 @@ async function main() {
 
   const player1 = await prisma.user.upsert({
     where: { email: "player1@example.com" },
-    update: {},
+    update: { emailVerifiedAt: new Date() },
     create: {
       email: "player1@example.com",
+      emailVerifiedAt: new Date(),
       name: "Priya Player",
       role: "PLAYER",
       passwordHash,
@@ -90,9 +93,10 @@ async function main() {
 
   const player2 = await prisma.user.upsert({
     where: { email: "player2@example.com" },
-    update: {},
+    update: { emailVerifiedAt: new Date() },
     create: {
       email: "player2@example.com",
+      emailVerifiedAt: new Date(),
       name: "Jordan Junior",
       role: "PLAYER",
       passwordHash,

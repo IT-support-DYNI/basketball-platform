@@ -48,8 +48,17 @@ Subjects: `Team` `PlayerProfile` `PlayerContact` `PlayerMedical` `PlayerWelfare`
 `TrainingSession` `Attendance` `Announcement` `Video` `Evaluation` `Feedback`
 `Notification` `User` `Registration` `Club` `all`.
 
-## Not done in W3 (own migration)
+## Auth hardening (W3 part 2)
 
-Email verification, password reset, refresh-token rotation, admin TOTP MFA,
-device / active-session list, account lockout — all need schema tables. Planned
-as a single migration + an email port (console adapter for local dev).
+Shipped (migration `20260828121321_auth_hardening`):
+
+| Feature | Where |
+|---|---|
+| Email verification | `AuthToken` (type `EMAIL_VERIFICATION`), `User.emailVerifiedAt`. Link emailed on register; `POST /api/v1/auth/verify-email`, `/auth/resend-verification`. An admin **can't approve** an unverified registration. `/verify-email` page. |
+| Password reset | `AuthToken` (type `PASSWORD_RESET`, 30-min TTL). `POST /api/v1/auth/forgot-password` (always 200 — no account enumeration), `/auth/reset-password`. `/forgot-password` + `/reset-password` pages. |
+| Brute-force lockout | `LoginAttempt` table. 5 failures in 15 min locks the email for the rest of the window, **even once the password is right**. Enforced in `authOptions.authorize`; the sign-in page reads `GET /api/v1/auth/login-status` to show "try again in N minutes". `lib/login-throttle.ts` (`computeLockout` is pure + unit-tested). |
+| Single-use tokens | Only the SHA-256 hash is stored (`lib/auth-tokens.ts`); `consumeAuthToken` validates + marks used atomically. |
+| Email port | `lib/mail/` — `MailPort` interface + `ConsoleMailAdapter` (logs the link; the free-tier / dev default). Real adapter plugs in at `lib/mail/index.ts`, `MAIL_TRANSPORT` env. |
+
+Still to do (part 3): admin TOTP MFA, device / active-session list + revocation
+(both need deeper NextAuth-flow integration), refresh-token rotation.
