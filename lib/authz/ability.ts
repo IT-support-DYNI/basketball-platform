@@ -30,6 +30,9 @@ export type Action =
  *  field-visibility engine (W5) reads off the same policy. */
 export type Subject =
   | "Team"
+  | "Season"
+  | "Squad"
+  | "Membership"
   | "PlayerProfile"
   | "PlayerContact"
   | "PlayerMedical"
@@ -101,6 +104,8 @@ function applyRole(
 
       can("access", "Team", { id: teamId });
       can("read", "Team", { id: teamId });
+      can("read", "Season");
+      can("read", ["Squad", "Membership"], { teamId });
 
       can(["read", "create", "update", "delete"], "TrainingSession", { teamId });
       can(["read", "record", "verify"], "Attendance", { teamId });
@@ -170,6 +175,7 @@ function applyRole(
       if (ownTeamId != null) {
         can("access", "Team", { id: ownTeamId });
         can("read", "Team", { id: ownTeamId });
+        can("read", ["Squad", "Membership"], { teamId: ownTeamId });
         can("read", "TrainingSession", { teamId: ownTeamId });
         can("read", "Announcement", { teamId: ownTeamId });
       }

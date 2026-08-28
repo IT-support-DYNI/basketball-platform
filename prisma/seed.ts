@@ -105,7 +105,24 @@ async function main() {
     include: { playerProfile: true },
   });
 
-  const session = await prisma.trainingSession.create({
+  // Season-scoped roster (W4 organisation model).
+  for (const [p, jersey, pos] of [
+    [player1.playerProfile!.id, 7, "PG"],
+    [player2.playerProfile!.id, 21, "C"],
+  ] as const) {
+    await prisma.teamMembership.upsert({
+      where: { playerProfileId_teamId_seasonId: { playerProfileId: p, teamId: team.id, seasonId: season.id } },
+      update: { jerseyNumber: jersey, position: pos, status: "ACTIVE" },
+      create: { playerProfileId: p, teamId: team.id, seasonId: season.id, jerseyNumber: jersey, position: pos, status: "ACTIVE" },
+    });
+  }
+  await prisma.staffAssignment.upsert({
+    where: { userId_teamId_role_seasonId: { userId: coachUser.id, teamId: team.id, role: "HEAD_COACH", seasonId: season.id } },
+    update: {},
+    create: { userId: coachUser.id, teamId: team.id, role: "HEAD_COACH", seasonId: season.id },
+  });
+
+  const trainingSession = await prisma.trainingSession.create({
     data: {
       teamId: team.id,
       title: "Tuesday Practice",
@@ -119,8 +136,8 @@ async function main() {
 
   await prisma.attendanceRecord.createMany({
     data: [
-      { sessionId: session.id, playerId: player1.playerProfile!.id, status: "PRESENT", recordedByCoachId: coachUser.coachProfile!.id },
-      { sessionId: session.id, playerId: player2.playerProfile!.id, status: "LATE", recordedByCoachId: coachUser.coachProfile!.id },
+      { sessionId: trainingSession.id, playerId: player1.playerProfile!.id, status: "PRESENT", recordedByCoachId: coachUser.coachProfile!.id },
+      { sessionId: trainingSession.id, playerId: player2.playerProfile!.id, status: "LATE", recordedByCoachId: coachUser.coachProfile!.id },
     ],
     skipDuplicates: true,
   });

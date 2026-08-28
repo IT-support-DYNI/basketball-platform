@@ -59,9 +59,32 @@ enum PlayerPosition {
   C
 }
 
+/// @deprecated — player status is now season-scoped on TeamMembership.status.
+/// Kept until every reader is migrated off PlayerProfile.status (W4 part 2).
 enum PlayerStatus {
   ACTIVE
   INACTIVE
+}
+
+/// A player's status within a team for a season (brief §8).
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  INJURED
+  SUSPENDED
+  INACTIVE
+  TRIALIST
+  FORMER
+}
+
+/// A staff member's role on a team (brief §8: "assign coaches and managers").
+enum StaffRole {
+  HEAD_COACH
+  ASSISTANT_COACH
+  TEAM_MANAGER
+  STATISTICIAN
+  MEDICAL_OFFICER
+  WELFARE_OFFICER
 }
 
 enum TeamStatus {
@@ -162,7 +185,81 @@ model Season {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
+  squads           Squad[]
+  memberships      TeamMembership[]
+  staffAssignments StaffAssignment[]
+
   @@index([clubId, isActive])
+}
+
+// ORGANISATION — squads, season-scoped memberships, staff assignments (brief §5, §8).
+
+/// A roster grouping within a team for a season (e.g. "Senior A", "U16 B").
+/// Optional layer — a team with a single squad per season is fine.
+model Squad {
+  id        Int      @id @default(autoincrement())
+  teamId    Int
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  seasonId  Int
+  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  name      String
+  ageGroup  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships TeamMembership[]
+
+  @@unique([teamId, seasonId, name])
+  @@index([seasonId])
+}
+
+/// A player's membership of a team for one season. Jersey number, position and
+/// status live here, never on PlayerProfile (brief §5). A player can have many
+/// memberships across seasons/teams — the historical record.
+model TeamMembership {
+  id                Int              @id @default(autoincrement())
+  playerProfileId   Int
+  player            PlayerProfile    @relation(fields: [playerProfileId], references: [id], onDelete: Cascade)
+  teamId            Int
+  team              Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  seasonId          Int
+  season            Season           @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  squadId           Int?
+  squad             Squad?           @relation(fields: [squadId], references: [id], onDelete: SetNull)
+  jerseyNumber      Int?
+  position          PlayerPosition?
+  secondaryPosition PlayerPosition?
+  status            MembershipStatus @default(ACTIVE)
+  joinedAt          DateTime         @default(now())
+  leftAt            DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // One membership per player per team per season.
+  @@unique([playerProfileId, teamId, seasonId])
+  @@index([teamId, seasonId])
+  @@index([seasonId, status])
+  // The "no two active players share a jersey in the same team+season" rule is a
+  // partial unique index (status = ACTIVE AND jerseyNumber IS NOT NULL), added
+  // by raw SQL in the migration — Prisma can't express a filtered unique index.
+}
+
+/// A staff member assigned to a team, optionally for a specific season.
+/// Supersedes TeamCoach; TeamCoach stays authoritative until its readers are
+/// migrated (W4 part 2).
+model StaffAssignment {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId    Int
+  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  seasonId  Int?
+  season    Season?   @relation(fields: [seasonId], references: [id], onDelete: SetNull)
+  role      StaffRole
+  createdAt DateTime  @default(now())
+
+  @@unique([userId, teamId, role, seasonId])
+  @@index([teamId])
 }
 
 // AUDIT LOG
@@ -287,6 +384,7 @@ model User {
   authTokens    AuthToken[]
   authSessions  AuthSession[]
   mfa           UserMfa?
+  staffAssignments StaffAssignment[]
   auditLogsActed AuditLog[]
   /// Populated when role = GUARDIAN — the player(s) this user manages.
   guardianOf     GuardianRelationship[] @relation("Guardian")
@@ -332,10 +430,16 @@ model PlayerProfile {
   id              Int            @id @default(autoincrement())
   userId          Int            @unique
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// @deprecated — a player's team/jersey/position/status are now season-scoped
+  /// on TeamMembership. These columns are kept in sync by the roster routes and
+  /// still read by the session/jwt layer; they're removed once every reader is
+  /// migrated (W4 part 2).
   teamId          Int?
   team            Team?          @relation(fields: [teamId], references: [id], onDelete: SetNull)
   photoUrl        String?
+  /// @deprecated — see TeamMembership.position
   position        PlayerPosition?
+  /// @deprecated — see TeamMembership.jerseyNumber
   jerseyNumber    Int?
   dateOfBirth     DateTime?
   /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
@@ -371,6 +475,7 @@ model PlayerProfile {
   feedback          Feedback[]
   videoAssignments  VideoAssignment[]
   guardians         GuardianRelationship[] @relation("Player")
+  memberships       TeamMembership[]
 
   @@index([teamId])
   @@index([registrationStatus])
@@ -415,6 +520,9 @@ model Team {
   trainingSessions TrainingSession[]
   videoAssignments VideoAssignment[]
   announcements    Announcement[]
+  squads           Squad[]
+  memberships      TeamMembership[]
+  staffAssignments StaffAssignment[]
 }
 
 model TeamCoach {

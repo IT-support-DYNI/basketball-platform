@@ -60,6 +60,9 @@ describe("club admin", () => {
     expect(can.can("delete", "Team", { id: 999 })).toBe(true);
     expect(can.can("read", "PlayerMedical", { teamId: 7 })).toBe(true);
     expect(can.can("approve", "Registration")).toBe(true);
+    expect(can.can("create", "Season")).toBe(true);
+    expect(can.can("create", "Squad", { teamId: 3 })).toBe(true);
+    expect(can.can("update", "Membership", { teamId: 3 })).toBe(true);
   });
 });
 
@@ -97,6 +100,16 @@ describe("head coach — own team only", () => {
   it("has no access to medical/welfare notes", () => {
     expect(c.can("read", "PlayerMedical", { teamId: 1 })).toBe(false);
     expect(c.can("read", "PlayerWelfare", { teamId: 1 })).toBe(false);
+  });
+
+  it("reads its own team's squads + memberships, not another's", () => {
+    expect(c.can("read", "Squad", { teamId: 1 })).toBe(true);
+    expect(c.can("read", "Membership", { teamId: 1 })).toBe(true);
+    expect(c.can("read", "Squad", { teamId: 2 })).toBe(false);
+    expect(c.can("read", "Season")).toBe(true);
+    // organisation changes are admin-only
+    expect(c.can("create", "Squad", { teamId: 1 })).toBe(false);
+    expect(c.can("update", "Season")).toBe(false);
   });
 
   it("a coach on two teams reaches both", () => {

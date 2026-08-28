@@ -1,22 +1,26 @@
-import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-import { route } from "@/lib/api";
+import { route, noContent } from "@/lib/api";
 import { requireRole, requireTeamAccess } from "@/lib/authorization";
-import { prisma } from "@/lib/prisma";
+import { idParam } from "@/lib/contracts/common";
+import { getActiveSeason } from "@/lib/season";
+import { getTenantContext } from "@/lib/tenant";
+import { removeFromRoster } from "@/lib/roster";
 
-/** Removes a player from the roster — unassigns their team (teamId → null); does not delete the account. */
-export const DELETE = route<{ id: string; playerId: string }>(async (_req, { params }) => {
+/**
+ * DELETE — remove a player from this team's roster for the active season. The
+ * membership becomes FORMER (kept for the historical record), the account is
+ * untouched.
+ */
+export const DELETE = route<{ id: string; playerId: string }>(async (_req, { params, requestId }) => {
   const session = requireRole(await getServerSession(authOptions), ["ADMIN", "COACH"]);
-  const teamId = Number(params.id);
+  const teamId = idParam.parse(params.id);
   requireTeamAccess(session, teamId);
 
-  const player = await prisma.playerProfile.findUnique({ where: { id: Number(params.playerId) } });
-  if (!player || player.teamId !== teamId) {
-    return NextResponse.json({ error: "Not found on this team" }, { status: 404 });
-  }
+  const ctx = await getTenantContext(session);
+  const season = await getActiveSeason(ctx.clubId);
 
-  await prisma.playerProfile.update({ where: { id: player.id }, data: { teamId: null } });
-  return NextResponse.json({ ok: true });
+  await removeFromRoster(idParam.parse(params.playerId), teamId, season.id);
+  return noContent(requestId);
 });
