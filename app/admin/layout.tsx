@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import AppContainer from "@/components/app/AppContainer";
 
 /*
  * middleware.ts already redirects role mismatches away from /admin —
@@ -12,5 +13,5 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "ADMIN") redirect("/login");
 
-  return <div className="mx-auto max-w-6xl px-6 py-8">{children}</div>;
+  return <AppContainer>{children}</AppContainer>;
 }

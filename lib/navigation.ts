@@ -88,45 +88,70 @@ export function capabilitiesFor(roles: string | string[]): Set<Capability> {
   return caps;
 }
 
-export type NavItem = { label: string; href: string; capability: Capability };
+/** Icon keys resolved to SVGs by `components/nav/NavIcon.tsx`. */
+export type NavIconName =
+  | "home"
+  | "team"
+  | "calendar"
+  | "attendance"
+  | "chart"
+  | "feedback"
+  | "video"
+  | "users"
+  | "whistle"
+  | "megaphone"
+  | "season"
+  | "settings"
+  | "shield"
+  | "inbox"
+  | "user";
+
+export type NavItem = {
+  label: string;
+  href: string;
+  capability: Capability;
+  icon: NavIconName;
+  /** Surfaced in the mobile bottom bar (max 4 per role); the rest live behind "More". */
+  primary?: boolean;
+};
 
 /** One flat, ordered list; the visible subset is whatever the caller can access. */
 const NAV: NavItem[] = [
-  { label: "Home", href: "/player/dashboard", capability: "player.home" },
-  { label: "Dashboard", href: "/coach/dashboard", capability: "coach.home" },
-  { label: "Dashboard", href: "/admin/dashboard", capability: "admin.home" },
+  { label: "Home", href: "/player/dashboard", capability: "player.home", icon: "home", primary: true },
+  { label: "Dashboard", href: "/coach/dashboard", capability: "coach.home", icon: "home", primary: true },
+  { label: "Dashboard", href: "/admin/dashboard", capability: "admin.home", icon: "home", primary: true },
 
-  { label: "Registrations", href: "/admin/registrations", capability: "admin.registrations" },
-  { label: "Members", href: "/admin/users", capability: "admin.members" },
+  { label: "Registrations", href: "/admin/registrations", capability: "admin.registrations", icon: "inbox", primary: true },
+  { label: "Members", href: "/admin/users", capability: "admin.members", icon: "users" },
 
-  { label: "My Team", href: "/player/my-team", capability: "player.team" },
-  { label: "Team", href: "/coach/my-teams", capability: "coach.team" },
-  { label: "Teams", href: "/admin/teams", capability: "admin.teams" },
-  { label: "Coaches", href: "/admin/coaches", capability: "admin.coaches" },
-  { label: "Players", href: "/coach/players", capability: "coach.players" },
-  { label: "Players", href: "/admin/players", capability: "admin.players" },
+  { label: "My Team", href: "/player/my-team", capability: "player.team", icon: "team", primary: true },
+  { label: "Team", href: "/coach/my-teams", capability: "coach.team", icon: "team", primary: true },
+  { label: "Teams", href: "/admin/teams", capability: "admin.teams", icon: "team", primary: true },
+  { label: "Coaches", href: "/admin/coaches", capability: "admin.coaches", icon: "whistle" },
+  { label: "Players", href: "/coach/players", capability: "coach.players", icon: "users" },
+  { label: "Players", href: "/admin/players", capability: "admin.players", icon: "users", primary: true },
 
-  { label: "Schedule", href: "/player/training", capability: "player.schedule" },
-  { label: "Training", href: "/coach/training", capability: "coach.training" },
-  { label: "Training", href: "/admin/training", capability: "admin.training" },
+  { label: "Schedule", href: "/player/training", capability: "player.schedule", icon: "calendar", primary: true },
+  { label: "Training", href: "/coach/training", capability: "coach.training", icon: "calendar", primary: true },
+  { label: "Training", href: "/admin/training", capability: "admin.training", icon: "calendar" },
 
-  { label: "Attendance", href: "/coach/attendance", capability: "coach.attendance" },
-  { label: "Attendance", href: "/admin/attendance", capability: "admin.attendance" },
+  { label: "Attendance", href: "/coach/attendance", capability: "coach.attendance", icon: "attendance", primary: true },
+  { label: "Attendance", href: "/admin/attendance", capability: "admin.attendance", icon: "attendance" },
 
-  { label: "Videos", href: "/player/videos", capability: "player.videos" },
-  { label: "Videos", href: "/coach/videos", capability: "coach.videos" },
+  { label: "Videos", href: "/player/videos", capability: "player.videos", icon: "video" },
+  { label: "Videos", href: "/coach/videos", capability: "coach.videos", icon: "video" },
 
-  { label: "Performance", href: "/player/performance", capability: "player.performance" },
-  { label: "Performance", href: "/coach/performance", capability: "coach.performance" },
-  { label: "Performance", href: "/admin/performance", capability: "admin.performance" },
-  { label: "Feedback", href: "/player/feedback", capability: "player.feedback" },
+  { label: "Performance", href: "/player/performance", capability: "player.performance", icon: "chart", primary: true },
+  { label: "Performance", href: "/coach/performance", capability: "coach.performance", icon: "chart" },
+  { label: "Performance", href: "/admin/performance", capability: "admin.performance", icon: "chart" },
+  { label: "Feedback", href: "/player/feedback", capability: "player.feedback", icon: "feedback" },
 
-  { label: "Announcements", href: "/coach/announcements", capability: "coach.announcements" },
+  { label: "Announcements", href: "/coach/announcements", capability: "coach.announcements", icon: "megaphone" },
 
-  { label: "Seasons", href: "/admin/seasons", capability: "admin.seasons" },
-  { label: "Settings", href: "/admin/settings", capability: "admin.settings" },
-  { label: "Profile", href: "/player/profile", capability: "player.profile" },
-  { label: "Security", href: "/settings/security", capability: "account.security" },
+  { label: "Seasons", href: "/admin/seasons", capability: "admin.seasons", icon: "season" },
+  { label: "Settings", href: "/admin/settings", capability: "admin.settings", icon: "settings" },
+  { label: "Profile", href: "/player/profile", capability: "player.profile", icon: "user" },
+  { label: "Security", href: "/settings/security", capability: "account.security", icon: "shield" },
 ];
 
 export function navFor(roles: string | string[]): NavItem[] {
@@ -139,4 +164,15 @@ export function navFor(roles: string | string[]): NavItem[] {
     items.push(item);
   }
   return items;
+}
+
+/**
+ * The mobile bottom-bar destinations: the items flagged `primary` that the
+ * caller can access, capped at 4 so the bar + a "More" tab stay on one row.
+ * Everything else (including any primary items past the cap) stays in "More".
+ */
+export function primaryNavFor(roles: string | string[]): NavItem[] {
+  return navFor(roles)
+    .filter((item) => item.primary)
+    .slice(0, 4);
 }

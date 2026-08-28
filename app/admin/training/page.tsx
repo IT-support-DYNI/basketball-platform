@@ -14,8 +14,8 @@ export default async function AdminTrainingPage() {
       <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Training</h1>
       <p className="mt-1 text-slate-600">Every scheduled session across every team (view-only — coaches run their own team's training).</p>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-surface">
-        <table className="w-full text-sm">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-surface">
+        <table className="w-full min-w-[38rem] text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-4 py-3">Team</th>

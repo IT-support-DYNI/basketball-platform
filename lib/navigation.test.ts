@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { navFor, capabilitiesFor } from "./navigation";
+import { navFor, primaryNavFor, capabilitiesFor } from "./navigation";
 
 describe("navigation", () => {
   it("gives a player their own menu, no admin items", () => {
@@ -36,5 +36,24 @@ describe("navigation", () => {
   it("keeps items in declared order", () => {
     const items = navFor("ADMIN");
     expect(items[0].href).toBe("/admin/dashboard");
+  });
+
+  it("every nav item carries an icon", () => {
+    for (const role of ["PLAYER", "COACH", "ADMIN"]) {
+      for (const item of navFor(role)) expect(item.icon).toBeTruthy();
+    }
+  });
+
+  it("primaryNavFor returns at most 4 accessible primary items per role", () => {
+    for (const role of ["PLAYER", "COACH", "ADMIN"]) {
+      const primary = primaryNavFor(role);
+      expect(primary.length).toBeGreaterThan(0);
+      expect(primary.length).toBeLessThanOrEqual(4);
+      const full = new Set(navFor(role).map((i) => i.href));
+      for (const item of primary) {
+        expect(item.primary).toBe(true);
+        expect(full.has(item.href)).toBe(true);
+      }
+    }
   });
 });

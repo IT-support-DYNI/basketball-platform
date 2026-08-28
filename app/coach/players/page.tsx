@@ -41,7 +41,7 @@ export default async function CoachPlayersPage() {
         <EmptyState title="No players on your roster yet" />
       ) : (
         <div className="overflow-x-auto rounded-card border border-line">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[34rem] text-sm">
             <thead>
               <tr className="border-b border-line bg-surface-2 text-left font-display text-[11px] uppercase tracking-wider text-ink-dim">
                 <th className="px-4 py-2.5">Name</th>

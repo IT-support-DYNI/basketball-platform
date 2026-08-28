@@ -92,10 +92,15 @@ const config: Config = {
           '0%,100%': { opacity: '1' },
           '50%': { opacity: '0.4' },
         },
+        'slide-up': {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.4s cubic-bezier(0.4,0,0.2,1) both',
         'pulse-live': 'pulse-live 1.6s ease-in-out infinite',
+        'slide-up': 'slide-up 0.28s cubic-bezier(0.32,0.72,0,1) both',
       },
     },
   },

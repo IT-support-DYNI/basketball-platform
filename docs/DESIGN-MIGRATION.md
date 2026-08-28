@@ -31,15 +31,15 @@ DYNI Blazers dark-first design system. Started W1 of the delivery plan.
 
 | Area | Status | Notes |
 |---|---|---|
-| App shell (`NavBar`, layout, theme) | ✅ done | |
+| App shell (`NavBar`, layout, theme) | ✅ done | Responsive: horizontal nav at `lg+`; below that a fixed bottom tab bar (`components/nav/BottomNav.tsx`, ≤4 primary items via `primaryNavFor`) + a "More" drawer with the full menu, identity, theme and sign-out. `AppContainer` is the shared page frame (fluid gutters, bottom clearance for the bar). |
 | Auth: login, register, set-password, registration-status | ✅ done | Register flow is restyled only — the multi-step resumable rebuild is W5 |
 | Player dashboard | ✅ done | reference implementation |
 | Coach dashboard | ✅ done | |
 | Admin dashboard | ✅ done | |
 | `StatTile`, `StatusBadge` | ✅ done | theme-aware; legacy `accent` names kept as aliases |
-| All other player screens | ⏳ shimmed | legible via token remap; full pass during each module's rebuild week |
-| All other coach screens | ⏳ shimmed | |
-| All other admin screens | ⏳ shimmed | |
+| All other player screens | ⏳ shimmed | legible via token remap; full pass during each module's rebuild week. Legacy `<table>`s wrapped in `overflow-x-auto` + `min-w-*` so they scroll rather than crush on mobile. |
+| All other coach screens | ⏳ shimmed | as above |
+| All other admin screens | ⏳ shimmed | as above |
 | Form components (`components/admin/*`, `components/coach/*`, …) | ⏳ shimmed | replaced with `components/ui` primitives as their screens are rebuilt |
 | Radix primitive layer | ✅ done | `components/ui`: Button, TextField, Select, Checkbox, RadioGroup, Field (FieldError/FieldHint/ErrorSummary), Card, Badge, Alert, PageHeader, Skeleton/LoadingState/EmptyState/ErrorState/PermissionDenied, Dialog, Tabs, DropdownMenu, Tooltip, Toast (+ `useToast`), DataTable |
 | `axe-core` in CI | ✅ done | `components/ui/ui.a11y.test.tsx` (Vitest + jest-axe), run by `.github/workflows/ci.yml` alongside lint + typecheck + build |
@@ -49,3 +49,13 @@ DYNI Blazers dark-first design system. Started W1 of the delivery plan.
 
 Foundation, brand, primitives, nav and CI are in place. Remaining migration is
 per-screen and happens during each module's rebuild week (W3 onward).
+
+## Responsive shell (W4 follow-up)
+
+The app now adapts down to a 375px phone: shell height on mobile went from a
+426px wrapping link stack to a 53px top bar + 56px bottom tab bar, no page has
+horizontal bleed, and every table either reflows (`DataTable`) or scrolls inside
+its own container. **Still to do** as each module is rebuilt: migrate the
+remaining raw `<table>` pages onto the `DataTable` primitive (which collapses to
+stacked cards) instead of horizontal scroll, and give `TeamManager`'s inline
+roster editor a card layout on mobile.
