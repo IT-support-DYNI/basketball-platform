@@ -43,6 +43,7 @@ export const PATCH = route<{ id: string }>(async (req, { params, requestId }) =>
   }
 
   const newStatus = DECISION_TO_STATUS[body.decision];
+  const targetTeamId = body.decision === "APPROVE" ? (body.teamId ?? player.teamId) : player.teamId;
 
   const updated = await prisma.$transaction(async (tx) => {
     const saved = await tx.playerProfile.update({
@@ -52,10 +53,41 @@ export const PATCH = route<{ id: string }>(async (req, { params, requestId }) =>
         registrationReviewNote: body.note,
         registrationReviewedByUserId: Number(session.user.id),
         registrationReviewedAt: new Date(),
-        teamId: body.decision === "APPROVE" ? (body.teamId ?? player.teamId) : player.teamId,
+        teamId: targetTeamId,
       },
       include: { user: { select: { id: true } } },
     });
+
+    // Approval puts the player on the team's roster for the active season,
+    // carrying whatever jersey/position they asked for at registration.
+    if (body.decision === "APPROVE" && targetTeamId) {
+      const team = await tx.team.findUnique({ where: { id: targetTeamId }, select: { clubId: true } });
+      const activeSeason = await tx.season.findFirst({
+        where: team?.clubId != null ? { clubId: team.clubId, isActive: true } : { isActive: true },
+        orderBy: { startDate: "desc" },
+      });
+      if (activeSeason) {
+        await tx.teamMembership.upsert({
+          where: {
+            playerProfileId_teamId_seasonId: {
+              playerProfileId: playerId,
+              teamId: targetTeamId,
+              seasonId: activeSeason.id,
+            },
+          },
+          create: {
+            playerProfileId: playerId,
+            teamId: targetTeamId,
+            seasonId: activeSeason.id,
+            status: "ACTIVE",
+            position: player.position,
+            // Jersey left null on purpose — an admin assigns it, avoiding an
+            // accidental clash from a self-registered preference.
+          },
+          update: { status: "ACTIVE", leftAt: null },
+        });
+      }
+    }
 
     await logAudit(tx, {
       actorUserId: Number(session.user.id),

@@ -31,17 +31,30 @@ pre-check to avoid creating an orphan account before hitting the index.
 | Routes | `/api/v1/seasons{,/[id]}`, `/api/v1/teams/[id]/squads{,/[squadId]}`, `/api/v1/memberships/[id]`, reworked `/api/v1/teams/[id]/players{,/[playerId]}`. |
 | Authz | subjects `Season` / `Squad` / `Membership` — admin manages, coach reads own team. |
 
-## Transitional (removed in W4 part 2)
+## W4 part 2 — UI + reader migration (done)
 
-- `PlayerProfile.teamId / jerseyNumber / position / status` — kept, marked
-  `@deprecated`, still read by the session/jwt layer and by roster pages that
-  query Prisma directly; synced by `lib/roster.ts`.
+- **jwt callback** now derives `teamIds` from `StaffAssignment` and a player's
+  `teamId` from their active `TeamMembership` (deprecated columns are a fallback
+  only). `TeamCoach` is no longer read anywhere.
+- **Admin UI**: `/admin/teams/[id]` (`TeamManager` — season selector, roster with
+  inline jersey/position/squad/status editing, add existing player or new
+  account, remove, squads, staff, CSV export), `/admin/teams` list,
+  `/admin/seasons` (`SeasonManager`). `/coach/my-teams/[id]` reuses `TeamManager`
+  read-restricted.
+- **Endpoints**: `POST /teams/:id/roster` (add existing), `GET
+  /teams/:id/roster/export` (CSV, audit-logged), `GET|POST|DELETE
+  /teams/:id/staff…`, `GET /players`, `GET /players/:id/memberships`.
+- Approving a registration now creates the `TeamMembership`.
+
+## Transitional (drop in W4 part 3)
+
+- `PlayerProfile.teamId / jerseyNumber / position / status` — kept, `@deprecated`,
+  synced by `lib/roster.ts`. Still read by a few directory-style list pages
+  (`/coach/players`, `/admin/players`, `/admin/registrations`) and written by
+  `/api/v1/register` + `players/[id]` PATCH as pre-approval intent.
 - `PlayerStatus` enum — superseded by `MembershipStatus`.
-- `TeamCoach` — superseded by `StaffAssignment` (backfilled), still authoritative
-  for the jwt callback's `teamIds` until its readers move.
+- `TeamCoach` table — superseded by `StaffAssignment`, no longer read; safe to
+  drop once those list pages move.
 
-## Still to build (W4 part 2)
-
-Team / squad / season **admin UI**, staff-assignment UI, add-existing-player-to-
-roster endpoint, historical membership view, roster **CSV export**; then migrate
-the remaining readers off the deprecated columns and drop them.
+W4 part 3: migrate the last list pages, then a `DROP COLUMN` / `DROP TABLE`
+migration.

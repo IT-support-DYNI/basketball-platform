@@ -37,6 +37,7 @@ export type Capability =
   | "admin.training"
   | "admin.attendance"
   | "admin.performance"
+  | "admin.seasons"
   | "admin.settings"
   | "account.security";
 
@@ -72,6 +73,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "admin.training",
     "admin.attendance",
     "admin.performance",
+    "admin.seasons",
     "admin.settings",
   "account.security",
   ],
@@ -121,6 +123,7 @@ const NAV: NavItem[] = [
 
   { label: "Announcements", href: "/coach/announcements", capability: "coach.announcements" },
 
+  { label: "Seasons", href: "/admin/seasons", capability: "admin.seasons" },
   { label: "Settings", href: "/admin/settings", capability: "admin.settings" },
   { label: "Profile", href: "/player/profile", capability: "player.profile" },
   { label: "Security", href: "/settings/security", capability: "account.security" },
