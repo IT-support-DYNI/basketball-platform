@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [master, dyni-blazers]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+        env:
+          # `postinstall` runs `prisma generate`, which only needs the schema.
+          PRISMA_SKIP_POSTINSTALL_GENERATE: "false"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests + accessibility (axe)
+        run: npm run test:run
+
+      - name: Build
+        run: npx next build
+        env:
+          # Build must not touch a real database. These are throwaway values
+          # just to satisfy schema validation and NextAuth at build time —
+          # no migration or query runs during `next build`.
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+          DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
+          NEXTAUTH_SECRET: "ci-build-only-not-a-real-secret"
+          NEXTAUTH_URL: "http://localhost:3000"

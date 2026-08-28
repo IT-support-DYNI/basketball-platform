@@ -41,6 +41,11 @@ DYNI Blazers dark-first design system. Started W1 of the delivery plan.
 | All other coach screens | ⏳ shimmed | |
 | All other admin screens | ⏳ shimmed | |
 | Form components (`components/admin/*`, `components/coach/*`, …) | ⏳ shimmed | replaced with `components/ui` primitives as their screens are rebuilt |
-| Radix primitive layer (Dialog, DataTable, Tabs, Toast, EmptyState…) | ⬜ not started | rest of W1 |
-| `axe-core` in CI | ⬜ not started | rest of W1 |
-| Per-permission declarative nav menu | ⬜ not started | rest of W1 — `NavBar` still uses per-role link maps |
+| Radix primitive layer | ✅ done | `components/ui`: Button, TextField, Select, Checkbox, RadioGroup, Field (FieldError/FieldHint/ErrorSummary), Card, Badge, Alert, PageHeader, Skeleton/LoadingState/EmptyState/ErrorState/PermissionDenied, Dialog, Tabs, DropdownMenu, Tooltip, Toast (+ `useToast`), DataTable |
+| `axe-core` in CI | ✅ done | `components/ui/ui.a11y.test.tsx` (Vitest + jest-axe), run by `.github/workflows/ci.yml` alongside lint + typecheck + build |
+| Per-permission declarative nav menu | ✅ done | `lib/navigation.ts` — capability-keyed, merges + de-dupes for multi-role users; `NavBar` + `NavLinks` (active-state highlighting) consume it |
+
+## W1 complete
+
+Foundation, brand, primitives, nav and CI are in place. Remaining migration is
+per-screen and happens during each module's rebuild week (W3 onward).
