@@ -19,6 +19,20 @@ import bcrypt from "bcryptjs";
 
 import { prisma } from "./prisma";
 
+/*
+ * Vercel preview / branch deployments get a unique URL per push, so a fixed
+ * NEXTAUTH_URL env var can't match them. When it isn't set explicitly (which is
+ * the case we want for Preview — Production still sets it to the real domain),
+ * derive it from the deployment's own URL. VERCEL_BRANCH_URL is the stable
+ * per-branch alias; VERCEL_URL is the per-deployment fallback.
+ */
+if (!process.env.NEXTAUTH_URL) {
+  const vercelHost = process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL;
+  if (vercelHost) {
+    process.env.NEXTAUTH_URL = `https://${vercelHost}`;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
