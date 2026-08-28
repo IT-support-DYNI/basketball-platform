@@ -31,7 +31,7 @@ DYNI Blazers dark-first design system. Started W1 of the delivery plan.
 
 | Area | Status | Notes |
 |---|---|---|
-| App shell (`NavBar`, layout, theme) | ✅ done | One nav pattern at **every** breakpoint: a slim top bar (brand + player notification bell) and a fixed bottom bar — ≤4 primary items via `primaryNavFor` + a "More" drawer with the full menu, identity, theme and sign-out (`components/nav/BottomNav.tsx`). The bar spans the viewport but its contents are centred + width-capped so it reads as a dock on desktop. `AppContainer` is the shared page frame (fluid gutters, bottom clearance for the bar). |
+| App shell (`NavBar`, layout, theme) | ✅ done | `components/nav/PrimaryNav.tsx` — same destinations everywhere, placed per breakpoint. `lg+`: one sticky **top** bar (brand · ≤4 primary pills via `primaryNavFor` · "More" · player bell). `<lg`: slim top bar (brand + bell) + a fixed **bottom** bar with the same tabs + "More". "More" opens a shared bottom-anchored drawer (full menu + identity + theme + sign-out). `AppContainer` is the shared page frame (fluid gutters; extra bottom room on mobile for the bar). |
 | Auth: login, register, set-password, registration-status | ✅ done | Register flow is restyled only — the multi-step resumable rebuild is W5 |
 | Player dashboard | ✅ done | reference implementation |
 | Coach dashboard | ✅ done | |
@@ -55,10 +55,10 @@ per-screen and happens during each module's rebuild week (W3 onward).
 The app now adapts down to a 375px phone: shell height went from a 426px
 wrapping link stack to a ~53px top bar + ~56px bottom bar, no page has
 horizontal bleed, and every table either reflows (`DataTable`) or scrolls inside
-its own container. The **same** bottom-bar + "More"-drawer nav is used on
-desktop too (per the manager's call — one consistent pattern, app-like ahead of
-the native build), with the bar's contents centred and width-capped so it
-presents as a dock rather than a stretched strip. **Still to do** as each module
-is rebuilt: migrate the remaining raw `<table>` pages onto the `DataTable`
-primitive (which collapses to stacked cards) instead of horizontal scroll, and
-give `TeamManager`'s inline roster editor a card layout on mobile.
+its own container. The same 4-primary + "More" destinations are used at every
+breakpoint (`components/nav/PrimaryNav.tsx`); below `lg` they sit in a fixed
+bottom bar, at `lg`+ they move into a single sticky **top** bar as pills next to
+the brand. **Still to do** as each module is rebuilt: migrate the remaining raw
+`<table>` pages onto the `DataTable` primitive (which collapses to stacked
+cards) instead of horizontal scroll, and give `TeamManager`'s inline roster
+editor a card layout on mobile.

@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 /**
  * The one page frame every signed-in screen sits in. Fluid gutters that grow
  * with the viewport, and bottom room on small screens so content clears the
- * fixed mobile nav bar (`components/nav/BottomNav.tsx`).
+ * fixed bottom nav bar on mobile (`components/nav/PrimaryNav.tsx`).
  */
 export default function AppContainer({
   children,
@@ -17,9 +17,9 @@ export default function AppContainer({
   return (
     <div
       className={cn(
-        // fluid gutters; generous bottom room at every breakpoint so content
-        // always clears the fixed bottom nav bar
-        "mx-auto w-full px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8 lg:px-8",
+        // fluid gutters; on mobile, extra bottom room so content clears the
+        // fixed bottom nav bar (the bar moves to the top at lg)
+        "mx-auto w-full px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8 lg:px-8 lg:pb-12",
         width === "prose" ? "max-w-3xl" : "max-w-6xl",
         className,
       )}
