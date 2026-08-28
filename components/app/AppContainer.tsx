@@ -17,9 +17,9 @@ export default function AppContainer({
   return (
     <div
       className={cn(
-        // fluid gutters; generous bottom room so content clears the fixed
-        // mobile nav bar, dropped back to normal once the bar is gone at lg
-        "mx-auto w-full px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8 lg:px-8 lg:pb-10",
+        // fluid gutters; generous bottom room at every breakpoint so content
+        // always clears the fixed bottom nav bar
+        "mx-auto w-full px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8 lg:px-8",
         width === "prose" ? "max-w-3xl" : "max-w-6xl",
         className,
       )}

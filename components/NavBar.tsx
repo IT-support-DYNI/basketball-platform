@@ -5,26 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { navFor, primaryNavFor } from "@/lib/navigation";
 import Brandmark from "./Brandmark";
-import LogoutButton from "./LogoutButton";
-import NavLinks from "./NavLinks";
 import BottomNav from "./nav/BottomNav";
-import ThemeToggle from "./theme/ThemeToggle";
-
-const ROLE_STYLES: Record<string, string> = {
-  ADMIN: "border-info/40 text-info",
-  COACH: "border-ember/40 text-ember",
-  PLAYER: "border-flame/40 text-flame-ink",
-};
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
 
 export default async function NavBar() {
   const session = await getServerSession(authOptions);
@@ -44,53 +25,25 @@ export default async function NavBar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-line bg-ground/85 backdrop-blur-md">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-5">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
           <Brandmark size="sm" href={homeHref} className="shrink-0" />
 
-          <div className="hidden min-w-0 flex-1 lg:block">
-            <NavLinks items={links} />
-          </div>
-
-          <div className="flex items-center gap-2">
-            {session.user.role === "PLAYER" && (
-              <Link
-                href="/player/notifications"
-                aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
-                className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink-dim transition hover:bg-surface-2 hover:text-ink"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
-                  <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-                </svg>
-                {unreadCount > 0 && (
-                  <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-flame px-1 text-[10px] font-bold text-on-flame ring-2 ring-ground">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
-              </Link>
-            )}
-
-            <div className="hidden lg:block">
-              <ThemeToggle />
-            </div>
-
-            <div className="hidden items-center gap-2 rounded-full border border-line bg-surface py-1 pl-1 pr-2.5 lg:flex">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-surface-3 font-condensed text-xs font-bold text-ink">
-                {initials(session.user.name ?? "?")}
-              </span>
-              <p className="text-sm font-semibold text-ink">{session.user.name}</p>
-              <span
-                className={`rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide ${
-                  ROLE_STYLES[session.user.role] ?? "border-line text-ink-dim"
-                }`}
-              >
-                {session.user.role}
-              </span>
-            </div>
-
-            <div className="hidden lg:block">
-              <LogoutButton />
-            </div>
-          </div>
+          {session.user.role === "PLAYER" && (
+            <Link
+              href="/player/notifications"
+              aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink-dim transition hover:bg-surface-2 hover:text-ink"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-flame px-1 text-[10px] font-bold text-on-flame ring-2 ring-ground">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
         </nav>
       </header>
 

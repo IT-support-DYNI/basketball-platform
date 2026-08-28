@@ -16,10 +16,11 @@ function isActive(pathname: string, href: string) {
 }
 
 /**
- * The app-style navigation for phones and small tablets (hidden at `lg`, where
- * the horizontal nav in `NavBar` takes over). Up to four primary destinations
- * plus a "More" tab that opens a drawer with the full menu, account identity,
- * theme toggle and sign-out.
+ * The app-style navigation used at every breakpoint: a fixed bottom bar with up
+ * to four primary destinations plus a "More" tab that opens a drawer holding the
+ * full menu, account identity, theme toggle and sign-out. The bar spans the
+ * viewport but its contents are centred and width-capped so it reads as a dock
+ * on wide screens rather than stretching edge to edge.
  */
 export default function BottomNav({
   primary,
@@ -43,11 +44,11 @@ export default function BottomNav({
     "flex flex-1 flex-col items-center justify-center gap-1 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] text-[10px] font-medium tracking-wide transition";
 
   return (
-    <>
-      <nav
-        aria-label="Primary"
-        className="fixed inset-x-0 bottom-0 z-50 flex border-t border-line bg-ground/95 backdrop-blur-md lg:hidden"
-      >
+    <nav
+      aria-label="Primary"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-ground/95 backdrop-blur-md"
+    >
+      <div className="mx-auto flex w-full max-w-md">
         {primary.map((item) => {
           const active = isActive(pathname, item.href);
           return (
@@ -57,7 +58,10 @@ export default function BottomNav({
               aria-current={active ? "page" : undefined}
               className={cn(tab, active ? "text-flame-ink" : "text-ink-dim hover:text-ink")}
             >
-              <NavIcon name={item.icon} className={cn("h-5 w-5", active && "drop-shadow-[0_0_6px_rgb(var(--flame)/0.5)]")} />
+              <NavIcon
+                name={item.icon}
+                className={cn("h-5 w-5", active && "drop-shadow-[0_0_6px_rgb(var(--flame)/0.5)]")}
+              />
               {item.label}
             </Link>
           );
@@ -76,13 +80,10 @@ export default function BottomNav({
           </Dialog.Trigger>
 
           <Dialog.Portal>
-            <Dialog.Overlay className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm data-[state=open]:animate-fade-in motion-reduce:animate-none lg:hidden" />
+            <Dialog.Overlay className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm data-[state=open]:animate-fade-in motion-reduce:animate-none" />
             <Dialog.Content
               aria-describedby={undefined}
-              className={cn(
-                "fixed inset-x-0 bottom-0 z-[61] max-h-[85vh] overflow-y-auto rounded-t-[20px] border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-pop lg:hidden",
-                "data-[state=open]:animate-slide-up motion-reduce:animate-none",
-              )}
+              className="fixed inset-x-0 bottom-0 z-[61] mx-auto max-h-[85vh] max-w-lg overflow-y-auto rounded-t-[20px] border border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-pop"
             >
               <div className="sticky top-0 flex items-center justify-between border-b border-line bg-surface px-5 py-3.5">
                 <div className="min-w-0">
@@ -104,7 +105,7 @@ export default function BottomNav({
                 </div>
               </div>
 
-              <ul className="grid grid-cols-2 gap-1.5 p-4">
+              <ul className="grid grid-cols-2 gap-1.5 p-4 sm:grid-cols-3">
                 {all.map((item) => {
                   const active = isActive(pathname, item.href);
                   return (
@@ -134,7 +135,7 @@ export default function BottomNav({
             </Dialog.Content>
           </Dialog.Portal>
         </Dialog.Root>
-      </nav>
-    </>
+      </div>
+    </nav>
   );
 }
