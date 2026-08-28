@@ -2,6 +2,10 @@ import { Session } from "next-auth";
 
 import { computeAttendanceStats } from "./attendance";
 import { prisma } from "./prisma";
+import { rosterPlayerFilter } from "./roster";
+
+/** Membership statuses that don't count towards a team's live roster size. */
+const OFF_ROSTER = ["FORMER", "INACTIVE"] as const;
 
 /*
  * Shared by app/api/dashboard/route.ts (for any future non-web client)
@@ -12,7 +16,7 @@ import { prisma } from "./prisma";
  */
 
 export async function getAdminDashboard() {
-  const [totalUsers, totalTeams, totalCoaches, totalPlayers, pendingRegistrations, activeTeams, recentAnnouncements] =
+  const [totalUsers, totalTeams, totalCoaches, totalPlayers, pendingRegistrations, teams, recentAnnouncements] =
     await Promise.all([
       prisma.user.count(),
       prisma.team.count(),
@@ -21,7 +25,7 @@ export async function getAdminDashboard() {
       prisma.playerProfile.count({ where: { registrationStatus: { not: "APPROVED" } } }),
       prisma.team.findMany({
         orderBy: { name: "asc" },
-        include: { _count: { select: { players: true } } },
+        include: { _count: { select: { memberships: { where: { status: { notIn: [...OFF_ROSTER] } } } } } },
       }),
       prisma.announcement.findMany({
         orderBy: { createdAt: "desc" },
@@ -29,6 +33,8 @@ export async function getAdminDashboard() {
         include: { author: { select: { name: true } } },
       }),
     ]);
+
+  const activeTeams = teams.map((t) => ({ ...t, playerCount: t._count.memberships }));
 
   return {
     stats: { totalUsers, totalTeams, totalCoaches, totalPlayers, pendingRegistrations },
@@ -43,7 +49,7 @@ export async function getCoachDashboard(session: Session) {
 
   const [players, nextSession, recentAnnouncements, recentVideos, recentAttendance] = await Promise.all([
     prisma.playerProfile.findMany({
-      where: { teamId: { in: teamIds } },
+      where: rosterPlayerFilter(teamIds),
       include: {
         user: { select: { name: true } },
         evaluations: { orderBy: { periodStart: "desc" }, take: 1 },

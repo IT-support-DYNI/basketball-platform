@@ -13,10 +13,10 @@ export const GET = route<{ id: string }>(async (_req, { params, requestId }) => 
 
   const player = await prisma.playerProfile.findUnique({
     where: { id: playerProfileId },
-    select: { id: true, teamId: true },
+    select: { id: true, memberships: { where: { status: { notIn: ["FORMER", "INACTIVE"] } }, select: { teamId: true } } },
   });
   if (!player) return ok([], { requestId });
-  requirePlayerAccess(session, player);
+  requirePlayerAccess(session, { id: player.id, teamIds: [...new Set(player.memberships.map((m) => m.teamId))] });
 
   const memberships = await prisma.teamMembership.findMany({
     where: { playerProfileId },

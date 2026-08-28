@@ -53,7 +53,7 @@ export default async function AdminDashboardPage() {
                     {team.name}
                   </Link>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-ink-faint">{team._count.players} players</span>
+                    <span className="text-xs text-ink-faint">{team.playerCount} players</span>
                     <StatusBadge status={team.status} />
                   </div>
                 </li>

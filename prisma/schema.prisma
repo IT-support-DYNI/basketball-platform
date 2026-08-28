@@ -59,13 +59,6 @@ enum PlayerPosition {
   C
 }
 
-/// @deprecated — player status is now season-scoped on TeamMembership.status.
-/// Kept until every reader is migrated off PlayerProfile.status (W4 part 2).
-enum PlayerStatus {
-  ACTIVE
-  INACTIVE
-}
-
 /// A player's status within a team for a season (brief §8).
 enum MembershipStatus {
   PENDING
@@ -417,7 +410,6 @@ model CoachProfile {
   phone   String?
   bio     String?
 
-  teams                TeamCoach[]
   sessionsCreated      TrainingSession[]        @relation("SessionCreatedBy")
   attendanceRecorded   AttendanceRecord[]       @relation("AttendanceRecordedBy")
   evaluationsGiven     PerformanceEvaluation[]  @relation("EvaluationCoach")
@@ -430,17 +422,7 @@ model PlayerProfile {
   id              Int            @id @default(autoincrement())
   userId          Int            @unique
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  /// @deprecated — a player's team/jersey/position/status are now season-scoped
-  /// on TeamMembership. These columns are kept in sync by the roster routes and
-  /// still read by the session/jwt layer; they're removed once every reader is
-  /// migrated (W4 part 2).
-  teamId          Int?
-  team            Team?          @relation(fields: [teamId], references: [id], onDelete: SetNull)
   photoUrl        String?
-  /// @deprecated — see TeamMembership.position
-  position        PlayerPosition?
-  /// @deprecated — see TeamMembership.jerseyNumber
-  jerseyNumber    Int?
   dateOfBirth     DateTime?
   /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
   contactPhone    String?
@@ -448,7 +430,13 @@ model PlayerProfile {
   guardianName    String?
   /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
   guardianContact String?
-  status          PlayerStatus   @default(ACTIVE)
+
+  /// The team + position the applicant asked for at sign-up. Advisory only —
+  /// the admin confirms the team and a coach assigns the jersey at approval,
+  /// which creates the authoritative TeamMembership.
+  registrationTeamId     Int?
+  registrationTeam       Team?          @relation("RegistrationApplicant", fields: [registrationTeamId], references: [id], onDelete: SetNull)
+  registrationPosition   PlayerPosition?
 
   /// Self-service registration lifecycle (DYNI Blazers PRD §6). Defaults to
   /// APPROVED so every existing/admin-created player is unaffected — this
@@ -477,7 +465,6 @@ model PlayerProfile {
   guardians         GuardianRelationship[] @relation("Player")
   memberships       TeamMembership[]
 
-  @@index([teamId])
   @@index([registrationStatus])
 }
 
@@ -515,27 +502,13 @@ model Team {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  coaches          TeamCoach[]
-  players          PlayerProfile[]
   trainingSessions TrainingSession[]
   videoAssignments VideoAssignment[]
   announcements    Announcement[]
   squads           Squad[]
   memberships      TeamMembership[]
   staffAssignments StaffAssignment[]
-}
-
-model TeamCoach {
-  id             Int          @id @default(autoincrement())
-  teamId         Int
-  team           Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  coachProfileId Int
-  coach          CoachProfile @relation(fields: [coachProfileId], references: [id], onDelete: Cascade)
-  isPrimary      Boolean      @default(false)
-  createdAt      DateTime     @default(now())
-
-  @@unique([teamId, coachProfileId])
-  @@index([coachProfileId])
+  registrationApplicants PlayerProfile[] @relation("RegistrationApplicant")
 }
 
 // TRAINING SESSIONS

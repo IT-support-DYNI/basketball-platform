@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { route } from "@/lib/api";
 import { requireAuth, requireRole, requirePlayerAccess } from "@/lib/authorization";
+import { playerTeamIdsSelect, playerTeamIds } from "@/lib/roster";
 import { updateEvaluationSchema } from "@/lib/contracts/performance";
 import { computeOverallScore } from "@/lib/performance";
 import { prisma } from "@/lib/prisma";
@@ -13,11 +14,11 @@ export const GET = route<{ id: string }>(async (_req, { params }) => {
 
   const evaluation = await prisma.performanceEvaluation.findUnique({
     where: { id: Number(params.id) },
-    include: { categoryScores: true, player: true, coach: { include: { user: { select: { name: true } } } } },
+    include: { categoryScores: true, player: { select: { id: true, ...playerTeamIdsSelect } }, coach: { include: { user: { select: { name: true } } } } },
   });
   if (!evaluation) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  requirePlayerAccess(session, evaluation.player);
+  requirePlayerAccess(session, { id: evaluation.player.id, teamIds: playerTeamIds(evaluation.player) });
   return NextResponse.json(evaluation);
 });
 
@@ -27,10 +28,10 @@ export const PATCH = route<{ id: string }>(async (req, { params }) => {
 
   const existing = await prisma.performanceEvaluation.findUnique({
     where: { id: evaluationId },
-    include: { player: true },
+    include: { player: { select: { id: true, ...playerTeamIdsSelect } } },
   });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  requirePlayerAccess(session, existing.player);
+  requirePlayerAccess(session, { id: existing.player.id, teamIds: playerTeamIds(existing.player) });
 
   const body = updateEvaluationSchema.parse(await req.json());
 

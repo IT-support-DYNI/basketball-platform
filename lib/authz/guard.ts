@@ -89,32 +89,28 @@ export function requireTeamAccess(session: Session, teamId: number): void {
   }
 }
 
-/** Row-level: can this caller read `player`'s data? Pass the already-loaded
- *  player so this needs no extra query. */
-export function requirePlayerAccess(
-  session: Session,
-  player: { id: number; teamId: number | null },
-): void {
-  if (
-    authorize(session).cannot("read", "PlayerProfile", {
-      id: player.id,
-      teamId: player.teamId ?? undefined,
-    })
-  ) {
-    throw new ForbiddenError("You don't have access to this player's data");
-  }
+/** A player, identified for an access check by their id and the teams they're
+ *  currently on (across seasons). Build with `playerAccessContext` /
+ *  `playerTeamIds` from lib/roster.ts. */
+export type PlayerRef = { id: number; teamIds: number[] };
+
+/** Row-level: can this caller read `player`'s data? */
+export function requirePlayerAccess(session: Session, player: PlayerRef): void {
+  const a = authorize(session);
+  const ok =
+    a.can("read", "PlayerProfile", { id: player.id }) ||
+    player.teamIds.some((teamId) => a.can("read", "PlayerProfile", { teamId }));
+  if (!ok) throw new ForbiddenError("You don't have access to this player's data");
 }
 
 /** Contact + guardian fields: admins and the player's own coach(es) only —
  *  deliberately not the player themselves, matching the prior contract. */
-export function canViewPlayerContactDetails(
-  session: Session,
-  player: { id: number; teamId: number | null },
-): boolean {
-  return authorize(session).can("read", "PlayerContact", {
-    id: player.id,
-    teamId: player.teamId ?? undefined,
-  });
+export function canViewPlayerContactDetails(session: Session, player: PlayerRef): boolean {
+  const a = authorize(session);
+  return (
+    a.can("read", "PlayerContact", { id: player.id }) ||
+    player.teamIds.some((teamId) => a.can("read", "PlayerContact", { teamId }))
+  );
 }
 
 export { rolesFor };

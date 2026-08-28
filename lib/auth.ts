@@ -150,7 +150,6 @@ export const authOptions: NextAuthOptions = {
           playerProfile: {
             select: {
               id: true,
-              teamId: true, // deprecated fallback
               registrationStatus: true,
               memberships: {
                 where: { status: { notIn: ["FORMER", "INACTIVE"] } },
@@ -175,14 +174,13 @@ export const authOptions: NextAuthOptions = {
       token.mustChangePassword = dbUser.mustChangePassword;
       token.emailVerified = dbUser.emailVerifiedAt != null;
       token.coachProfileId = dbUser.coachProfile?.id;
-      // Team scope comes from StaffAssignment (players) / active TeamMembership
-      // (players). The deprecated PlayerProfile.teamId is a fallback only.
+      // Team scope comes from StaffAssignment (staff) / active TeamMembership
+      // (players) — the season-scoped organisation model.
       token.teamIds = dbUser.staffAssignments.length
         ? [...new Set(dbUser.staffAssignments.map((a) => a.teamId))]
         : undefined;
       token.playerId = dbUser.playerProfile?.id;
-      token.teamId =
-        dbUser.playerProfile?.memberships[0]?.teamId ?? dbUser.playerProfile?.teamId ?? undefined;
+      token.teamId = dbUser.playerProfile?.memberships[0]?.teamId ?? undefined;
       // Only PlayerProfile carries this — Admin/Coach/Guardian accounts have
       // no gate here (Guardian's own dashboard is a later increment; the
       // gate that matters today is on the linked child's PlayerProfile).

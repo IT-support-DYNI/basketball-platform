@@ -11,12 +11,14 @@ export const GET = route<{ id: string }>(async (_req, { params }) => {
 
   const coach = await prisma.coachProfile.findUnique({
     where: { id: Number(params.id) },
-    include: {
-      user: { select: { id: true, name: true, email: true } },
-      teams: { include: { team: { select: { id: true, name: true } } } },
-    },
+    include: { user: { select: { id: true, name: true, email: true } } },
+  });
+  if (!coach) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const assignments = await prisma.staffAssignment.findMany({
+    where: { userId: coach.userId },
+    include: { team: { select: { id: true, name: true } } },
   });
 
-  if (!coach) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(coach);
+  return NextResponse.json({ ...coach, teams: assignments });
 });

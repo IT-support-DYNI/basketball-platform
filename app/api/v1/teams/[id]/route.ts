@@ -17,8 +17,8 @@ export const GET = route<{ id: string }>(async (_req, { params, requestId }) => 
   const team = await prisma.team.findUnique({
     where: { id: teamId },
     include: {
-      coaches: { include: { coach: { include: { user: { select: { id: true, name: true, email: true } } } } } },
-      _count: { select: { players: true } },
+      staffAssignments: { include: { user: { select: { id: true, name: true, email: true } } } },
+      _count: { select: { memberships: { where: { status: { notIn: ["FORMER"] } } } } },
     },
   });
 

@@ -33,7 +33,7 @@ export const PATCH = route<{ id: string }>(async (req, { params, requestId }) =>
   });
   if (!player) throw new NotFoundError("That registration wasn't found.");
 
-  if (body.decision === "APPROVE" && !body.teamId && !player.teamId) {
+  if (body.decision === "APPROVE" && !body.teamId && !player.registrationTeamId) {
     throw new BadRequestError("A team must be assigned to approve this registration.");
   }
   if (body.decision === "APPROVE" && !player.user.emailVerifiedAt) {
@@ -43,7 +43,7 @@ export const PATCH = route<{ id: string }>(async (req, { params, requestId }) =>
   }
 
   const newStatus = DECISION_TO_STATUS[body.decision];
-  const targetTeamId = body.decision === "APPROVE" ? (body.teamId ?? player.teamId) : player.teamId;
+  const targetTeamId = body.teamId ?? player.registrationTeamId;
 
   const updated = await prisma.$transaction(async (tx) => {
     const saved = await tx.playerProfile.update({
@@ -53,7 +53,7 @@ export const PATCH = route<{ id: string }>(async (req, { params, requestId }) =>
         registrationReviewNote: body.note,
         registrationReviewedByUserId: Number(session.user.id),
         registrationReviewedAt: new Date(),
-        teamId: targetTeamId,
+        ...(body.teamId ? { registrationTeamId: body.teamId } : {}),
       },
       include: { user: { select: { id: true } } },
     });
@@ -80,7 +80,7 @@ export const PATCH = route<{ id: string }>(async (req, { params, requestId }) =>
             teamId: targetTeamId,
             seasonId: activeSeason.id,
             status: "ACTIVE",
-            position: player.position,
+            position: player.registrationPosition,
             // Jersey left null on purpose — an admin assigns it, avoiding an
             // accidental clash from a self-registered preference.
           },
@@ -94,7 +94,7 @@ export const PATCH = route<{ id: string }>(async (req, { params, requestId }) =>
       action: `REGISTRATION_${newStatus}`,
       entityType: "PlayerProfile",
       entityId: playerId,
-      metadata: { note: body.note, teamId: saved.teamId },
+      metadata: { note: body.note, teamId: targetTeamId },
     });
 
     await notifyUser(tx, {

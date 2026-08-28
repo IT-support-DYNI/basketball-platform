@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { computeAttendanceStats } from "@/lib/attendance";
+import { rosterPlayerFilter } from "@/lib/roster";
 
 export default async function CoachAttendancePage() {
   const session = await getServerSession(authOptions);
@@ -11,8 +12,15 @@ export default async function CoachAttendancePage() {
 
   const [players, recentSessions] = await Promise.all([
     prisma.playerProfile.findMany({
-      where: { teamId: { in: teamIds } },
-      include: { user: { select: { name: true } }, attendanceRecords: true, team: { select: { name: true } } },
+      where: rosterPlayerFilter(teamIds),
+      include: {
+        user: { select: { name: true } },
+        attendanceRecords: true,
+        memberships: {
+          where: { teamId: { in: teamIds }, status: { notIn: ["FORMER", "INACTIVE"] } },
+          include: { team: { select: { name: true } } },
+        },
+      },
       orderBy: { user: { name: "asc" } },
     }),
     prisma.trainingSession.findMany({
@@ -37,7 +45,7 @@ export default async function CoachAttendancePage() {
               <li key={p.id} className="flex items-center justify-between py-2.5 text-sm">
                 <div>
                   <span className="font-medium text-slate-800">{p.user.name}</span>
-                  <span className="ml-2 text-xs text-slate-400">{p.team?.name}</span>
+                  <span className="ml-2 text-xs text-slate-400">{p.memberships[0]?.team.name}</span>
                 </div>
                 <span className="text-slate-600">{stats.percentage != null ? `${stats.percentage}%` : "No sessions yet"}</span>
               </li>

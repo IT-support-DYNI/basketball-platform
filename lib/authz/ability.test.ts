@@ -208,18 +208,18 @@ describe("back-compat guards preserve prior behaviour", () => {
   });
 
   it("requirePlayerAccess", () => {
-    expect(() => requirePlayerAccess(coach1, { id: 5, teamId: 1 })).not.toThrow();
-    expect(() => requirePlayerAccess(coach1, { id: 5, teamId: 2 })).toThrow();
-    expect(() => requirePlayerAccess(coach1, { id: 5, teamId: null })).toThrow();
-    expect(() => requirePlayerAccess(player1, { id: 30, teamId: 1 })).not.toThrow();
-    expect(() => requirePlayerAccess(player1, { id: 31, teamId: 1 })).toThrow();
-    expect(() => requirePlayerAccess(admin, { id: 999, teamId: 999 })).not.toThrow();
+    expect(() => requirePlayerAccess(coach1, { id: 5, teamIds: [1] })).not.toThrow();
+    expect(() => requirePlayerAccess(coach1, { id: 5, teamIds: [2] })).toThrow();
+    expect(() => requirePlayerAccess(coach1, { id: 5, teamIds: [] })).toThrow();
+    expect(() => requirePlayerAccess(player1, { id: 30, teamIds: [1] })).not.toThrow();
+    expect(() => requirePlayerAccess(player1, { id: 31, teamIds: [1] })).toThrow();
+    expect(() => requirePlayerAccess(admin, { id: 999, teamIds: [999] })).not.toThrow();
   });
 
   it("canViewPlayerContactDetails — admins and the player's coach, not the player", () => {
-    expect(canViewPlayerContactDetails(admin, { id: 1, teamId: 9 })).toBe(true);
-    expect(canViewPlayerContactDetails(coach1, { id: 5, teamId: 1 })).toBe(true);
-    expect(canViewPlayerContactDetails(coach1, { id: 5, teamId: 2 })).toBe(false);
-    expect(canViewPlayerContactDetails(player1, { id: 30, teamId: 1 })).toBe(false);
+    expect(canViewPlayerContactDetails(admin, { id: 1, teamIds: [9] })).toBe(true);
+    expect(canViewPlayerContactDetails(coach1, { id: 5, teamIds: [1] })).toBe(true);
+    expect(canViewPlayerContactDetails(coach1, { id: 5, teamIds: [2] })).toBe(false);
+    expect(canViewPlayerContactDetails(player1, { id: 30, teamIds: [1] })).toBe(false);
   });
 });

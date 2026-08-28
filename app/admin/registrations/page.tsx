@@ -8,7 +8,7 @@ export default async function AdminRegistrationsPage() {
       where: { registrationStatus: { not: "APPROVED" } },
       include: {
         user: { select: { name: true, email: true, createdAt: true } },
-        team: { select: { id: true, name: true } },
+        registrationTeam: { select: { id: true, name: true } },
       },
       orderBy: { registrationSubmittedAt: "desc" },
     }),
@@ -31,9 +31,8 @@ export default async function AdminRegistrationsPage() {
                 </div>
                 <p className="text-sm text-slate-500">{r.user.email}</p>
                 <p className="mt-1 text-sm text-slate-600">
-                  Applied to: <span className="font-medium">{r.team?.name ?? "—"}</span>
-                  {r.position && ` · ${r.position}`}
-                  {r.jerseyNumber != null && ` · #${r.jerseyNumber}`}
+                  Applied to: <span className="font-medium">{r.registrationTeam?.name ?? "—"}</span>
+                  {r.registrationPosition && ` · ${r.registrationPosition}`}
                 </p>
                 {r.dateOfBirth && (
                   <p className="text-xs text-slate-400">DOB: {new Date(r.dateOfBirth).toLocaleDateString()}</p>
@@ -49,7 +48,7 @@ export default async function AdminRegistrationsPage() {
               </div>
             </div>
 
-            <ReviewRegistrationForm playerId={r.id} teams={teams} defaultTeamId={r.teamId} />
+            <ReviewRegistrationForm playerId={r.id} teams={teams} defaultTeamId={r.registrationTeamId} />
           </div>
         ))}
 

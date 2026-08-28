@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { route } from "@/lib/api";
 import { requireRole, requirePlayerAccess } from "@/lib/authorization";
+import { playerTeamIdsSelect, playerTeamIds } from "@/lib/roster";
 import { createFeedbackSchema } from "@/lib/contracts/feedback";
 import { notifyUser } from "@/lib/notify";
 import { sendPushToUser } from "@/lib/push";
@@ -14,9 +15,9 @@ export const POST = route(async (req: NextRequest) => {
   const session = requireRole(await getServerSession(authOptions), ["COACH"]);
   const body = createFeedbackSchema.parse(await req.json());
 
-  const player = await prisma.playerProfile.findUnique({ where: { id: body.playerId } });
+  const player = await prisma.playerProfile.findUnique({ where: { id: body.playerId }, select: { id: true, userId: true, ...playerTeamIdsSelect } });
   if (!player) return NextResponse.json({ error: "Player not found" }, { status: 404 });
-  requirePlayerAccess(session, player);
+  requirePlayerAccess(session, { id: player.id, teamIds: playerTeamIds(player) });
 
   const feedback = await prisma.$transaction(async (tx) => {
     const created = await tx.feedback.create({

@@ -7,7 +7,6 @@ export const registerSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   teamId: z.number().int().positive(),
   position: z.enum(["PG", "SG", "SF", "PF", "C"]).optional(),
-  jerseyNumber: z.number().int().min(0).max(99).optional(),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
   contactPhone: z.string().optional(),
   guardianName: z.string().optional(),

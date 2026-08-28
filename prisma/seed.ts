@@ -71,12 +71,6 @@ async function main() {
     });
   }
 
-  await prisma.teamCoach.upsert({
-    where: { teamId_coachProfileId: { teamId: team.id, coachProfileId: coachUser.coachProfile!.id } },
-    update: {},
-    create: { teamId: team.id, coachProfileId: coachUser.coachProfile!.id, isPrimary: true },
-  });
-
   const player1 = await prisma.user.upsert({
     where: { email: "player1@example.com" },
     update: { emailVerifiedAt: new Date() },
@@ -86,7 +80,9 @@ async function main() {
       name: "Priya Player",
       role: "PLAYER",
       passwordHash,
-      playerProfile: { create: { teamId: team.id, position: "PG", jerseyNumber: 7 } },
+      playerProfile: {
+        create: { registrationTeamId: team.id, registrationPosition: "PG", registrationStatus: "APPROVED" },
+      },
     },
     include: { playerProfile: true },
   });
@@ -100,7 +96,9 @@ async function main() {
       name: "Jordan Junior",
       role: "PLAYER",
       passwordHash,
-      playerProfile: { create: { teamId: team.id, position: "C", jerseyNumber: 21 } },
+      playerProfile: {
+        create: { registrationTeamId: team.id, registrationPosition: "C", registrationStatus: "APPROVED" },
+      },
     },
     include: { playerProfile: true },
   });

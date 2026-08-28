@@ -27,7 +27,7 @@ pre-check to avoid creating an orphan account before hitting the index.
 | | |
 |---|---|
 | `lib/season.ts` | `getActiveSeason(clubId)` — the season everything resolves against; creates one if none exists. |
-| `lib/roster.ts` | `addToRoster` / `updateMembership` / `removeFromRoster`. Maps Prisma `P2002` → jersey `ConflictError`. `removeFromRoster` sets the membership `FORMER` (never deletes). Keeps the deprecated `PlayerProfile` columns in sync. |
+| `lib/roster.ts` | `addToRoster` / `updateMembership` / `removeFromRoster`. Maps Prisma `P2002` → jersey `ConflictError`. `removeFromRoster` sets the membership `FORMER` (never deletes). `playerTeamIdsSelect` / `playerTeamIds` / `playerAccessContext` / `rosterPlayerFilter` — the query fragments every reader uses to scope players by their live memberships. |
 | Routes | `/api/v1/seasons{,/[id]}`, `/api/v1/teams/[id]/squads{,/[squadId]}`, `/api/v1/memberships/[id]`, reworked `/api/v1/teams/[id]/players{,/[playerId]}`. |
 | Authz | subjects `Season` / `Squad` / `Membership` — admin manages, coach reads own team. |
 
@@ -46,15 +46,22 @@ pre-check to avoid creating an orphan account before hitting the index.
   /teams/:id/staff…`, `GET /players`, `GET /players/:id/memberships`.
 - Approving a registration now creates the `TeamMembership`.
 
-## Transitional (drop in W4 part 3)
+## W4 part 3 — drop the deprecated model (done)
 
-- `PlayerProfile.teamId / jerseyNumber / position / status` — kept, `@deprecated`,
-  synced by `lib/roster.ts`. Still read by a few directory-style list pages
-  (`/coach/players`, `/admin/players`, `/admin/registrations`) and written by
-  `/api/v1/register` + `players/[id]` PATCH as pre-approval intent.
-- `PlayerStatus` enum — superseded by `MembershipStatus`.
-- `TeamCoach` table — superseded by `StaffAssignment`, no longer read; safe to
-  drop once those list pages move.
+Migration `20260828145344_drop_deprecated_org_fields`:
 
-W4 part 3: migrate the last list pages, then a `DROP COLUMN` / `DROP TABLE`
-migration.
+- **Dropped** `PlayerProfile.teamId / jerseyNumber / position / status`, the
+  `TeamCoach` table, and the `PlayerStatus` enum. Every reader now goes through
+  `TeamMembership` / `StaffAssignment` (see `lib/roster.ts` helpers).
+- **Added** two advisory columns — `PlayerProfile.registrationTeamId`
+  (FK, `ON DELETE SET NULL`) + `registrationPosition` — carrying *what the
+  applicant asked for* at self-registration. They're read only by the
+  registration screens (`/register`, `/admin/registrations`,
+  `/registration-status`); once an admin approves, the real roster row is a
+  `TeamMembership` created by `PATCH /api/v1/registrations/[id]`. The backfill
+  copied the old `teamId` / `position` into them.
+- `requirePlayerAccess` / `canViewPlayerContactDetails` now take a
+  `PlayerRef = { id, teamIds }` — build it with `playerAccessContext(id)` or
+  `{ id, teamIds: playerTeamIds(player) }` after selecting `playerTeamIdsSelect`.
+- The self-registration form no longer asks for a jersey number; "position" is
+  labelled a preference the coach confirms on the roster.

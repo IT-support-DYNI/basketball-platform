@@ -38,14 +38,15 @@ export async function notifyUsers(
   });
 }
 
-/** Every player currently on a team, as user ids — for team-wide fan-out (new session, new team video, announcement). */
+/** Every player currently on a team's roster (any active season), as user ids —
+ *  for team-wide fan-out (new session, new team video, announcement). */
 export async function teamPlayerUserIds(
   tx: Prisma.TransactionClient,
   teamId: number
 ): Promise<number[]> {
-  const players = await tx.playerProfile.findMany({
-    where: { teamId },
-    select: { userId: true },
+  const memberships = await tx.teamMembership.findMany({
+    where: { teamId, status: { notIn: ["FORMER", "INACTIVE"] } },
+    select: { player: { select: { userId: true } } },
   });
-  return players.map((p) => p.userId);
+  return [...new Set(memberships.map((m) => m.player.userId))];
 }

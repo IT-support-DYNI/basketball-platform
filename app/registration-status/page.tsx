@@ -16,7 +16,7 @@ export default async function RegistrationStatusPage() {
 
   const player = await prisma.playerProfile.findUnique({
     where: { id: session.user.playerId },
-    include: { team: { select: { name: true } }, user: { select: { emailVerifiedAt: true, email: true } } },
+    include: { registrationTeam: { select: { name: true } }, user: { select: { emailVerifiedAt: true, email: true } } },
   });
   if (!player) redirect("/login");
 
@@ -33,7 +33,7 @@ export default async function RegistrationStatusPage() {
 
   const body =
     player.registrationStatus === "PENDING"
-      ? `You applied to join ${player.team?.name ?? "a team"}. An administrator will review your registration shortly — you'll get a notification the moment there's a decision.`
+      ? `You applied to join ${player.registrationTeam?.name ?? "a team"}. An administrator will review your registration shortly — you'll get a notification the moment there's a decision.`
       : player.registrationStatus === "CHANGES_REQUESTED"
         ? "An administrator has asked for a change before your registration can be approved."
         : "If you think this is a mistake, please contact the club directly.";

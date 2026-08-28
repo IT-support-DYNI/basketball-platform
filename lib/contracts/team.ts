@@ -30,15 +30,13 @@ export const addPlayerToTeamSchema = z.object({
   guardianContact: z.string().optional(),
 });
 
+/** Profile-level fields only. Jersey / position / squad / status are
+ *  season-scoped — see updateMembershipSchema in contracts/organisation. */
 export const updatePlayerSchema = z.object({
   name: z.string().min(1).optional(),
-  position: z.enum(["PG", "SG", "SF", "PF", "C"]).optional(),
-  jerseyNumber: z.number().int().min(0).max(99).optional(),
   dateOfBirth: z.string().optional(),
   photoUrl: z.string().url().optional(),
   contactPhone: z.string().optional(),
   guardianName: z.string().optional(),
   guardianContact: z.string().optional(),
-  status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
-  teamId: z.number().int().positive().nullable().optional(),
 });

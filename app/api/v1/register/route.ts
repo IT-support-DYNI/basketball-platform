@@ -50,9 +50,8 @@ export const POST = route(async (req: NextRequest, { requestId }) => {
         mustChangePassword: false,
         playerProfile: {
           create: {
-            teamId: body.teamId,
-            position: body.position,
-            jerseyNumber: body.jerseyNumber,
+            registrationTeamId: body.teamId,
+            registrationPosition: body.position,
             dateOfBirth: new Date(body.dateOfBirth),
             contactPhone: body.contactPhone,
             guardianName: body.guardianName,

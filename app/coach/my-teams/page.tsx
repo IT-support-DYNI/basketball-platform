@@ -9,9 +9,9 @@ export default async function CoachMyTeamsPage() {
   const session = await getServerSession(authOptions);
 
   const teams = await prisma.team.findMany({
-    where: { coaches: { some: { coachProfileId: session!.user.coachProfileId } } },
+    where: { id: { in: session!.user.teamIds ?? [] } },
     orderBy: { name: "asc" },
-    include: { _count: { select: { players: true } } },
+    include: { _count: { select: { memberships: { where: { status: { notIn: ["FORMER"] } } } } } },
   });
 
   return (
@@ -33,7 +33,7 @@ export default async function CoachMyTeamsPage() {
               </div>
               <StatusBadge status={team.status} />
             </div>
-            <p className="mt-3 text-sm text-slate-500">{team._count.players} players</p>
+            <p className="mt-3 text-sm text-slate-500">{team._count.memberships} players</p>
           </Link>
         ))}
         {teams.length === 0 && <p className="text-sm text-slate-500">No teams assigned to you yet — ask an admin.</p>}

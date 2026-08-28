@@ -38,7 +38,7 @@ export const GET = route<{ id: string }>(async (req: NextRequest, { params, requ
   });
 
   const canSeeContact =
-    memberships.length > 0 && canViewPlayerContactDetails(session, { id: memberships[0].player.id, teamId });
+    memberships.length > 0 && canViewPlayerContactDetails(session, { id: memberships[0].player.id, teamIds: [teamId] });
 
   const roster = memberships.map((m) => ({
     membershipId: m.id,

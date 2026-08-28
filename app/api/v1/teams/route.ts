@@ -24,7 +24,7 @@ export const GET = route(async (_req, { requestId }) => {
     const teams = await prisma.team.findMany({
       where: teamClubScope(ctx),
       orderBy: { name: "asc" },
-      include: { _count: { select: { players: true, coaches: true } } },
+      include: { _count: { select: { memberships: { where: { status: { notIn: ["FORMER"] } } }, staffAssignments: true } } },
     });
     return ok(teams, { requestId });
   }
@@ -32,10 +32,10 @@ export const GET = route(async (_req, { requestId }) => {
   if (session.user.role === "COACH") {
     const teams = await prisma.team.findMany({
       where: {
-        AND: [teamClubScope(ctx), { coaches: { some: { coachProfileId: session.user.coachProfileId } } }],
+        AND: [teamClubScope(ctx), { id: { in: session.user.teamIds ?? [] } }],
       },
       orderBy: { name: "asc" },
-      include: { _count: { select: { players: true } } },
+      include: { _count: { select: { memberships: { where: { status: { notIn: ["FORMER"] } } } } } },
     });
     return ok(teams, { requestId });
   }

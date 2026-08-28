@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import RecordEvaluationForm from "@/components/coach/RecordEvaluationForm";
+import { rosterPlayerFilter } from "@/lib/roster";
 import WriteFeedbackForm from "@/components/coach/WriteFeedbackForm";
 
 export default async function CoachPerformancePage() {
@@ -10,7 +11,7 @@ export default async function CoachPerformancePage() {
   const teamIds = session!.user.teamIds ?? [];
 
   const players = await prisma.playerProfile.findMany({
-    where: { teamId: { in: teamIds } },
+    where: rosterPlayerFilter(teamIds),
     include: { user: { select: { name: true } }, evaluations: { orderBy: { periodStart: "desc" }, take: 1 } },
     orderBy: { user: { name: "asc" } },
   });

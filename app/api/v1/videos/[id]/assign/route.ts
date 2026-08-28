@@ -7,6 +7,8 @@ import { requireRole, requireTeamAccess } from "@/lib/authorization";
 import { assignVideoSchema } from "@/lib/contracts/video";
 import { notifyUsers, teamPlayerUserIds } from "@/lib/notify";
 import { sendPushToUsers } from "@/lib/push";
+import { playerTeamIds, playerTeamIdsSelect } from "@/lib/roster";
+import { ForbiddenError } from "@/lib/api/errors";
 import { prisma } from "@/lib/prisma";
 
 export const POST = route<{ id: string }>(async (req: NextRequest, { params }) => {
@@ -19,8 +21,16 @@ export const POST = route<{ id: string }>(async (req: NextRequest, { params }) =
   teamIds.forEach((teamId) => requireTeamAccess(session, teamId));
 
   if (playerIds.length > 0) {
-    const players = await prisma.playerProfile.findMany({ where: { id: { in: playerIds } } });
-    players.forEach((p) => requireTeamAccess(session, p.teamId ?? -1));
+    const players = await prisma.playerProfile.findMany({
+      where: { id: { in: playerIds } },
+      select: { id: true, ...playerTeamIdsSelect },
+    });
+    const accessible = new Set(session.user.teamIds ?? []);
+    players.forEach((p) => {
+      if (!playerTeamIds(p).some((teamId) => accessible.has(teamId))) {
+        throw new ForbiddenError("You don't have access to one or more of those players.");
+      }
+    });
   }
 
   const video = await prisma.video.findUnique({ where: { id: videoId } });

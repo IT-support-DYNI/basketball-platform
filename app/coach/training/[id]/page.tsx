@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import StatusBadge from "@/components/StatusBadge";
 import MarkAttendanceForm from "@/components/coach/MarkAttendanceForm";
 import SessionStatusControls from "@/components/coach/SessionStatusControls";
+import { rosterPlayerFilter } from "@/lib/roster";
 
 export default async function CoachSessionDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -13,12 +14,18 @@ export default async function CoachSessionDetailPage({ params }: { params: { id:
 
   const trainingSession = await prisma.trainingSession.findUnique({
     where: { id: sessionId },
-    include: { team: { include: { players: { include: { user: true } } } }, attendanceRecords: true },
+    include: { team: { select: { id: true, name: true } }, attendanceRecords: true },
   });
   if (!trainingSession) notFound();
   if (!session?.user.teamIds?.includes(trainingSession.teamId)) redirect("/coach/training");
 
-  const players = trainingSession.team.players.map((p) => ({
+  const roster = await prisma.playerProfile.findMany({
+    where: rosterPlayerFilter(trainingSession.teamId),
+    include: { user: { select: { name: true } } },
+    orderBy: { user: { name: "asc" } },
+  });
+
+  const players = roster.map((p) => ({
     id: p.id,
     name: p.user.name,
     currentStatus: trainingSession.attendanceRecords.find((r) => r.playerId === p.id)?.status ?? null,

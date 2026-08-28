@@ -17,7 +17,7 @@ export const GET = route(async (req: NextRequest) => {
     where: status ? { registrationStatus: status as never } : { registrationStatus: { not: "APPROVED" } },
     include: {
       user: { select: { id: true, name: true, email: true, createdAt: true } },
-      team: { select: { id: true, name: true } },
+      registrationTeam: { select: { id: true, name: true } },
       registrationReviewedBy: { select: { name: true } },
     },
     orderBy: { registrationSubmittedAt: "desc" },

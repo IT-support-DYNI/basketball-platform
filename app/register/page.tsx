@@ -29,7 +29,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [teamId, setTeamId] = useState("");
   const [position, setPosition] = useState("");
-  const [jerseyNumber, setJerseyNumber] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [guardianName, setGuardianName] = useState("");
@@ -70,7 +69,6 @@ export default function RegisterPage() {
           password,
           teamId: Number(teamId),
           position: position || undefined,
-          jerseyNumber: jerseyNumber ? Number(jerseyNumber) : undefined,
           dateOfBirth,
           contactPhone: contactPhone || undefined,
           guardianName: guardianName || undefined,
@@ -138,7 +136,7 @@ export default function RegisterPage() {
               </option>
             ))}
           </Select>
-          <Select label="Position" hint="Optional" value={position} onChange={(e) => setPosition(e.target.value)}>
+          <Select label="Preferred position" hint="Optional — your coach confirms this once you're on the roster" value={position} onChange={(e) => setPosition(e.target.value)}>
             <option value="">Not sure yet</option>
             {POSITIONS.map((p) => (
               <option key={p} value={p}>
@@ -146,7 +144,6 @@ export default function RegisterPage() {
               </option>
             ))}
           </Select>
-          <TextField label="Jersey number" hint="Optional" type="number" min={0} max={99} value={jerseyNumber} onChange={(e) => setJerseyNumber(e.target.value)} />
           <TextField label="Your phone" hint="Optional" type="tel" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
           <TextField label="Parent / guardian name" hint="If under 18" value={guardianName} onChange={(e) => setGuardianName(e.target.value)} />
           <TextField label="Parent / guardian contact" hint="If under 18" value={guardianContact} onChange={(e) => setGuardianContact(e.target.value)} />
