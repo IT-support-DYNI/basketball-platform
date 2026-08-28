@@ -10,7 +10,7 @@ export default function RemoveCoachButton({ teamId, coachProfileId }: { teamId: 
   async function handleClick() {
     setLoading(true);
     try {
-      await fetch(`/api/teams/${teamId}/coaches/${coachProfileId}`, { method: "DELETE" });
+      await fetch(`/api/v1/teams/${teamId}/coaches/${coachProfileId}`, { method: "DELETE" });
       router.refresh();
     } finally {
       setLoading(false);

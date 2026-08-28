@@ -24,7 +24,7 @@ export default function MarkAttendanceForm({ sessionId, players }: { sessionId: 
     setSaving(true);
     setSaved(false);
     try {
-      await fetch(`/api/sessions/${sessionId}/attendance`, {
+      await fetch(`/api/v1/sessions/${sessionId}/attendance`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

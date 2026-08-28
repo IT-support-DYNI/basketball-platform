@@ -18,7 +18,7 @@ export default function CreateTeamForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/teams", {
+      const res = await fetch("/api/v1/teams", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, ageGroup: ageGroup || undefined, description: description || undefined }),

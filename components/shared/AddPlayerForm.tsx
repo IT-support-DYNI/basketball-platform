@@ -22,7 +22,7 @@ export default function AddPlayerForm({ teamId }: { teamId: number }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/teams/${teamId}/players`, {
+      const res = await fetch(`/api/v1/teams/${teamId}/players`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

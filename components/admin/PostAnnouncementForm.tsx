@@ -21,7 +21,7 @@ export default function PostAnnouncementForm({ teams }: { teams: TeamOption[] })
     setLoading(true);
 
     try {
-      const res = await fetch("/api/announcements", {
+      const res = await fetch("/api/v1/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

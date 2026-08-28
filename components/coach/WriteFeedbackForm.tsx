@@ -19,7 +19,7 @@ export default function WriteFeedbackForm({ players }: { players: PlayerOption[]
     setLoading(true);
 
     try {
-      const res = await fetch("/api/feedback", {
+      const res = await fetch("/api/v1/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playerId: Number(playerId), message }),

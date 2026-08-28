@@ -1,24 +1,18 @@
 import { UserRole } from "@prisma/client";
 import { Session } from "next-auth";
 
+import { AuthorizationError } from "./api/errors";
+
 /*
  * Two-layer RBAC, per ARCHITECTURE.md §3.2:
  *   1. requireRole      — route-level: can this role even call this endpoint?
  *   2. requireTeamAccess / requirePlayerAccess — row-level: does this
  *      specific caller own the resource they're trying to touch?
- * Route handlers call these and let AuthorizationError propagate to a
- * shared catch block (see lib/api.ts) that turns it into a 401/403.
+ * Route handlers call these and let AuthorizationError (an ApiError) propagate
+ * to the shared catch in lib/api/route.ts, which turns it into a 401/403.
  */
 
-export class AuthorizationError extends Error {
-  status: number;
-
-  constructor(message: string, status = 403) {
-    super(message);
-    this.name = "AuthorizationError";
-    this.status = status;
-  }
-}
+export { AuthorizationError };
 
 export function requireAuth(session: Session | null): Session {
   if (!session?.user || session.user.isActive === false) {

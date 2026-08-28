@@ -22,7 +22,7 @@ export default function AssignCoachForm({ teamId, options }: { teamId: number; o
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/teams/${teamId}/coaches`, {
+      const res = await fetch(`/api/v1/teams/${teamId}/coaches`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ coachProfileId: Number(coachProfileId) }),

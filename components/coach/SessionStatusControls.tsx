@@ -10,7 +10,7 @@ export default function SessionStatusControls({ sessionId, status }: { sessionId
   async function setStatus(newStatus: string) {
     setLoading(true);
     try {
-      await fetch(`/api/sessions/${sessionId}`, {
+      await fetch(`/api/v1/sessions/${sessionId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),

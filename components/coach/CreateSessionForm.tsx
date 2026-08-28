@@ -27,7 +27,7 @@ export default function CreateSessionForm({ teams }: { teams: TeamOption[] }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/teams/${teamId}/sessions`, {
+      const res = await fetch(`/api/v1/teams/${teamId}/sessions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, date, startTime, endTime, location, notes: notes || undefined }),

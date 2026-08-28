@@ -12,7 +12,7 @@ export default function ResubmitRegistrationButton({ playerId }: { playerId: num
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(`/api/players/${playerId}/resubmit-registration`, { method: "POST" });
+      const res = await fetch(`/api/v1/players/${playerId}/resubmit-registration`, { method: "POST" });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setError(body.error ?? "Something went wrong.");

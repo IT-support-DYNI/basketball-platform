@@ -28,7 +28,7 @@ export default function UploadVideoForm() {
     setLoading(true);
 
     try {
-      const uploadUrlRes = await fetch("/api/videos/upload-url", {
+      const uploadUrlRes = await fetch("/api/v1/videos/upload-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contentType: file.type || "video/mp4" }),
@@ -57,7 +57,7 @@ export default function UploadVideoForm() {
         return;
       }
 
-      const createRes = await fetch("/api/videos", {
+      const createRes = await fetch("/api/v1/videos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description: description || undefined, category, key: uploadUrlBody.key }),

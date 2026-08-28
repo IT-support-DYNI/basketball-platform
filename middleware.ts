@@ -28,17 +28,29 @@ export async function middleware(req: NextRequest) {
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/set-password" ||
+    pathname === "/api/v1" ||
+    pathname === "/api/v1/openapi.json" ||
     pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/register") ||
-    pathname.startsWith("/api/public");
+    pathname.startsWith("/api/v1/register") ||
+    pathname.startsWith("/api/v1/public");
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const isApiRequest = pathname.startsWith("/api/");
 
   if (isPublic) {
     return NextResponse.next();
   }
 
   if (!token || token.isActive === false) {
+    // API callers get a JSON 401, not an HTML redirect, so the client sees a
+    // real error to handle (consistent error responses, brief §37).
+    if (isApiRequest) {
+      const requestId = req.headers.get("x-request-id") || crypto.randomUUID();
+      return NextResponse.json(
+        { error: "You need to sign in to do that.", code: "UNAUTHORIZED", requestId },
+        { status: 401, headers: { "x-request-id": requestId } },
+      );
+    }
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
@@ -51,8 +63,6 @@ export async function middleware(req: NextRequest) {
   // registration-status gate below was silently breaking a pending
   // player's own AJAX calls, since a plain pathname check redirected them
   // too — see git history for the fix.)
-  const isApiRequest = pathname.startsWith("/api/");
-
   if (!isApiRequest && token.mustChangePassword && pathname !== "/set-password") {
     return NextResponse.redirect(new URL("/set-password", req.url));
   }

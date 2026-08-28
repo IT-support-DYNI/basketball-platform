@@ -15,7 +15,7 @@ export default function AssignVideoForm({ videoId, teams }: { videoId: number; t
     if (!teamId) return;
     setLoading(true);
     try {
-      await fetch(`/api/videos/${videoId}/assign`, {
+      await fetch(`/api/v1/videos/${videoId}/assign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ teamIds: [Number(teamId)] }),

@@ -14,7 +14,7 @@ export default function EditContactForm({ playerId, initialPhone }: { playerId: 
     setSaving(true);
     setSaved(false);
     try {
-      await fetch(`/api/players/${playerId}`, {
+      await fetch(`/api/v1/players/${playerId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contactPhone: phone }),

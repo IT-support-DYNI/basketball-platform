@@ -26,7 +26,7 @@ export default function RecordEvaluationForm({ players }: { players: PlayerOptio
     setLoading(true);
 
     try {
-      const res = await fetch("/api/evaluations", {
+      const res = await fetch("/api/v1/evaluations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

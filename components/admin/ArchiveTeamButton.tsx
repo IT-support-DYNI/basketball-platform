@@ -11,7 +11,7 @@ export default function ArchiveTeamButton({ teamId, status }: { teamId: number; 
   async function toggle() {
     setLoading(true);
     try {
-      await fetch(`/api/teams/${teamId}`, {
+      await fetch(`/api/v1/teams/${teamId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus }),

@@ -40,7 +40,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/public/teams")
+    fetch("/api/v1/public/teams")
       .then((res) => res.json())
       .then((data) => setTeams(data))
       .catch(() => setTeamsError("Couldn't load the team list — refresh to try again."));
@@ -61,7 +61,7 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/register", {
+      const res = await fetch("/api/v1/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

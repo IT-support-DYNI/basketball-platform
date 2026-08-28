@@ -11,7 +11,7 @@ export default function RemovePlayerButton({ teamId, playerId }: { teamId: numbe
     if (!confirm("Remove this player from the team roster? Their account stays, just unassigned.")) return;
     setLoading(true);
     try {
-      await fetch(`/api/teams/${teamId}/players/${playerId}`, { method: "DELETE" });
+      await fetch(`/api/v1/teams/${teamId}/players/${playerId}`, { method: "DELETE" });
       router.refresh();
     } finally {
       setLoading(false);

@@ -28,7 +28,7 @@ export default function ReviewRegistrationForm({
     }
     setLoading(decision);
     try {
-      const res = await fetch(`/api/registrations/${playerId}`, {
+      const res = await fetch(`/api/v1/registrations/${playerId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
