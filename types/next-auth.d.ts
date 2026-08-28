@@ -16,6 +16,8 @@ declare module "next-auth" {
       isActive: boolean;
       mustChangePassword: boolean;
       emailVerified?: boolean;
+      /** The current device-session handle (AuthSession.tokenId). */
+      sid?: string;
       coachProfileId?: number;
       teamIds?: number[];
       playerId?: number;
@@ -28,6 +30,8 @@ declare module "next-auth" {
   interface User {
     id: string;
     role: UserRole;
+    /** Device-session handle, set by authorize() and read once in the jwt callback. */
+    sid?: string;
   }
 }
 
@@ -38,6 +42,7 @@ declare module "next-auth/jwt" {
     isActive: boolean;
     mustChangePassword: boolean;
     emailVerified?: boolean;
+    sid?: string;
     coachProfileId?: number;
     teamIds?: number[];
     playerId?: number;

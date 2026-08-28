@@ -34,6 +34,12 @@ export const POST = route(async (req: NextRequest, { requestId }) => {
       where: { userId, type: "PASSWORD_RESET", usedAt: null },
       data: { usedAt: new Date() },
     });
+    // A reset is also a "log everyone out" — any session on the old password
+    // (including an attacker's) is revoked.
+    await tx.authSession.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
     await logAudit(tx, {
       actorUserId: userId,
       action: "PASSWORD_RESET_COMPLETED",

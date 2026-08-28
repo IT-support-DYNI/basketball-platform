@@ -224,6 +224,38 @@ model LoginAttempt {
   @@index([email, createdAt])
 }
 
+/// A signed-in device/browser. The JWT carries `tokenId`; the session is
+/// revoked (from another device, or on password reset) by setting `revokedAt`,
+/// which the jwt callback checks on every request. This is what makes an
+/// otherwise-stateless JWT session revocable (brief §32: session revocation).
+model AuthSession {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenId    String    @unique
+  userAgent  String?
+  ipHash     String?
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+
+  @@index([userId])
+}
+
+/// TOTP multi-factor auth. Mandatory for administrators (Doc 6 §19.5),
+/// optional for everyone else. `secret` is the base32 TOTP seed; the managed
+/// database is encrypted at rest, and a column-level encryption pass is a
+/// follow-up if club policy requires it. `recoveryCodes` are bcrypt hashes,
+/// each removed as it is used.
+model UserMfa {
+  userId        Int       @id
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  secret        String
+  enabledAt     DateTime?
+  recoveryCodes String[]
+  createdAt     DateTime  @default(now())
+}
+
 // USERS
 
 model User {
@@ -253,6 +285,8 @@ model User {
   announcements  Announcement[] @relation("AnnouncementAuthor")
   pushSubscriptions PushSubscription[]
   authTokens    AuthToken[]
+  authSessions  AuthSession[]
+  mfa           UserMfa?
   auditLogsActed AuditLog[]
   /// Populated when role = GUARDIAN — the player(s) this user manages.
   guardianOf     GuardianRelationship[] @relation("Guardian")

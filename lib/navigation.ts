@@ -37,7 +37,8 @@ export type Capability =
   | "admin.training"
   | "admin.attendance"
   | "admin.performance"
-  | "admin.settings";
+  | "admin.settings"
+  | "account.security";
 
 const ROLE_CAPABILITIES: Record<string, Capability[]> = {
   PLAYER: [
@@ -48,6 +49,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "player.performance",
     "player.feedback",
     "player.profile",
+  "account.security",
   ],
   COACH: [
     "coach.home",
@@ -58,6 +60,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "coach.videos",
     "coach.performance",
     "coach.announcements",
+  "account.security",
   ],
   ADMIN: [
     "admin.home",
@@ -70,6 +73,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "admin.attendance",
     "admin.performance",
     "admin.settings",
+  "account.security",
   ],
 };
 
@@ -119,6 +123,7 @@ const NAV: NavItem[] = [
 
   { label: "Settings", href: "/admin/settings", capability: "admin.settings" },
   { label: "Profile", href: "/player/profile", capability: "player.profile" },
+  { label: "Security", href: "/settings/security", capability: "account.security" },
 ];
 
 export function navFor(roles: string | string[]): NavItem[] {

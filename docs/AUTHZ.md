@@ -60,5 +60,18 @@ Shipped (migration `20260828121321_auth_hardening`):
 | Single-use tokens | Only the SHA-256 hash is stored (`lib/auth-tokens.ts`); `consumeAuthToken` validates + marks used atomically. |
 | Email port | `lib/mail/` — `MailPort` interface + `ConsoleMailAdapter` (logs the link; the free-tier / dev default). Real adapter plugs in at `lib/mail/index.ts`, `MAIL_TRANSPORT` env. |
 
-Still to do (part 3): admin TOTP MFA, device / active-session list + revocation
-(both need deeper NextAuth-flow integration), refresh-token rotation.
+### MFA + device sessions (W3 part 3)
+
+Shipped (migration `20260828123402_mfa_and_sessions`): `AuthSession`, `UserMfa`.
+
+| Feature | Where |
+|---|---|
+| **TOTP MFA** | `lib/totp.ts` — RFC 6238, hand-rolled on Node `crypto` (no OTP dependency), unit-tested against the RFC vectors. `lib/mfa.ts` — enrollment, 10 bcrypt-hashed recovery codes (consumed one-per-use). Endpoints `GET/POST /api/v1/auth/mfa`, `/mfa/setup`, `/mfa/enable`, `/mfa/disable`. Voluntary for all; the settings page nudges admins (Doc 6 §19.5). |
+| **Login step-up** | `authOptions.authorize`: password OK + MFA on → needs a `totp` credential. Missing → throws `MFA_REQUIRED`; wrong → `MFA_INVALID` (NextAuth v4 surfaces both to the client). The sign-in page shows a code field on the second step. |
+| **Device sessions** | `lib/auth-sessions.ts`. `authorize` creates an `AuthSession` (UA + hashed IP) and puts its `tokenId` in the JWT as `sid`; the jwt callback checks it every request — revoked → `isActive:false` → logged out next request. Endpoints `GET /api/v1/auth/sessions`, `DELETE /auth/sessions/:id`, `POST /auth/sessions/revoke-others`. A password reset revokes every session. |
+| **"Refresh rotation"** | JWT `maxAge` 7 d / `updateAge` 1 d (re-issue), and the `AuthSession` check is the revocation half — the practical equivalent for a credentials + JWT setup (brief §4's "where applicable"). |
+| **Settings UI** | `/settings/security` — MFA enable/disable + recovery codes, signed-in device list with per-device and "sign out all others". Linked from every role's nav. |
+
+Verified end to end: MFA setup → enable → sign out → step-up login (bad code
+rejected, good code in) → revoke another device → revoke own device → next
+request 401.

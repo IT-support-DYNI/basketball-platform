@@ -26,6 +26,13 @@ const ENDPOINTS: Endpoint[] = [
   { method: "POST", path: "/auth/verify-email", summary: "Confirm an email address from its token", tag: "Auth", auth: "none" },
   { method: "POST", path: "/auth/resend-verification", summary: "Re-send the confirmation email", tag: "Auth", auth: "user" },
   { method: "GET", path: "/auth/login-status", summary: "Whether an email is currently locked out", tag: "Auth", auth: "none" },
+  { method: "GET", path: "/auth/mfa", summary: "The caller's two-factor status", tag: "Auth", auth: "user" },
+  { method: "POST", path: "/auth/mfa/setup", summary: "Begin two-factor enrollment", tag: "Auth", auth: "user" },
+  { method: "POST", path: "/auth/mfa/enable", summary: "Confirm enrollment, get recovery codes", tag: "Auth", auth: "user" },
+  { method: "POST", path: "/auth/mfa/disable", summary: "Turn two-factor off", tag: "Auth", auth: "user" },
+  { method: "GET", path: "/auth/sessions", summary: "Active device sessions", tag: "Auth", auth: "user" },
+  { method: "DELETE", path: "/auth/sessions/{id}", summary: "Sign a device out", tag: "Auth", auth: "user" },
+  { method: "POST", path: "/auth/sessions/revoke-others", summary: "Sign out every other device", tag: "Auth", auth: "user" },
   { method: "GET", path: "/public/teams", summary: "Teams open for registration", tag: "Public", auth: "none" },
 
   { method: "GET", path: "/teams", summary: "List teams in scope", tag: "Teams", auth: "user" },
