@@ -3,14 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function SessionStatusControls({ sessionId, status }: { sessionId: number; status: string }) {
+export default function SessionStatusControls({ eventId, status }: { eventId: number; status: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function setStatus(newStatus: string) {
     setLoading(true);
     try {
-      await fetch(`/api/v1/sessions/${sessionId}`, {
+      await fetch(`/api/v1/events/${eventId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),

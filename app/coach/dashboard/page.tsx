@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { getCoachDashboard } from "@/lib/dashboard";
+import { eventDayLabel } from "@/lib/events";
 import StatTile from "@/components/StatTile";
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
@@ -32,7 +33,7 @@ export default async function CoachDashboardPage() {
         <StatTile
           label="Next session"
           value={nextSession ? nextSession.title : "None scheduled"}
-          sub={nextSession ? new Date(nextSession.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" }) : undefined}
+          sub={nextSession ? eventDayLabel(nextSession.startAt) : undefined}
           accent="info"
           href="/coach/training"
         />

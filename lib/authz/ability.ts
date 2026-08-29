@@ -37,7 +37,8 @@ export type Subject =
   | "PlayerContact"
   | "PlayerMedical"
   | "PlayerWelfare"
-  | "TrainingSession"
+  | "Event"
+  | "Venue"
   | "Attendance"
   | "Announcement"
   | "Video"
@@ -107,7 +108,9 @@ function applyRole(
       can("read", "Season");
       can("read", ["Squad", "Membership"], { teamId });
 
-      can(["read", "create", "update", "delete"], "TrainingSession", { teamId });
+      can(["read", "create", "update", "delete"], "Event", { teamId });
+      can("read", "Event", { teamId: null }); // club-wide events
+      can("read", "Venue");
       can(["read", "record", "verify"], "Attendance", { teamId });
 
       can("read", "PlayerProfile", { teamId });
@@ -133,7 +136,9 @@ function applyRole(
       if (teamId == null) break;
       can("access", "Team", { id: teamId });
       can("read", "Team", { id: teamId });
-      can(["read", "create", "update"], "TrainingSession", { teamId });
+      can(["read", "create", "update"], "Event", { teamId });
+      can("read", "Event", { teamId: null });
+      can("read", "Venue");
       can(["read", "record"], "Attendance", { teamId });
       can("read", "PlayerProfile", { teamId });
       can(["read", "create"], "Announcement", { teamId });
@@ -176,9 +181,11 @@ function applyRole(
         can("access", "Team", { id: ownTeamId });
         can("read", "Team", { id: ownTeamId });
         can("read", ["Squad", "Membership"], { teamId: ownTeamId });
-        can("read", "TrainingSession", { teamId: ownTeamId });
+        can("read", "Event", { teamId: ownTeamId });
         can("read", "Announcement", { teamId: ownTeamId });
       }
+      can("read", "Event", { teamId: null }); // club-wide events
+      can("read", "Venue");
       can("read", "Announcement", { scope: "PLATFORM" });
 
       // Own profile only (roster listings go through Team access, not this).
@@ -197,7 +204,7 @@ function applyRole(
       // the player's to change (brief §17).
       cannot(["create", "update", "delete"], "Evaluation");
       cannot(["record", "verify"], "Attendance");
-      cannot(["create", "update", "delete"], "TrainingSession");
+      cannot(["create", "update", "delete"], "Event");
       cannot(["update", "delete"], "PlayerProfile");
       break;
     }

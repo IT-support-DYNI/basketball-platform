@@ -75,8 +75,8 @@ describe("head coach — own team only", () => {
   });
 
   it("manages training + attendance for its team, not another", () => {
-    expect(c.can("create", "TrainingSession", { teamId: 1 })).toBe(true);
-    expect(c.can("create", "TrainingSession", { teamId: 2 })).toBe(false);
+    expect(c.can("create", "Event", { teamId: 1 })).toBe(true);
+    expect(c.can("create", "Event", { teamId: 2 })).toBe(false);
     expect(c.can("record", "Attendance", { teamId: 1 })).toBe(true);
     expect(c.can("record", "Attendance", { teamId: 2 })).toBe(false);
     expect(c.can("verify", "Attendance", { teamId: 1 })).toBe(true);
@@ -132,8 +132,8 @@ describe("player — self only", () => {
   it("accesses its own team's schedule + announcements, not another team's", () => {
     expect(p.can("access", "Team", { id: 1 })).toBe(true);
     expect(p.can("access", "Team", { id: 2 })).toBe(false);
-    expect(p.can("read", "TrainingSession", { teamId: 1 })).toBe(true);
-    expect(p.can("read", "TrainingSession", { teamId: 2 })).toBe(false);
+    expect(p.can("read", "Event", { teamId: 1 })).toBe(true);
+    expect(p.can("read", "Event", { teamId: 2 })).toBe(false);
     expect(p.can("read", "Announcement", { teamId: 1 })).toBe(true);
     expect(p.can("read", "Announcement", { scope: "PLATFORM" })).toBe(true);
     expect(p.can("read", "Announcement", { teamId: 2 })).toBe(false);
@@ -159,9 +159,9 @@ describe("player — self only", () => {
     expect(p.can("update", "Evaluation", { playerId: 30 })).toBe(false);
     expect(p.can("record", "Attendance", { playerId: 30 })).toBe(false);
     expect(p.can("verify", "Attendance", { teamId: 1 })).toBe(false);
-    expect(p.can("create", "TrainingSession", { teamId: 1 })).toBe(false);
-    expect(p.can("update", "TrainingSession", { teamId: 1 })).toBe(false);
-    expect(p.can("delete", "TrainingSession", { teamId: 1 })).toBe(false);
+    expect(p.can("create", "Event", { teamId: 1 })).toBe(false);
+    expect(p.can("update", "Event", { teamId: 1 })).toBe(false);
+    expect(p.can("delete", "Event", { teamId: 1 })).toBe(false);
   });
 
   it("manages only its own notifications", () => {

@@ -12,7 +12,7 @@ export default async function PlayerFeedbackPage() {
         where: { playerId },
         include: {
           coach: { include: { user: { select: { name: true } } } },
-          session: { select: { title: true } },
+          event: { select: { title: true } },
           evaluation: { select: { periodType: true } },
         },
         orderBy: { createdAt: "desc" },
@@ -30,7 +30,7 @@ export default async function PlayerFeedbackPage() {
             <p className="italic text-slate-700">"{f.message}"</p>
             <p className="mt-2 text-xs text-slate-400">
               — {f.coach.user.name} · {new Date(f.createdAt).toLocaleDateString()}
-              {f.session ? ` · re: ${f.session.title}` : ""}
+              {f.event ? ` · re: ${f.event.title}` : ""}
               {f.evaluation ? ` · re: ${f.evaluation.periodType.toLowerCase()} evaluation` : ""}
             </p>
           </li>

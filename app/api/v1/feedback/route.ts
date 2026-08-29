@@ -25,7 +25,7 @@ export const POST = route(async (req: NextRequest) => {
         playerId: body.playerId,
         coachId: session.user.coachProfileId!,
         evaluationId: body.evaluationId,
-        sessionId: body.sessionId,
+        eventId: body.eventId,
         message: body.message,
       },
     });

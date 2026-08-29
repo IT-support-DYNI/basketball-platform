@@ -55,10 +55,10 @@ export async function getCoachDashboard(session: Session) {
         evaluations: { orderBy: { periodStart: "desc" }, take: 1 },
       },
     }),
-    prisma.trainingSession.findFirst({
-      where: { teamId: { in: teamIds }, date: { gte: now }, status: "SCHEDULED" },
-      orderBy: { date: "asc" },
-      include: { team: { select: { name: true } } },
+    prisma.event.findFirst({
+      where: { teamId: { in: teamIds }, startAt: { gte: now }, status: "SCHEDULED" },
+      orderBy: { startAt: "asc" },
+      include: { team: { select: { name: true } }, venue: { select: { name: true } } },
     }),
     prisma.announcement.findMany({
       where: { OR: [{ scope: "PLATFORM" }, { teamId: { in: teamIds } }] },
@@ -71,7 +71,7 @@ export async function getCoachDashboard(session: Session) {
       take: 5,
     }),
     prisma.attendanceRecord.findMany({
-      where: { session: { teamId: { in: teamIds } } },
+      where: { event: { teamId: { in: teamIds } } },
       orderBy: { recordedAt: "desc" },
       take: 200,
     }),
@@ -111,9 +111,14 @@ export async function getPlayerDashboard(session: Session) {
   const [nextSession, attendanceRecords, evaluations, latestVideo, latestFeedback, notifications] =
     await Promise.all([
       session.user.teamId
-        ? prisma.trainingSession.findFirst({
-            where: { teamId: session.user.teamId, date: { gte: now }, status: "SCHEDULED" },
-            orderBy: { date: "asc" },
+        ? prisma.event.findFirst({
+            where: {
+              OR: [{ teamId: session.user.teamId }, { teamId: null }],
+              startAt: { gte: now },
+              status: "SCHEDULED",
+            },
+            orderBy: { startAt: "asc" },
+            include: { venue: { select: { name: true } } },
           })
         : null,
       prisma.attendanceRecord.findMany({ where: { playerId } }),

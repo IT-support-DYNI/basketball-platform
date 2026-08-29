@@ -120,22 +120,66 @@ async function main() {
     create: { userId: coachUser.id, teamId: team.id, role: "HEAD_COACH", seasonId: season.id },
   });
 
-  const trainingSession = await prisma.trainingSession.create({
+  let venue = await prisma.venue.findFirst({ where: { clubId: club.id, name: "Community Sports Centre" } });
+  if (!venue) {
+    venue = await prisma.venue.create({
+      data: {
+        clubId: club.id,
+        name: "Community Sports Centre",
+        address: "12 Riverside Way",
+        checkInPin: "4827",
+      },
+    });
+  }
+
+  const day = 24 * 60 * 60 * 1000;
+  const at = (offsetDays: number, hour: number, minute = 0) => {
+    const d = new Date(Date.now() + offsetDays * day);
+    d.setHours(hour, minute, 0, 0);
+    return d;
+  };
+
+  const trainingEvent = await prisma.event.create({
     data: {
       teamId: team.id,
+      type: "TRAINING",
       title: "Tuesday Practice",
-      date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-      startTime: "18:00",
-      endTime: "20:00",
-      location: "Community Sports Centre",
-      createdByCoachId: coachUser.coachProfile!.id,
+      venueId: venue.id,
+      startAt: at(3, 18),
+      endAt: at(3, 20),
+      createdByUserId: coachUser.id,
+    },
+  });
+
+  await prisma.event.create({
+    data: {
+      teamId: team.id,
+      type: "MATCH",
+      title: "Friendly vs Riverside Hoops",
+      venueId: venue.id,
+      startAt: at(7, 15),
+      endAt: at(7, 17),
+      arrivalTime: at(7, 14),
+      dressCode: "Home whites",
+      createdByUserId: coachUser.id,
+    },
+  });
+
+  await prisma.event.create({
+    data: {
+      type: "REGISTRATION_DEADLINE",
+      title: "Season registration closes",
+      startAt: at(14, 23, 59),
+      endAt: at(14, 23, 59),
+      visibility: "CLUB",
+      createdByUserId: admin.id,
     },
   });
 
   await prisma.attendanceRecord.createMany({
     data: [
-      { sessionId: trainingSession.id, playerId: player1.playerProfile!.id, status: "PRESENT", recordedByCoachId: coachUser.coachProfile!.id },
-      { sessionId: trainingSession.id, playerId: player2.playerProfile!.id, status: "LATE", recordedByCoachId: coachUser.coachProfile!.id },
+      { eventId: trainingEvent.id, playerId: player1.playerProfile!.id, status: "PRESENT", recordedByCoachId: coachUser.coachProfile!.id },
+      { eventId: trainingEvent.id, playerId: player2.playerProfile!.id, status: "LATE", recordedByCoachId: coachUser.coachProfile!.id },
     ],
     skipDuplicates: true,
   });

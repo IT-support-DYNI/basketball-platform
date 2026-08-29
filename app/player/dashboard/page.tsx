@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { getPlayerDashboard } from "@/lib/dashboard";
+import { eventDayLabel, eventTimeRange } from "@/lib/events";
 import StatTile from "@/components/StatTile";
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
@@ -27,12 +28,8 @@ export default async function PlayerDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <StatTile
           label="Next training"
-          value={
-            nextSession
-              ? `${new Date(nextSession.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}`
-              : "None scheduled"
-          }
-          sub={nextSession ? `${nextSession.startTime}–${nextSession.endTime}` : undefined}
+          value={nextSession ? eventDayLabel(nextSession.startAt) : "None scheduled"}
+          sub={nextSession ? eventTimeRange(nextSession.startAt, nextSession.endAt) : undefined}
           accent="info"
           href="/player/training"
         />

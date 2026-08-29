@@ -23,9 +23,9 @@ export default async function CoachAttendancePage() {
       },
       orderBy: { user: { name: "asc" } },
     }),
-    prisma.trainingSession.findMany({
+    prisma.event.findMany({
       where: { teamId: { in: teamIds } },
-      orderBy: { date: "desc" },
+      orderBy: { startAt: "desc" },
       take: 10,
       include: { team: { select: { name: true } } },
     }),
@@ -60,7 +60,7 @@ export default async function CoachAttendancePage() {
         <ul className="mt-3 divide-y divide-slate-100">
           {recentSessions.map((s) => (
             <li key={s.id} className="flex items-center justify-between py-2.5 text-sm">
-              <span className="font-medium text-slate-800">{s.title} · {s.team.name} · {new Date(s.date).toLocaleDateString()}</span>
+              <span className="font-medium text-slate-800">{s.title} · {s.team?.name ?? "Club-wide"} · {new Date(s.startAt).toLocaleDateString()}</span>
               <Link href={`/coach/training/${s.id}`} className="text-xs font-semibold text-court-700 hover:text-court-800">Mark attendance →</Link>
             </li>
           ))}

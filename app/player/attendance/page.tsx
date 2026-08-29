@@ -13,8 +13,8 @@ export default async function PlayerAttendancePage() {
   const records = playerId
     ? await prisma.attendanceRecord.findMany({
         where: { playerId },
-        include: { session: { select: { title: true, date: true } } },
-        orderBy: { session: { date: "desc" } },
+        include: { event: { select: { title: true, startAt: true } } },
+        orderBy: { event: { startAt: "desc" } },
       })
     : [];
 
@@ -36,7 +36,7 @@ export default async function PlayerAttendancePage() {
         <table className="w-full min-w-[38rem] text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
             <tr>
-              <th className="px-4 py-3">Session</th>
+              <th className="px-4 py-3">Event</th>
               <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Status</th>
             </tr>
@@ -44,8 +44,8 @@ export default async function PlayerAttendancePage() {
           <tbody className="divide-y divide-slate-100">
             {records.map((r) => (
               <tr key={r.id}>
-                <td className="px-4 py-3 font-medium text-slate-800">{r.session.title}</td>
-                <td className="px-4 py-3 text-slate-600">{new Date(r.session.date).toLocaleDateString()}</td>
+                <td className="px-4 py-3 font-medium text-slate-800">{r.event.title}</td>
+                <td className="px-4 py-3 text-slate-600">{new Date(r.event.startAt).toLocaleDateString()}</td>
                 <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
               </tr>
             ))}

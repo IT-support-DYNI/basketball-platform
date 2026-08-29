@@ -18,8 +18,8 @@ export const GET = route<{ id: string }>(async (_req, { params }) => {
 
   const records = await prisma.attendanceRecord.findMany({
     where: { playerId },
-    include: { session: { select: { id: true, title: true, date: true } } },
-    orderBy: { session: { date: "desc" } },
+    include: { event: { select: { id: true, title: true, startAt: true } } },
+    orderBy: { event: { startAt: "desc" } },
   });
 
   return NextResponse.json({ stats: computeAttendanceStats(records), records });

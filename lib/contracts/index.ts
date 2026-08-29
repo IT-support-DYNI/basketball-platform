@@ -16,7 +16,12 @@ export { createFeedbackSchema } from "./feedback";
 export { createEvaluationSchema, updateEvaluationSchema } from "./performance";
 export { pushSubscribeSchema, pushUnsubscribeSchema } from "./push";
 export { registerSchema, reviewRegistrationSchema } from "./registration";
-export { createSessionSchema, updateSessionSchema } from "./session";
+export {
+  createEventSchema,
+  updateEventSchema,
+  createVenueSchema,
+  updateVenueSchema,
+} from "./event";
 export {
   createTeamSchema,
   updateTeamSchema,
@@ -32,7 +37,12 @@ import { bulkAttendanceSchema } from "./attendance";
 import { createFeedbackSchema } from "./feedback";
 import { createEvaluationSchema, updateEvaluationSchema } from "./performance";
 import { registerSchema, reviewRegistrationSchema } from "./registration";
-import { createSessionSchema, updateSessionSchema } from "./session";
+import {
+  createEventSchema,
+  updateEventSchema,
+  createVenueSchema,
+  updateVenueSchema,
+} from "./event";
 import {
   createTeamSchema,
   updateTeamSchema,
@@ -50,8 +60,10 @@ export type CreateEvaluationInput = z.infer<typeof createEvaluationSchema>;
 export type UpdateEvaluationInput = z.infer<typeof updateEvaluationSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ReviewRegistrationInput = z.infer<typeof reviewRegistrationSchema>;
-export type CreateSessionInput = z.infer<typeof createSessionSchema>;
-export type UpdateSessionInput = z.infer<typeof updateSessionSchema>;
+export type CreateEventInput = z.infer<typeof createEventSchema>;
+export type UpdateEventInput = z.infer<typeof updateEventSchema>;
+export type CreateVenueInput = z.infer<typeof createVenueSchema>;
+export type UpdateVenueInput = z.infer<typeof updateVenueSchema>;
 export type CreateTeamInput = z.infer<typeof createTeamSchema>;
 export type UpdateTeamInput = z.infer<typeof updateTeamSchema>;
 export type AssignCoachInput = z.infer<typeof assignCoachSchema>;

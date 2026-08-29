@@ -6,12 +6,14 @@
  *   Team             — roster + owning entity for sessions/videos/announcements
  *   TeamCoach        — many-to-many: a team can have several coaches, a
  *                       coach can manage several teams
- *   TrainingSession  — created/managed by a coach, scoped to a team
- *   AttendanceRecord — one row per (session, player)
+ *   Venue            — a place events happen; club-scoped, optional map coords
+ *   Event            — training/match/meeting/deadline; team- or club-scoped,
+ *                       optionally recurring (EventRecurrence)
+ *   AttendanceRecord — one row per (event, player)
  *   Video            — uploaded by a coach/admin, assigned via VideoAssignment
  *   PerformanceEvaluation — weekly/monthly, one per (player, coach, period)
  *   PerformanceCategoryScore — one row per scored category per evaluation
- *   Feedback         — written note, optionally tied to a session or evaluation
+ *   Feedback         — written note, optionally tied to an event or evaluation
  *   Notification     — in-app only for MVP
  *   Announcement     — platform-wide (admin) or team-scoped (coach/admin)
  */
@@ -85,10 +87,36 @@ enum TeamStatus {
   ARCHIVED
 }
 
-enum SessionStatus {
+enum EventStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
+  POSTPONED
+}
+
+enum EventType {
+  TRAINING
+  MATCH
+  TOURNAMENT
+  TEAM_MEETING
+  FITNESS_TEST
+  SOCIAL
+  MEDICAL
+  REGISTRATION_DEADLINE
+  PAYMENT_DEADLINE
+  OTHER
+}
+
+enum EventVisibility {
+  TEAM
+  CLUB
+  PUBLIC
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
 }
 
 enum AttendanceStatus {
@@ -166,6 +194,7 @@ model Club {
 
   teams   Team[]
   seasons Season[]
+  venues  Venue[]
 }
 
 model Season {
@@ -379,6 +408,7 @@ model User {
   mfa           UserMfa?
   staffAssignments StaffAssignment[]
   auditLogsActed AuditLog[]
+  eventsCreated  Event[]               @relation("EventCreatedBy")
   /// Populated when role = GUARDIAN — the player(s) this user manages.
   guardianOf     GuardianRelationship[] @relation("Guardian")
   /// Populated when role = ADMIN and this admin has reviewed at least one registration.
@@ -410,7 +440,6 @@ model CoachProfile {
   phone   String?
   bio     String?
 
-  sessionsCreated      TrainingSession[]        @relation("SessionCreatedBy")
   attendanceRecorded   AttendanceRecord[]       @relation("AttendanceRecordedBy")
   evaluationsGiven     PerformanceEvaluation[]  @relation("EvaluationCoach")
   feedbackGiven        Feedback[]               @relation("FeedbackCoach")
@@ -502,7 +531,7 @@ model Team {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  trainingSessions TrainingSession[]
+  events           Event[]
   videoAssignments VideoAssignment[]
   announcements    Announcement[]
   squads           Squad[]
@@ -511,36 +540,89 @@ model Team {
   registrationApplicants PlayerProfile[] @relation("RegistrationApplicant")
 }
 
-// TRAINING SESSIONS
+// VENUES
 
-model TrainingSession {
-  id               Int           @id @default(autoincrement())
-  teamId           Int
-  team             Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  title            String
-  notes            String?
-  date             DateTime
-  startTime        String
-  endTime          String
-  location         String
-  status           SessionStatus @default(SCHEDULED)
-  createdByCoachId Int
-  createdBy        CoachProfile  @relation("SessionCreatedBy", fields: [createdByCoachId], references: [id])
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+model Venue {
+  id         Int      @id @default(autoincrement())
+  clubId     Int?
+  club       Club?    @relation(fields: [clubId], references: [id], onDelete: SetNull)
+  name       String
+  address    String?
+  mapLat     Float?
+  mapLng     Float?
+  notes      String?
+  /// Static fallback PIN a coach can read out for check-in when a player
+  /// can't scan the rotating QR (W5 part 4). Null = QR only.
+  checkInPin String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  events Event[]
+
+  @@index([clubId])
+}
+
+// EVENTS & SCHEDULING
+
+/// An RRULE-lite recurrence rule. When an Event carries a `recurrenceId`, the
+/// concrete occurrences are materialised as their own Event rows (each with the
+/// same `recurrenceId`) at creation time — editing or cancelling one occurrence
+/// only touches that row, never the series (brief §14).
+model EventRecurrence {
+  id        Int                 @id @default(autoincrement())
+  frequency RecurrenceFrequency
+  interval  Int                 @default(1)
+  /// 0=Sunday … 6=Saturday. Used for WEEKLY; empty = same weekday as the first occurrence.
+  byWeekday Int[]               @default([])
+  until     DateTime?
+  count     Int?
+  createdAt DateTime            @default(now())
+
+  events Event[]
+}
+
+model Event {
+  id              Int             @id @default(autoincrement())
+  /// Null = a club-wide event (deadlines, socials) not tied to one team.
+  teamId          Int?
+  team            Team?           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  type            EventType       @default(TRAINING)
+  title           String
+  description     String?
+  venueId         Int?
+  venue           Venue?          @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  /// Free-text location used when there is no Venue row (kept from the old model).
+  locationText    String?
+  startAt         DateTime
+  endAt           DateTime
+  /// "Be there by" — shown to players, distinct from the official start.
+  arrivalTime     DateTime?
+  rsvpDeadline    DateTime?
+  capacity        Int?
+  dressCode       String?
+  visibility      EventVisibility @default(TEAM)
+  status          EventStatus     @default(SCHEDULED)
+  recurrenceId    Int?
+  recurrence      EventRecurrence? @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
+  createdByUserId Int
+  createdBy       User            @relation("EventCreatedBy", fields: [createdByUserId], references: [id])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   attendanceRecords AttendanceRecord[]
   feedback          Feedback[]
 
-  @@index([teamId, date])
+  @@index([teamId, startAt])
+  @@index([startAt])
+  @@index([recurrenceId])
 }
 
 // ATTENDANCE
 
 model AttendanceRecord {
   id                 Int              @id @default(autoincrement())
-  sessionId          Int
-  session            TrainingSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  eventId            Int
+  event              Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   playerId           Int
   player             PlayerProfile    @relation(fields: [playerId], references: [id], onDelete: Cascade)
   status             AttendanceStatus
@@ -549,7 +631,7 @@ model AttendanceRecord {
   recordedBy         CoachProfile     @relation("AttendanceRecordedBy", fields: [recordedByCoachId], references: [id])
   recordedAt         DateTime         @default(now())
 
-  @@unique([sessionId, playerId])
+  @@unique([eventId, playerId])
   @@index([playerId])
 }
 
@@ -635,8 +717,8 @@ model Feedback {
   coach        CoachProfile            @relation("FeedbackCoach", fields: [coachId], references: [id])
   evaluationId Int?
   evaluation   PerformanceEvaluation?  @relation(fields: [evaluationId], references: [id], onDelete: SetNull)
-  sessionId    Int?
-  session      TrainingSession?        @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  eventId      Int?
+  event        Event?                  @relation(fields: [eventId], references: [id], onDelete: SetNull)
   message      String
   createdAt    DateTime                @default(now())
 

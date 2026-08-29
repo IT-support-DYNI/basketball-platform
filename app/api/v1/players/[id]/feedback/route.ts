@@ -19,7 +19,7 @@ export const GET = route<{ id: string }>(async (_req, { params }) => {
     where: { playerId },
     include: {
       coach: { include: { user: { select: { name: true } } } },
-      session: { select: { id: true, title: true, date: true } },
+      event: { select: { id: true, title: true, startAt: true } },
       evaluation: { select: { id: true, periodType: true, periodStart: true } },
     },
     orderBy: { createdAt: "desc" },
