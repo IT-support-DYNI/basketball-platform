@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { eventDayLabel, eventTimeRange, EVENT_TYPE_LABEL } from "@/lib/events";
 import { describeRule } from "@/lib/recurrence";
 import { rosterPlayerFilter } from "@/lib/roster";
+import { RSVP_LABEL, tallyResponses } from "@/lib/rsvp";
 import StatusBadge from "@/components/StatusBadge";
 import MarkAttendanceForm from "@/components/coach/MarkAttendanceForm";
 import SessionStatusControls from "@/components/coach/SessionStatusControls";
@@ -21,6 +22,10 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
       venue: { select: { name: true, address: true } },
       recurrence: true,
       attendanceRecords: true,
+      availabilityResponses: {
+        select: { response: true, note: true, user: { select: { name: true } } },
+        orderBy: { user: { name: "asc" } },
+      },
     },
   });
   if (!event) notFound();
@@ -39,6 +44,14 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
     name: p.user.name,
     currentStatus: event.attendanceRecords.find((r) => r.playerId === p.id)?.status ?? null,
   }));
+
+  const rsvps = event.availabilityResponses;
+  const rsvpCounts = tallyResponses(rsvps, roster.length);
+  const rsvpGroups = {
+    ATTENDING: rsvps.filter((r) => r.response === "ATTENDING"),
+    UNSURE: rsvps.filter((r) => r.response === "UNSURE"),
+    NOT_ATTENDING: rsvps.filter((r) => r.response === "NOT_ATTENDING"),
+  } as const;
 
   return (
     <main>
@@ -66,6 +79,35 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
         </div>
         <SessionStatusControls eventId={event.id} status={event.status} recurring={event.recurrenceId != null} />
       </div>
+
+      {event.teamId != null && (
+        <section className="mt-8 rounded-2xl border border-slate-200 bg-surface p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-bold text-slate-900">RSVPs</h2>
+            <p className="text-sm text-slate-500">
+              {rsvpCounts.attending} going · {rsvpCounts.unsure} unsure · {rsvpCounts.notAttending} not going ·{" "}
+              {rsvpCounts.noResponse} no response
+              {event.capacity != null && ` · capacity ${event.capacity}`}
+            </p>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            {(["ATTENDING", "UNSURE", "NOT_ATTENDING"] as const).map((k) => (
+              <div key={k} className="rounded-xl border border-slate-200 p-3">
+                <p className="font-mono text-[11px] uppercase tracking-wider text-slate-400">{RSVP_LABEL[k]}</p>
+                <ul className="mt-1.5 space-y-0.5 text-sm text-slate-700">
+                  {rsvpGroups[k].map((r, i) => (
+                    <li key={i}>
+                      {r.user.name}
+                      {r.note ? <span className="text-slate-400"> — {r.note}</span> : null}
+                    </li>
+                  ))}
+                  {rsvpGroups[k].length === 0 && <li className="text-slate-400">—</li>}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mt-8 rounded-2xl border border-slate-200 bg-surface p-5">
         <h2 className="font-bold text-slate-900">Attendance</h2>

@@ -28,6 +28,7 @@ export default async function CoachSchedulePage() {
 
       <CalendarView
         manageBasePath="/coach/training"
+        canRsvp
         feedUrl={`${baseUrl()}/api/v1/public/calendar.ics?token=${token}`}
       />
     </main>

@@ -76,7 +76,34 @@ fetches `/api/v1/events?from=&to=` on range change. Wired into the three
 `lib/ics.ts` builds RFC-5545 output (UTC times, CRLF, 75-octet line folding,
 text escaping).
 
+## RSVP (W5 part 3)
+
+`AvailabilityResponse` (`eventId` + `userId` unique, `response`
+ATTENDING/NOT_ATTENDING/UNSURE, optional `note`) — deliberately **separate**
+from `AttendanceRecord`: an RSVP is an intention, attendance is what happened
+(brief §11).
+
+- `GET /api/v1/events/{id}/rsvp` — the caller's own RSVP + a summary
+  (`counts`, `capacity`, `window`, `deadline`); staff who can record attendance
+  for the team also get the per-person `roster` breakdown.
+- `POST` — set/change; `DELETE` — clear. Enforced by `lib/rsvp.ts`:
+  `rsvpWindowState` (closed once the event is cancelled, has ended, or the
+  `rsvpDeadline` passed — repeating your existing answer is still allowed) and
+  `capacityState` (a new "attending" is rejected 409 once `capacity` "attending"
+  responses exist).
+- UI: `components/calendar/RsvpControl.tsx` in the calendar event dialog
+  (players + staff, future team events only); a full breakdown on the coach
+  event page; the create form gained **Capacity** and **RSVP by** fields.
+
+## Reminders (W5 part 3)
+
+`lib/reminders.ts#runRsvpReminders` — nudges roster players with no response for
+events whose deadline is within 24h (or, deadline-less, that start in 24–48h).
+`Event.rsvpReminderSentAt` makes it at-most-once per event. Run daily by
+`GET /api/v1/cron/reminders` (guarded by `CRON_SECRET`; `vercel.json` schedules
+it `0 8 * * *`). Middleware allows `/api/v1/cron/*` through — the route checks
+the bearer secret itself.
+
 ## Still to come
 
-- **W5 part 3** — RSVP (`AvailabilityResponse`, deadline + capacity), reminders
 - **W5 part 4** — QR check-in (`QrCheckInToken`), venue PIN, check-in/out times, `AttendanceAudit` corrections, reports

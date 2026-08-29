@@ -75,7 +75,15 @@ export const createVenueSchema = z.object({
 
 export const updateVenueSchema = createVenueSchema.partial();
 
+export const RSVP_RESPONSES = ["ATTENDING", "NOT_ATTENDING", "UNSURE"] as const;
+
+export const rsvpSchema = z.object({
+  response: z.enum(RSVP_RESPONSES),
+  note: z.string().max(500).optional(),
+});
+
 export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;
 export type CreateVenueInput = z.infer<typeof createVenueSchema>;
 export type UpdateVenueInput = z.infer<typeof updateVenueSchema>;
+export type RsvpInput = z.infer<typeof rsvpSchema>;

@@ -36,7 +36,8 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/v1/auth/") ||
     pathname.startsWith("/api/v1/register") ||
-    pathname.startsWith("/api/v1/public");
+    pathname.startsWith("/api/v1/public") ||
+    pathname.startsWith("/api/v1/cron/"); // guarded by CRON_SECRET in the route
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   const isApiRequest = pathname.startsWith("/api/");

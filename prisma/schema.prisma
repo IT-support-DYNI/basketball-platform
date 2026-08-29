@@ -119,6 +119,12 @@ enum RecurrenceFrequency {
   MONTHLY
 }
 
+enum RsvpResponse {
+  ATTENDING
+  NOT_ATTENDING
+  UNSURE
+}
+
 enum AttendanceStatus {
   PRESENT
   ABSENT
@@ -413,6 +419,7 @@ model User {
   staffAssignments StaffAssignment[]
   auditLogsActed AuditLog[]
   eventsCreated  Event[]               @relation("EventCreatedBy")
+  availabilityResponses AvailabilityResponse[]
   /// Populated when role = GUARDIAN — the player(s) this user manages.
   guardianOf     GuardianRelationship[] @relation("Guardian")
   /// Populated when role = ADMIN and this admin has reviewed at least one registration.
@@ -603,6 +610,9 @@ model Event {
   arrivalTime     DateTime?
   rsvpDeadline    DateTime?
   capacity        Int?
+  /// Set by the reminder cron once it has nudged non-responders for this event,
+  /// so a player is nudged at most once per event (lib/reminders.ts).
+  rsvpReminderSentAt DateTime?
   dressCode       String?
   visibility      EventVisibility @default(TEAM)
   status          EventStatus     @default(SCHEDULED)
@@ -613,12 +623,31 @@ model Event {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  attendanceRecords AttendanceRecord[]
-  feedback          Feedback[]
+  attendanceRecords     AttendanceRecord[]
+  feedback              Feedback[]
+  availabilityResponses AvailabilityResponse[]
 
   @@index([teamId, startAt])
   @@index([startAt])
   @@index([recurrenceId])
+}
+
+/// A player's (or staff's) RSVP to an event — kept deliberately separate from
+/// AttendanceRecord: an RSVP is an intention, attendance is what happened
+/// (brief §11 — "do not treat RSVP as confirmed attendance").
+model AvailabilityResponse {
+  id          Int          @id @default(autoincrement())
+  eventId     Int
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  response    RsvpResponse
+  note        String?
+  respondedAt DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([eventId, userId])
+  @@index([eventId])
 }
 
 // ATTENDANCE

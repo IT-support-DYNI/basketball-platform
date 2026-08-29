@@ -19,6 +19,7 @@ export default async function PlayerSchedulePage() {
 
       <CalendarView
         manageBasePath={null}
+        canRsvp
         feedUrl={`${baseUrl()}/api/v1/public/calendar.ics?token=${token}`}
       />
     </main>

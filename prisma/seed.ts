@@ -160,7 +160,7 @@ async function main() {
     orderBy: { startAt: "asc" },
   }))!;
 
-  await prisma.event.create({
+  const matchEvent = await prisma.event.create({
     data: {
       teamId: team.id,
       type: "MATCH",
@@ -169,9 +169,19 @@ async function main() {
       startAt: at(7, 15),
       endAt: at(7, 17),
       arrivalTime: at(7, 14),
+      rsvpDeadline: at(5, 18),
+      capacity: 12,
       dressCode: "Home whites",
       createdByUserId: coachUser.id,
     },
+  });
+
+  await prisma.availabilityResponse.createMany({
+    data: [
+      { eventId: matchEvent.id, userId: player1.id, response: "ATTENDING" },
+      { eventId: matchEvent.id, userId: player2.id, response: "UNSURE", note: "Might have a lift issue" },
+    ],
+    skipDuplicates: true,
   });
 
   await prisma.event.create({

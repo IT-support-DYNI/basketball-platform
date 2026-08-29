@@ -29,6 +29,8 @@ export default function CreateSessionForm({
   const [venueId, setVenueId] = useState("");
   const [locationText, setLocationText] = useState("");
   const [description, setDescription] = useState("");
+  const [capacity, setCapacity] = useState("");
+  const [rsvpBy, setRsvpBy] = useState("");
   const [repeats, setRepeats] = useState(false);
   const [frequency, setFrequency] = useState("WEEKLY");
   const [recurInterval, setRecurInterval] = useState("1");
@@ -66,6 +68,8 @@ export default function CreateSessionForm({
           venueId: venueId ? Number(venueId) : undefined,
           locationText: locationText || undefined,
           description: description || undefined,
+          capacity: capacity ? Number(capacity) : undefined,
+          rsvpDeadline: rsvpBy ? new Date(`${rsvpBy}T23:59`).toISOString() : undefined,
           recurrence,
         }),
       });
@@ -80,6 +84,8 @@ export default function CreateSessionForm({
       setDate("");
       setLocationText("");
       setDescription("");
+      setCapacity("");
+      setRsvpBy("");
       setOpen(false);
       router.refresh();
     } finally {
@@ -141,6 +147,17 @@ export default function CreateSessionForm({
         onChange={(e) => setDescription(e.target.value)}
         className={`w-full ${field}`}
       />
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          Capacity
+          <input type="number" min={1} max={200} placeholder="unlimited" value={capacity} onChange={(e) => setCapacity(e.target.value)} className={`w-full ${field}`} />
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          RSVP by
+          <input type="date" value={rsvpBy} onChange={(e) => setRsvpBy(e.target.value)} className={`w-full ${field}`} />
+        </label>
+      </div>
 
       <label className="flex items-center gap-2 text-sm text-slate-700">
         <input type="checkbox" checked={repeats} onChange={(e) => setRepeats(e.target.checked)} className="h-4 w-4 accent-court-600" />

@@ -7,6 +7,7 @@ import { cn } from "@/lib/cn";
 import { EVENT_TYPE_LABEL } from "@/lib/events";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { useToast } from "@/components/ui/toast";
+import RsvpControl from "./RsvpControl";
 
 type EventType = keyof typeof EVENT_TYPE_LABEL;
 
@@ -66,10 +67,13 @@ type View = "month" | "week" | "agenda";
 export default function CalendarView({
   manageBasePath,
   feedUrl,
+  canRsvp = false,
 }: {
   /** e.g. "/coach/training" — event chips link to `${manageBasePath}/${id}`. Null = no per-event page. */
   manageBasePath: string | null;
   feedUrl: string | null;
+  /** Show the RSVP control in the event dialog (players, and staff who attend). */
+  canRsvp?: boolean;
 }) {
   const toast = useToast();
   const notify = (title: string, tone?: "success" | "danger") => toast({ title, tone });
@@ -183,6 +187,7 @@ export default function CalendarView({
         <EventDialog
           event={selected}
           manageBasePath={manageBasePath}
+          canRsvp={canRsvp}
           onClose={() => setSelected(null)}
         />
       )}
@@ -347,15 +352,18 @@ function AgendaList({ events, onSelect }: { events: ApiEvent[]; onSelect: (e: Ap
 function EventDialog({
   event,
   manageBasePath,
+  canRsvp,
   onClose,
 }: {
   event: ApiEvent;
   manageBasePath: string | null;
+  canRsvp: boolean;
   onClose: () => void;
 }) {
   const start = new Date(event.startAt);
   const end = new Date(event.endAt);
   const isDeadline = start.getTime() === end.getTime();
+  const showRsvp = canRsvp && event.team != null && !isDeadline && event.status !== "CANCELLED";
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -382,6 +390,12 @@ function EventDialog({
           {event.recurrenceId && <Row label="Repeats">Part of a recurring series</Row>}
           {event.description && <Row label="Details">{event.description}</Row>}
         </dl>
+
+        {showRsvp && (
+          <div className="mt-4">
+            <RsvpControl eventId={event.id} />
+          </div>
+        )}
 
         <div className="mt-5 flex flex-wrap gap-2">
           <a

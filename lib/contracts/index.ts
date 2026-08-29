@@ -21,6 +21,7 @@ export {
   updateEventSchema,
   createVenueSchema,
   updateVenueSchema,
+  rsvpSchema,
 } from "./event";
 export {
   createTeamSchema,
@@ -42,6 +43,7 @@ import {
   updateEventSchema,
   createVenueSchema,
   updateVenueSchema,
+  rsvpSchema,
 } from "./event";
 import {
   createTeamSchema,
@@ -64,6 +66,7 @@ export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;
 export type CreateVenueInput = z.infer<typeof createVenueSchema>;
 export type UpdateVenueInput = z.infer<typeof updateVenueSchema>;
+export type RsvpInput = z.infer<typeof rsvpSchema>;
 export type CreateTeamInput = z.infer<typeof createTeamSchema>;
 export type UpdateTeamInput = z.infer<typeof updateTeamSchema>;
 export type AssignCoachInput = z.infer<typeof assignCoachSchema>;
