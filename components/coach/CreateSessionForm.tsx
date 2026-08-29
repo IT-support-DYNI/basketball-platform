@@ -29,6 +29,10 @@ export default function CreateSessionForm({
   const [venueId, setVenueId] = useState("");
   const [locationText, setLocationText] = useState("");
   const [description, setDescription] = useState("");
+  const [repeats, setRepeats] = useState(false);
+  const [frequency, setFrequency] = useState("WEEKLY");
+  const [recurInterval, setRecurInterval] = useState("1");
+  const [untilDate, setUntilDate] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -40,6 +44,15 @@ export default function CreateSessionForm({
     try {
       const startAt = new Date(`${date}T${startTime}`).toISOString();
       const endAt = new Date(`${date}T${endTime}`).toISOString();
+
+      const recurrence = repeats
+        ? {
+            frequency,
+            interval: Math.max(1, Number(recurInterval) || 1),
+            byWeekday: frequency === "WEEKLY" ? [new Date(`${date}T${startTime}`).getDay()] : [],
+            ...(untilDate ? { until: new Date(`${untilDate}T23:59`).toISOString() } : {}),
+          }
+        : undefined;
 
       const res = await fetch("/api/v1/events", {
         method: "POST",
@@ -53,6 +66,7 @@ export default function CreateSessionForm({
           venueId: venueId ? Number(venueId) : undefined,
           locationText: locationText || undefined,
           description: description || undefined,
+          recurrence,
         }),
       });
 
@@ -127,6 +141,28 @@ export default function CreateSessionForm({
         onChange={(e) => setDescription(e.target.value)}
         className={`w-full ${field}`}
       />
+
+      <label className="flex items-center gap-2 text-sm text-slate-700">
+        <input type="checkbox" checked={repeats} onChange={(e) => setRepeats(e.target.checked)} className="h-4 w-4 accent-court-600" />
+        Repeats
+      </label>
+      {repeats && (
+        <div className="grid gap-3 rounded-xl border border-slate-200 p-3 sm:grid-cols-3">
+          <select value={frequency} onChange={(e) => setFrequency(e.target.value)} className={field}>
+            <option value="DAILY">Daily</option>
+            <option value="WEEKLY">Weekly</option>
+            <option value="MONTHLY">Monthly</option>
+          </select>
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            every
+            <input type="number" min={1} max={12} value={recurInterval} onChange={(e) => setRecurInterval(e.target.value)} className={`w-16 ${field}`} />
+          </label>
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            until
+            <input type="date" value={untilDate} onChange={(e) => setUntilDate(e.target.value)} className={field} />
+          </label>
+        </div>
+      )}
 
       {error && <p className="text-sm text-rose-700">{error}</p>}
 

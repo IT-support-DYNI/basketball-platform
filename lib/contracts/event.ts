@@ -21,8 +21,17 @@ export const EVENT_TYPES = [
 
 export const EVENT_STATUSES = ["SCHEDULED", "COMPLETED", "CANCELLED", "POSTPONED"] as const;
 export const EVENT_VISIBILITIES = ["TEAM", "CLUB", "PUBLIC"] as const;
+export const RECURRENCE_FREQUENCIES = ["DAILY", "WEEKLY", "MONTHLY"] as const;
 
 const isoDateTime = z.string().datetime({ offset: true });
+
+export const recurrenceSchema = z.object({
+  frequency: z.enum(RECURRENCE_FREQUENCIES),
+  interval: z.number().int().min(1).max(52).default(1),
+  byWeekday: z.array(z.number().int().min(0).max(6)).max(7).default([]),
+  until: isoDateTime.optional(),
+  count: z.number().int().min(2).max(260).optional(),
+});
 
 const eventCore = z.object({
   type: z.enum(EVENT_TYPES).default("TRAINING"),
@@ -40,10 +49,12 @@ const eventCore = z.object({
   visibility: z.enum(EVENT_VISIBILITIES).default("TEAM"),
 });
 
-export const createEventSchema = eventCore.refine((v) => new Date(v.endAt) > new Date(v.startAt), {
-  message: "The event must end after it starts.",
-  path: ["endAt"],
-});
+export const createEventSchema = eventCore
+  .extend({ recurrence: recurrenceSchema.optional() })
+  .refine((v) => new Date(v.endAt) > new Date(v.startAt), {
+    message: "The event must end after it starts.",
+    path: ["endAt"],
+  });
 
 export const updateEventSchema = eventCore
   .partial()

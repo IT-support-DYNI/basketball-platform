@@ -393,6 +393,10 @@ model User {
   /// accounts are seeded verified; self-registrations must verify before an
   /// administrator can approve them.
   emailVerifiedAt DateTime?
+  /// Opaque secret in the personal ICS subscription URL
+  /// (/api/v1/calendar/feed.ics?token=…). Null until the user first reveals
+  /// their feed; rotating it invalidates the old URL. Not a login credential.
+  calendarToken String? @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

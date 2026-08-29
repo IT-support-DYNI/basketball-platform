@@ -48,25 +48,40 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params }) 
   if (!canEdit) throw new ForbiddenError("You don't have access to this event.");
 
   const body = updateEventSchema.parse(await req.json());
+  // `?scope=series` applies the change to this and every later occurrence of the
+  // same recurrence. Per-occurrence fields (start/end datetimes) are never bulk
+  // applied — each occurrence keeps its own slot.
+  const series = req.nextUrl.searchParams.get("scope") === "series" && existing.recurrenceId != null;
+
+  const sharedData = {
+    title: body.title,
+    description: body.description,
+    type: body.type,
+    teamId: body.teamId === undefined ? undefined : body.teamId,
+    venueId: body.venueId === undefined ? undefined : body.venueId,
+    locationText: body.locationText,
+    arrivalTime: body.arrivalTime === undefined ? undefined : body.arrivalTime ? new Date(body.arrivalTime) : null,
+    rsvpDeadline:
+      body.rsvpDeadline === undefined ? undefined : body.rsvpDeadline ? new Date(body.rsvpDeadline) : null,
+    capacity: body.capacity === undefined ? undefined : body.capacity,
+    dressCode: body.dressCode,
+    visibility: body.visibility,
+    status: body.status,
+  };
+
+  if (series) {
+    await prisma.event.updateMany({
+      where: { recurrenceId: existing.recurrenceId!, startAt: { gte: existing.startAt } },
+      data: sharedData,
+    });
+  }
 
   const updated = await prisma.event.update({
     where: { id: existing.id },
     data: {
-      title: body.title,
-      description: body.description,
-      type: body.type,
-      teamId: body.teamId === undefined ? undefined : body.teamId,
-      venueId: body.venueId === undefined ? undefined : body.venueId,
-      locationText: body.locationText,
+      ...sharedData,
       startAt: body.startAt ? new Date(body.startAt) : undefined,
       endAt: body.endAt ? new Date(body.endAt) : undefined,
-      arrivalTime: body.arrivalTime === undefined ? undefined : body.arrivalTime ? new Date(body.arrivalTime) : null,
-      rsvpDeadline:
-        body.rsvpDeadline === undefined ? undefined : body.rsvpDeadline ? new Date(body.rsvpDeadline) : null,
-      capacity: body.capacity === undefined ? undefined : body.capacity,
-      dressCode: body.dressCode,
-      visibility: body.visibility,
-      status: body.status,
     },
     include,
   });
@@ -95,8 +110,9 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params }) 
   return ok(updated);
 });
 
-/** "Delete" = cancel; attendance/history stays intact (brief §14). */
-export const DELETE = route<{ id: string }>(async (_req, { params }) => {
+/** "Delete" = cancel; attendance/history stays intact (brief §14).
+ *  `?scope=series` cancels this and every later occurrence. */
+export const DELETE = route<{ id: string }>(async (req: NextRequest, { params }) => {
   const session = requireRole(await getServerSession(authOptions), ["COACH", "ADMIN"]);
   const existing = await prisma.event.findUnique({ where: { id: Number(params.id) } });
   if (!existing) throw new NotFoundError("That event wasn't found.");
@@ -107,6 +123,13 @@ export const DELETE = route<{ id: string }>(async (_req, { params }) => {
       : authorize(session).can("delete", "Event", { teamId: existing.teamId });
   if (!canEdit) throw new ForbiddenError("You don't have access to this event.");
 
+  const series = req.nextUrl.searchParams.get("scope") === "series" && existing.recurrenceId != null;
+  if (series) {
+    await prisma.event.updateMany({
+      where: { recurrenceId: existing.recurrenceId!, startAt: { gte: existing.startAt } },
+      data: { status: "CANCELLED" },
+    });
+  }
   const updated = await prisma.event.update({ where: { id: existing.id }, data: { status: "CANCELLED" } });
 
   if (updated.teamId != null) {

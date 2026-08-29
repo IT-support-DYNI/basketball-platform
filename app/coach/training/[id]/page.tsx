@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { eventDayLabel, eventTimeRange, EVENT_TYPE_LABEL } from "@/lib/events";
+import { describeRule } from "@/lib/recurrence";
 import { rosterPlayerFilter } from "@/lib/roster";
 import StatusBadge from "@/components/StatusBadge";
 import MarkAttendanceForm from "@/components/coach/MarkAttendanceForm";
@@ -18,6 +19,7 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
     include: {
       team: { select: { id: true, name: true } },
       venue: { select: { name: true, address: true } },
+      recurrence: true,
       attendanceRecords: true,
     },
   });
@@ -51,9 +53,18 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
             {eventTimeRange(event.startAt, event.endAt)}
             {event.venue?.name ? ` · ${event.venue.name}` : event.locationText ? ` · ${event.locationText}` : ""}
           </p>
+          {event.recurrence && (
+            <p className="mt-1 text-xs text-flame-ink">{describeRule({
+              frequency: event.recurrence.frequency,
+              interval: event.recurrence.interval,
+              byWeekday: event.recurrence.byWeekday,
+              until: event.recurrence.until,
+              count: event.recurrence.count,
+            })}</p>
+          )}
           {event.description && <p className="mt-2 text-sm text-slate-500">{event.description}</p>}
         </div>
-        <SessionStatusControls eventId={event.id} status={event.status} />
+        <SessionStatusControls eventId={event.id} status={event.status} recurring={event.recurrenceId != null} />
       </div>
 
       <section className="mt-8 rounded-2xl border border-slate-200 bg-surface p-5">

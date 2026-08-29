@@ -45,8 +45,38 @@ their team's events + read club-wide + read venues. Players: read their team's
 events + club-wide + venues. Admins: everything. `lib/events.ts#visibleEventScope`
 is the matching Prisma `where` fragment for list queries.
 
+## Recurrence (W5 part 2)
+
+`POST /api/v1/events` accepts an optional `recurrence` (`frequency`,
+`interval`, `byWeekday[]`, `until?` | `count?`). `lib/recurrence.ts#expandOccurrences`
+materialises one `Event` row per occurrence in a transaction, all sharing the
+`recurrenceId` — capped at `MAX_OCCURRENCES` (260) and a one-year horizon.
+Editing a single occurrence just edits that row; `PATCH`/`DELETE
+/api/v1/events/{id}?scope=series` applies to this occurrence **and every later
+one** in the series (per-occurrence datetimes are never bulk-rewritten).
+
+## Calendar UI (W5 part 2)
+
+`components/calendar/CalendarView.tsx` — a client component with **month / week /
+agenda** views, prev/next/today navigation, a type-coloured event chip, and a
+details dialog (with a per-event `.ics` download + a "Manage" link for staff). It
+fetches `/api/v1/events?from=&to=` on range change. Wired into the three
+`/…/training` pages (now "Schedule"); coaches also get the create form there.
+
+## ICS export (W5 part 2)
+
+- `GET /api/v1/events/{id}/ics` — one event, `Content-Disposition: attachment`.
+- `GET /api/v1/public/calendar.ics?token=…` — a personal subscription feed
+  (public, no cookies; gated by an unguessable per-user token). Returns the
+  caller's visible events for a window around now.
+- `GET|POST /api/v1/calendar/token` — reveal / rotate the token; the URL is
+  surfaced by the calendar's **Subscribe** button. Token lives in
+  `User.calendarToken` (migration `20260829140000_calendar_token`).
+
+`lib/ics.ts` builds RFC-5545 output (UTC times, CRLF, 75-octet line folding,
+text escaping).
+
 ## Still to come
 
-- **W5 part 2** — recurrence materialisation, month/week/agenda calendar UI, ICS feed
 - **W5 part 3** — RSVP (`AvailabilityResponse`, deadline + capacity), reminders
 - **W5 part 4** — QR check-in (`QrCheckInToken`), venue PIN, check-in/out times, `AttendanceAudit` corrections, reports

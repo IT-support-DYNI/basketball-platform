@@ -8,6 +8,7 @@ import { requireAuth, requireRole } from "@/lib/authorization";
 import { authorize } from "@/lib/authz/guard";
 import { createEventSchema } from "@/lib/contracts/event";
 import { parseRange, visibleEventScope } from "@/lib/events";
+import { expandOccurrences } from "@/lib/recurrence";
 import { notifyUsers, teamPlayerUserIds } from "@/lib/notify";
 import { sendPushToUsers } from "@/lib/push";
 import { eventDayLabel } from "@/lib/events";
@@ -48,7 +49,8 @@ export const GET = route(async (req: NextRequest) => {
 
 /**
  * POST /api/v1/events — create an event. Coaches create team events; admins can
- * also create club-wide events (teamId: null). Recurrence lands in W5 part 2.
+ * also create club-wide events (teamId: null). A `recurrence` rule materialises
+ * one Event row per occurrence, all sharing a recurrenceId.
  */
 export const POST = route(async (req: NextRequest) => {
   const session = requireRole(await getServerSession(authOptions), ["COACH", "ADMIN"]);
@@ -61,25 +63,59 @@ export const POST = route(async (req: NextRequest) => {
     throw new ForbiddenError("You don't have access to that team.");
   }
 
-  const event = await prisma.event.create({
-    data: {
-      teamId: body.teamId ?? null,
-      type: body.type,
-      title: body.title,
-      description: body.description,
-      venueId: body.venueId ?? null,
-      locationText: body.locationText,
-      startAt: new Date(body.startAt),
-      endAt: new Date(body.endAt),
-      arrivalTime: body.arrivalTime ? new Date(body.arrivalTime) : null,
-      rsvpDeadline: body.rsvpDeadline ? new Date(body.rsvpDeadline) : null,
-      capacity: body.capacity ?? null,
-      dressCode: body.dressCode,
-      visibility: body.visibility,
-      createdByUserId: Number(session.user.id),
-    },
-    include: listInclude,
-  });
+  const firstStart = new Date(body.startAt);
+  const firstEnd = new Date(body.endAt);
+  const baseData = {
+    teamId: body.teamId ?? null,
+    type: body.type,
+    title: body.title,
+    description: body.description,
+    venueId: body.venueId ?? null,
+    locationText: body.locationText,
+    arrivalTime: body.arrivalTime ? new Date(body.arrivalTime) : null,
+    rsvpDeadline: body.rsvpDeadline ? new Date(body.rsvpDeadline) : null,
+    capacity: body.capacity ?? null,
+    dressCode: body.dressCode,
+    visibility: body.visibility,
+    createdByUserId: Number(session.user.id),
+  };
+
+  const event = body.recurrence
+    ? await prisma.$transaction(async (tx) => {
+        const rec = await tx.eventRecurrence.create({
+          data: {
+            frequency: body.recurrence!.frequency,
+            interval: body.recurrence!.interval,
+            byWeekday: body.recurrence!.byWeekday,
+            until: body.recurrence!.until ? new Date(body.recurrence!.until) : null,
+            count: body.recurrence!.count ?? null,
+          },
+        });
+        const occ = expandOccurrences(
+          {
+            frequency: rec.frequency,
+            interval: rec.interval,
+            byWeekday: rec.byWeekday,
+            until: rec.until,
+            count: rec.count,
+          },
+          firstStart,
+          firstEnd,
+        );
+        await tx.event.createMany({
+          data: occ.map((o) => ({ ...baseData, startAt: o.startAt, endAt: o.endAt, recurrenceId: rec.id })),
+        });
+        const first = await tx.event.findFirst({
+          where: { recurrenceId: rec.id },
+          orderBy: { startAt: "asc" },
+          include: listInclude,
+        });
+        return first!;
+      })
+    : await prisma.event.create({
+        data: { ...baseData, startAt: firstStart, endAt: firstEnd },
+        include: listInclude,
+      });
 
   if (event.teamId != null) {
     const recipients = await prisma.$transaction(async (tx) => {

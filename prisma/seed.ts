@@ -139,17 +139,26 @@ async function main() {
     return d;
   };
 
-  const trainingEvent = await prisma.event.create({
-    data: {
-      teamId: team.id,
-      type: "TRAINING",
-      title: "Tuesday Practice",
-      venueId: venue.id,
-      startAt: at(3, 18),
-      endAt: at(3, 20),
-      createdByUserId: coachUser.id,
-    },
+  // A weekly recurring training series — 8 occurrences materialised.
+  const recurrence = await prisma.eventRecurrence.create({
+    data: { frequency: "WEEKLY", interval: 1, byWeekday: [at(3, 18).getDay()], count: 8 },
   });
+  const firstStart = at(3, 18);
+  const trainingRows = Array.from({ length: 8 }, (_, i) => ({
+    teamId: team.id,
+    type: "TRAINING" as const,
+    title: "Tuesday Practice",
+    venueId: venue.id,
+    startAt: new Date(firstStart.getTime() + i * 7 * day),
+    endAt: new Date(firstStart.getTime() + i * 7 * day + 2 * 60 * 60 * 1000),
+    createdByUserId: coachUser.id,
+    recurrenceId: recurrence.id,
+  }));
+  await prisma.event.createMany({ data: trainingRows });
+  const trainingEvent = (await prisma.event.findFirst({
+    where: { recurrenceId: recurrence.id },
+    orderBy: { startAt: "asc" },
+  }))!;
 
   await prisma.event.create({
     data: {
