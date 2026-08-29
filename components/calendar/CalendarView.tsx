@@ -364,6 +364,16 @@ function EventDialog({
   const end = new Date(event.endAt);
   const isDeadline = start.getTime() === end.getTime();
   const showRsvp = canRsvp && event.team != null && !isDeadline && event.status !== "CANCELLED";
+  // Check-in opens 2h before the event and closes 1h after it ends.
+  const now = Date.now();
+  const showCheckIn =
+    canRsvp &&
+    !manageBasePath && // players only — staff manage via the event page
+    event.team != null &&
+    !isDeadline &&
+    event.status !== "CANCELLED" &&
+    now >= start.getTime() - 2 * 3600e3 &&
+    now <= end.getTime() + 3600e3;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -398,6 +408,14 @@ function EventDialog({
         )}
 
         <div className="mt-5 flex flex-wrap gap-2">
+          {showCheckIn && (
+            <Link
+              href={`/checkin/${event.id}`}
+              className="rounded-full bg-flame px-4 py-2 text-sm font-bold text-on-flame"
+            >
+              Check in
+            </Link>
+          )}
           <a
             href={`/api/v1/events/${event.id}/ics`}
             className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink-dim hover:text-ink"

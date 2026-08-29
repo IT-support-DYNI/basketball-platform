@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
@@ -9,6 +10,7 @@ import { rosterPlayerFilter } from "@/lib/roster";
 import { RSVP_LABEL, tallyResponses } from "@/lib/rsvp";
 import StatusBadge from "@/components/StatusBadge";
 import MarkAttendanceForm from "@/components/coach/MarkAttendanceForm";
+import AttendanceCorrections from "@/components/coach/AttendanceCorrections";
 import SessionStatusControls from "@/components/coach/SessionStatusControls";
 
 export default async function CoachEventDetailPage({ params }: { params: { id: string } }) {
@@ -39,11 +41,24 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
       })
     : [];
 
+  const nameById = new Map(roster.map((p) => [p.id, p.user.name]));
   const players = roster.map((p) => ({
     id: p.id,
     name: p.user.name,
     currentStatus: event.attendanceRecords.find((r) => r.playerId === p.id)?.status ?? null,
   }));
+
+  const register = event.attendanceRecords
+    .map((r) => ({
+      id: r.id,
+      name: nameById.get(r.playerId) ?? "Unknown",
+      status: r.status,
+      method: r.method,
+      note: r.note,
+      checkInAt: r.checkInAt?.toISOString() ?? null,
+      checkOutAt: r.checkOutAt?.toISOString() ?? null,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const rsvps = event.availabilityResponses;
   const rsvpCounts = tallyResponses(rsvps, roster.length);
@@ -77,7 +92,17 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
           )}
           {event.description && <p className="mt-2 text-sm text-slate-500">{event.description}</p>}
         </div>
-        <SessionStatusControls eventId={event.id} status={event.status} recurring={event.recurrenceId != null} />
+        <div className="flex flex-col items-end gap-2">
+          <SessionStatusControls eventId={event.id} status={event.status} recurring={event.recurrenceId != null} />
+          {event.teamId != null && (
+            <Link
+              href={`/coach/training/${event.id}/checkin`}
+              className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink-dim hover:text-ink"
+            >
+              Open check-in screen →
+            </Link>
+          )}
+        </div>
       </div>
 
       {event.teamId != null && (
@@ -119,6 +144,18 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
           )}
         </div>
       </section>
+
+      {event.teamId != null && register.length > 0 && (
+        <section className="mt-8 rounded-2xl border border-slate-200 bg-surface p-5">
+          <h2 className="font-bold text-slate-900">Register &amp; corrections</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Check-in times and method. Every correction records a reason.
+          </p>
+          <div className="mt-3">
+            <AttendanceCorrections records={register} />
+          </div>
+        </section>
+      )}
     </main>
   );
 }

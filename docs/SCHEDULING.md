@@ -104,6 +104,33 @@ events whose deadline is within 24h (or, deadline-less, that start in 24–48h).
 it `0 8 * * *`). Middleware allows `/api/v1/cron/*` through — the route checks
 the bearer secret itself.
 
-## Still to come
+## Check-in & audit (W5 part 4)
 
-- **W5 part 4** — QR check-in (`QrCheckInToken`), venue PIN, check-in/out times, `AttendanceAudit` corrections, reports
+Migration `20260829200000_checkin_and_audit`. `AttendanceRecord` gains
+`method` (`AttendanceMethod` COACH/QR/PIN), `checkInAt`, `checkOutAt`,
+`verifiedByCoachId`/`verifiedAt`, and `recordedByCoachId` becomes **nullable**
+(a self-check-in has no coach).
+
+- **`QrCheckInToken`** — `lib/checkin.ts#mintQrToken` mints a 45-second rotating
+  token (SHA-256 hash stored, raw goes in the QR payload) and prunes expired
+  ones. `GET /api/v1/events/{id}/qr` (coach) returns the token, the
+  `/checkin/{id}?t=…` URL and the venue PIN; the venue screen re-fetches every
+  20s.
+- **`POST /api/v1/events/{id}/checkin`** (player) — verifies a QR token *or* the
+  venue `checkInPin` server-side, only within `[start-2h, end+1h]`, and sets
+  `checkInAt` + `method` + a status of PRESENT / LATE (10-min grace past the
+  arrival time). `POST …/checkout` sets `checkOutAt`.
+- **`AttendanceAudit`** — `PATCH /api/v1/attendance/{id}` (coach) requires a
+  `reason` and writes a before/after row; `GET …/audit` returns the history.
+- **Report** — `GET /api/v1/reports/attendance?teamId=&from=&to=&format=csv`
+  (coach/admin): per-player present/late/absent/excused + % over a window, with
+  CSV export. Surfaced by `components/reports/AttendanceReport.tsx` on the
+  `/coach/attendance` and `/admin/attendance` pages.
+
+Pages: `/checkin/{eventId}` (player landing — auto check-in from the QR link, PIN
+fallback, check-out), `/coach/training/{id}/checkin` (the projector QR screen —
+`qrcode-generator`, no runtime dependency). The coach event page gained a
+"Register & corrections" section and an "Open check-in screen" link; the
+calendar event dialog shows a **Check in** button to players during the window.
+
+**W5 complete.**

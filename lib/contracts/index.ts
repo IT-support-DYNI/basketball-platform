@@ -11,7 +11,7 @@ export * from "./auth";
 export * from "./organisation";
 
 export { createAnnouncementSchema } from "./announcement";
-export { bulkAttendanceSchema } from "./attendance";
+export { bulkAttendanceSchema, checkinSchema, correctAttendanceSchema } from "./attendance";
 export { createFeedbackSchema } from "./feedback";
 export { createEvaluationSchema, updateEvaluationSchema } from "./performance";
 export { pushSubscribeSchema, pushUnsubscribeSchema } from "./push";
@@ -34,7 +34,7 @@ export { createStaffUserSchema, updateUserSchema, setPasswordSchema } from "./us
 export { requestUploadSchema, createVideoSchema, assignVideoSchema } from "./video";
 
 import { createAnnouncementSchema } from "./announcement";
-import { bulkAttendanceSchema } from "./attendance";
+import { bulkAttendanceSchema, checkinSchema, correctAttendanceSchema } from "./attendance";
 import { createFeedbackSchema } from "./feedback";
 import { createEvaluationSchema, updateEvaluationSchema } from "./performance";
 import { registerSchema, reviewRegistrationSchema } from "./registration";
@@ -57,6 +57,8 @@ import { requestUploadSchema, createVideoSchema, assignVideoSchema } from "./vid
 
 export type CreateAnnouncementInput = z.infer<typeof createAnnouncementSchema>;
 export type BulkAttendanceInput = z.infer<typeof bulkAttendanceSchema>;
+export type CheckinInput = z.infer<typeof checkinSchema>;
+export type CorrectAttendanceInput = z.infer<typeof correctAttendanceSchema>;
 export type CreateFeedbackInput = z.infer<typeof createFeedbackSchema>;
 export type CreateEvaluationInput = z.infer<typeof createEvaluationSchema>;
 export type UpdateEvaluationInput = z.infer<typeof updateEvaluationSchema>;

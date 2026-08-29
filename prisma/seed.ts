@@ -197,7 +197,13 @@ async function main() {
 
   await prisma.attendanceRecord.createMany({
     data: [
-      { eventId: trainingEvent.id, playerId: player1.playerProfile!.id, status: "PRESENT", recordedByCoachId: coachUser.coachProfile!.id },
+      {
+        eventId: trainingEvent.id,
+        playerId: player1.playerProfile!.id,
+        status: "PRESENT",
+        method: "PIN",
+        checkInAt: new Date(trainingEvent.startAt.getTime() - 4 * 60_000),
+      },
       { eventId: trainingEvent.id, playerId: player2.playerProfile!.id, status: "LATE", recordedByCoachId: coachUser.coachProfile!.id },
     ],
     skipDuplicates: true,

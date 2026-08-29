@@ -132,6 +132,12 @@ enum AttendanceStatus {
   EXCUSED
 }
 
+enum AttendanceMethod {
+  COACH
+  QR
+  PIN
+}
+
 enum VideoCategory {
   SHOOTING
   BALL_HANDLING
@@ -420,6 +426,7 @@ model User {
   auditLogsActed AuditLog[]
   eventsCreated  Event[]               @relation("EventCreatedBy")
   availabilityResponses AvailabilityResponse[]
+  attendanceAudits AttendanceAudit[]    @relation("AttendanceAuditBy")
   /// Populated when role = GUARDIAN — the player(s) this user manages.
   guardianOf     GuardianRelationship[] @relation("Guardian")
   /// Populated when role = ADMIN and this admin has reviewed at least one registration.
@@ -452,6 +459,7 @@ model CoachProfile {
   bio     String?
 
   attendanceRecorded   AttendanceRecord[]       @relation("AttendanceRecordedBy")
+  attendanceVerified   AttendanceRecord[]       @relation("AttendanceVerifiedBy")
   evaluationsGiven     PerformanceEvaluation[]  @relation("EvaluationCoach")
   feedbackGiven        Feedback[]               @relation("FeedbackCoach")
 }
@@ -626,6 +634,7 @@ model Event {
   attendanceRecords     AttendanceRecord[]
   feedback              Feedback[]
   availabilityResponses AvailabilityResponse[]
+  qrTokens              QrCheckInToken[]
 
   @@index([teamId, startAt])
   @@index([startAt])
@@ -660,12 +669,55 @@ model AttendanceRecord {
   player             PlayerProfile    @relation(fields: [playerId], references: [id], onDelete: Cascade)
   status             AttendanceStatus
   note               String?
-  recordedByCoachId  Int
-  recordedBy         CoachProfile     @relation("AttendanceRecordedBy", fields: [recordedByCoachId], references: [id])
+  /// How the row got here. COACH = a coach marked it; QR / PIN = the player
+  /// checked themselves in at the venue.
+  method             AttendanceMethod @default(COACH)
+  checkInAt          DateTime?
+  checkOutAt         DateTime?
+  /// Set (with recordedBy) when a coach marks/edits; null for a pure self-check-in.
+  recordedByCoachId  Int?
+  recordedBy         CoachProfile?    @relation("AttendanceRecordedBy", fields: [recordedByCoachId], references: [id])
   recordedAt         DateTime         @default(now())
+  /// A coach can "verify" a self-check-in (spot-check the register).
+  verifiedByCoachId  Int?
+  verifiedBy         CoachProfile?    @relation("AttendanceVerifiedBy", fields: [verifiedByCoachId], references: [id])
+  verifiedAt         DateTime?
+
+  audits AttendanceAudit[]
 
   @@unique([eventId, playerId])
   @@index([playerId])
+}
+
+/// Before/after diff for every correction to an AttendanceRecord — a routine,
+/// frequent operation that needs its own fast, structured trail and its own UI
+/// (brief §11 — "attendance correction with audit history").
+model AttendanceAudit {
+  id              Int              @id @default(autoincrement())
+  recordId        Int
+  record          AttendanceRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  changedByUserId Int
+  changedBy       User             @relation("AttendanceAuditBy", fields: [changedByUserId], references: [id])
+  before          Json
+  after           Json
+  reason          String
+  changedAt       DateTime         @default(now())
+
+  @@index([recordId])
+}
+
+/// Short-lived rotating token rendered as a QR code on the venue check-in
+/// screen. Verified server-side against the event + a time window; the raw
+/// token is never stored, only its SHA-256 hash.
+model QrCheckInToken {
+  id        Int      @id @default(autoincrement())
+  eventId   Int
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
 }
 
 // VIDEOS

@@ -38,6 +38,7 @@
     "clsx": "^2.1.1",
     "next": "^14.2.15",
     "next-auth": "^4.24.15",
+    "qrcode-generator": "^2.0.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "tailwind-merge": "^3.6.0",
