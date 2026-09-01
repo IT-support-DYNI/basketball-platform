@@ -138,6 +138,22 @@ async function main() {
     },
     include: { playerProfile: true },
   });
+  // Jordan Junior is a minor on the senior roster; Gina Guardian is their
+  // parent, so messaging safeguarding (W7) auto-includes her in any conversation
+  // Jordan is in.
+  await prisma.playerProfile.update({
+    where: { id: player2.playerProfile!.id },
+    data: { dateOfBirth: new Date("2010-11-02") },
+  });
+  await prisma.guardianRelationship.upsert({
+    where: { guardianUserId_playerProfileId: { guardianUserId: guardianUser.id, playerProfileId: player2.playerProfile!.id } },
+    update: {},
+    create: {
+      guardianUserId: guardianUser.id,
+      playerProfileId: player2.playerProfile!.id,
+      relationshipLabel: "Parent",
+    },
+  });
   await prisma.guardianRelationship.upsert({
     where: { guardianUserId_playerProfileId: { guardianUserId: guardianUser.id, playerProfileId: childUser.playerProfile!.id } },
     update: {},
@@ -396,6 +412,34 @@ async function main() {
           body: "New home shirts are in. Pick yours up from the coaches' table before Saturday's session.",
         },
       ],
+    });
+  }
+
+  if ((await prisma.conversation.count()) === 0) {
+    const channel = await prisma.conversation.create({
+      data: {
+        type: "TEAM",
+        teamId: team.id,
+        createdByUserId: coachUser.id,
+        safeguarded: true,
+        participants: {
+          create: [
+            { userId: coachUser.id, role: "admin" },
+            { userId: player1.id },
+            { userId: player2.id },
+          ],
+        },
+      },
+    });
+    await prisma.message.createMany({
+      data: [
+        { conversationId: channel.id, authorUserId: coachUser.id, body: "Welcome to the team channel. Session times and any last-minute changes go here." },
+        { conversationId: channel.id, authorUserId: player1.id, body: "Thanks coach — see everyone Saturday." },
+      ],
+    });
+    await prisma.conversation.update({
+      where: { id: channel.id },
+      data: { lastMessageAt: new Date() },
     });
   }
 

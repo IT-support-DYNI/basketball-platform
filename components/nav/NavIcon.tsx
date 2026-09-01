@@ -22,6 +22,7 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
   attendance: <path d="M4 12.5 9 17.5 20 6.5M4 19h16" />,
   chart: <path d="M4 20V4m0 16h16M8 16v-4m4 4V8m4 8v-6" />,
   feedback: <path d="M5 5h14v10H9l-4 4V5Z" />,
+  chat: <path d="M4 4h12v9H8l-4 3.5V4Zm6 12.5V17a3 3 0 0 0 3 3h4l3 2.5V11a3 3 0 0 0-3-3h-.5" />,
   video: (
     <>
       <rect x="3.5" y="6" width="12" height="12" rx="2" />

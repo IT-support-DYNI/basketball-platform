@@ -1,7 +1,7 @@
 # Communication
 
 Three distinct surfaces: **announcements** (one-way broadcast), **notifications**
-(per-user event feed), and **chat** (two-way, W7 part 3).
+(per-user event feed), and **chat** (two-way).
 
 ## Announcements (W7 part 1)
 
@@ -52,9 +52,53 @@ Migration `20260901210000_notification_prefs`. `Notification` gains `category`
   one summary email per user whose opted-in categories hold an unread item aged
   20–44h (so a same-day re-trigger doesn't re-send and read items drop out).
 
+## Chat (W7 part 3)
+
+Migration `20260902090000_messaging`. `Conversation` (`type` TEAM | EVENT |
+GROUP | DIRECT, optional `teamId` / `eventId`, `safeguarded`, `lastMessageAt`),
+`ConversationParticipant` (one row per member, `role` member|admin,
+`viaGuardianship`, `lastReadAt`), `Message` (`body`, `editedAt`, `deletedAt`
+for soft delete). `ClubSafeguardingPolicy` is one row per club, created lazily
+with safe defaults.
+
+- **Transport is polling.** The client re-fetches the list every 15s and the
+  open thread every 4s (`GET /api/v1/conversations/{id}?after=<messageId>`).
+  `lib/chat.ts#postMessage` is the single publish point, so a realtime adapter
+  (Pusher/Ably/WS) can slot in later without touching call sites.
+- **Team channels are implicit.** `ensureTeamConversation(teamId)` finds-or-
+  creates the `type:TEAM` conversation and re-syncs its participants to the
+  current roster + staff (+ guardians) on every list fetch. Members are added,
+  never auto-removed — history stays intact. `GET /api/v1/conversations` ensures
+  the caller's team channel(s) before returning.
+- **Safeguarding** (`lib/safeguarding.ts`, brief §13). A conversation is
+  `safeguarded` when it contains a minor (per `Club.minorAgeThreshold`). Then:
+  - guardians of every minor are auto-added as participants
+    (`viaGuardianship: true`) when the conversation is created / synced;
+  - `directMessageAllowed()` blocks a 1:1 DM where exactly one of the two is a
+    minor (adult↔adult and minor↔minor are fine). Pure + unit-tested
+    (`lib/safeguarding.test.ts`); `createConversation` calls it.
+  - A club admin can loosen either rule via `ClubSafeguardingPolicy`
+    (`blockAdultMinorDirectMessages`, `guardianAutoIncludedWithMinor`).
+- **Endpoints** — `GET|POST /api/v1/conversations`, `GET
+  /api/v1/conversations/contacts` (people you share a team with), `GET
+  /api/v1/conversations/{id}`, `POST /api/v1/conversations/{id}/messages`,
+  `POST /api/v1/conversations/{id}/read`, `PATCH|DELETE /api/v1/messages/{id}`
+  (edit is author-only within 15 min; delete is author / conversation admin /
+  club admin → soft delete).
+- **Notifications** — `postMessage` notifies the other participants with an
+  explicit `category: "MESSAGES"` override (there's no `MESSAGE`
+  `NotificationType`), de-duped on `conversation:{id}`, then pushes to those
+  opted into that category.
+- **Surface** — `/messages`, shared by every role (nav capability `messages`).
+  `components/messages/MessagesClient.tsx`: two-pane on `md+`, list→thread on
+  mobile with a back control; a "New" dialog picks one contact for a DM or
+  several for a group.
+
+Known limitation: a group created *before* one of its members gained a guardian
+relationship isn't retro-synced (only team channels re-sync). New conversations
+and all DMs are covered.
+
 ## Still to come (W7)
 
-- Part 3 — team / event chat (`Conversation`, `Message`), safeguarding rules
-  for minors, polling transport (Pusher/Ably drop-in later).
 - Part 4 — dashboard polish (unacked announcements, unread messages, pending
   RSVPs, outstanding consent) + the admin audit-log viewer.

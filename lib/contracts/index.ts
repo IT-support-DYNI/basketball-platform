@@ -11,6 +11,7 @@ export * from "./auth";
 export * from "./organisation";
 
 export { createAnnouncementSchema } from "./announcement";
+export { createConversationSchema, messageBodySchema } from "./chat";
 export {
   createConsentDocumentSchema,
   updateConsentDocumentSchema,
@@ -40,6 +41,7 @@ export { createStaffUserSchema, updateUserSchema, setPasswordSchema } from "./us
 export { requestUploadSchema, createVideoSchema, assignVideoSchema } from "./video";
 
 import { createAnnouncementSchema } from "./announcement";
+import { createConversationSchema, messageBodySchema } from "./chat";
 import { bulkAttendanceSchema, checkinSchema, correctAttendanceSchema } from "./attendance";
 import { createFeedbackSchema } from "./feedback";
 import { createEvaluationSchema, updateEvaluationSchema } from "./performance";
@@ -62,6 +64,8 @@ import { createStaffUserSchema, updateUserSchema, setPasswordSchema } from "./us
 import { requestUploadSchema, createVideoSchema, assignVideoSchema } from "./video";
 
 export type CreateAnnouncementInput = z.infer<typeof createAnnouncementSchema>;
+export type CreateConversationInput = z.infer<typeof createConversationSchema>;
+export type MessageBodyInput = z.infer<typeof messageBodySchema>;
 export type BulkAttendanceInput = z.infer<typeof bulkAttendanceSchema>;
 export type CheckinInput = z.infer<typeof checkinSchema>;
 export type CorrectAttendanceInput = z.infer<typeof correctAttendanceSchema>;

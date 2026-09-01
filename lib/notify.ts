@@ -1,4 +1,4 @@
-import { NotificationType, Prisma } from "@prisma/client";
+import { NotificationCategory, NotificationType, Prisma } from "@prisma/client";
 
 import { CATEGORY_FOR_TYPE } from "./notification-categories";
 
@@ -14,6 +14,9 @@ import { CATEGORY_FOR_TYPE } from "./notification-categories";
 interface NotifyInput {
   userId: number;
   type: NotificationType;
+  /** Overrides the type→category mapping (e.g. chat messages reuse a generic
+   *  type but belong to the MESSAGES category). */
+  category?: NotificationCategory;
   title: string;
   message: string;
   linkPath?: string;
@@ -24,13 +27,13 @@ interface NotifyInput {
 
 export async function notifyUser(
   tx: Prisma.TransactionClient,
-  { userId, type, title, message, linkPath, dedupeKey }: NotifyInput,
+  { userId, type, category, title, message, linkPath, dedupeKey }: NotifyInput,
 ) {
   if (dedupeKey) {
     await tx.notification.deleteMany({ where: { userId, dedupeKey, isRead: false } });
   }
   await tx.notification.create({
-    data: { userId, type, category: CATEGORY_FOR_TYPE[type], title, message, linkPath, dedupeKey },
+    data: { userId, type, category: category ?? CATEGORY_FOR_TYPE[type], title, message, linkPath, dedupeKey },
   });
 }
 
@@ -51,7 +54,7 @@ export async function notifyUsers(
     data: userIds.map((userId) => ({
       userId,
       type: data.type,
-      category: CATEGORY_FOR_TYPE[data.type],
+      category: data.category ?? CATEGORY_FOR_TYPE[data.type],
       title: data.title,
       message: data.message,
       linkPath: data.linkPath,
