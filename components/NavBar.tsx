@@ -12,13 +12,11 @@ export default async function NavBar() {
   const links = navFor(session.user.role);
   const primary = primaryNavFor(session.user.role);
   const homeHref = links[0]?.href ?? "/";
-  const isPlayer = session.user.role === "PLAYER";
 
-  const unreadCount = isPlayer
-    ? await prisma.notification.count({
-        where: { userId: Number(session.user.id), isRead: false },
-      })
-    : 0;
+  // Everyone gets the notification bell now (W7).
+  const unreadCount = await prisma.notification.count({
+    where: { userId: Number(session.user.id), isRead: false },
+  });
 
   return (
     <PrimaryNav
@@ -27,7 +25,7 @@ export default async function NavBar() {
       homeHref={homeHref}
       userName={session.user.name ?? "Account"}
       userRole={session.user.role}
-      showBell={isPlayer}
+      showBell
       unreadCount={unreadCount}
     />
   );

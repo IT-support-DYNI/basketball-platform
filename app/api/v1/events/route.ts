@@ -132,7 +132,7 @@ export const POST = route(async (req: NextRequest) => {
       title: "New event scheduled",
       body: `${event.title} — ${eventDayLabel(event.startAt)}`,
       url: "/player/training",
-    });
+    }, "SCHEDULE");
   }
 
   return created(event);

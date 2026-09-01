@@ -182,6 +182,16 @@ enum NotificationType {
   REGISTRATION_UPDATE
 }
 
+/// Coarse grouping a user can set channel preferences for.
+enum NotificationCategory {
+  SCHEDULE
+  ANNOUNCEMENTS
+  PERFORMANCE
+  VIDEOS
+  REGISTRATION
+  MESSAGES
+}
+
 enum AnnouncementScope {
   PLATFORM
   TEAM
@@ -424,6 +434,7 @@ model User {
 
   uploadedVideos Video[]        @relation("VideoUploader")
   notifications  Notification[]
+  notificationPrefs NotificationPreference[] @relation("NotificationPrefs")
   announcements  Announcement[] @relation("AnnouncementAuthor")
   pushSubscriptions PushSubscription[]
   authTokens    AuthToken[]
@@ -932,17 +943,37 @@ model Feedback {
 // NOTIFICATIONS
 
 model Notification {
-  id        Int              @id @default(autoincrement())
+  id        Int                  @id @default(autoincrement())
   userId    Int
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      NotificationType
+  category  NotificationCategory  @default(ANNOUNCEMENTS)
   title     String
   message   String
   linkPath  String?
-  isRead    Boolean          @default(false)
-  createdAt DateTime         @default(now())
+  /// Set when a notification is about a specific thing (an event, an
+  /// announcement). A fresh notification with the same key replaces any earlier
+  /// unread one for that user, so repeat edits don't stack (Doc 10 — "digested
+  /// / de-duplicated, not one-per-event").
+  dedupeKey String?
+  isRead    Boolean              @default(false)
+  createdAt DateTime             @default(now())
 
   @@index([userId, isRead])
+  @@index([userId, dedupeKey])
+}
+
+/// Per-user channel choice for a notification category. In-app is always on;
+/// only email + push are opt-in/out. A missing row means the category default.
+model NotificationPreference {
+  id       Int                  @id @default(autoincrement())
+  userId   Int
+  user     User                 @relation("NotificationPrefs", fields: [userId], references: [id], onDelete: Cascade)
+  category NotificationCategory
+  email    Boolean              @default(false)
+  push     Boolean              @default(true)
+
+  @@unique([userId, category])
 }
 
 // ANNOUNCEMENTS

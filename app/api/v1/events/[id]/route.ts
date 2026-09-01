@@ -97,6 +97,7 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params }) 
           ? `${updated.title} was cancelled.`
           : `${updated.title} — ${eventDayLabel(updated.startAt)}`,
         linkPath: "/player/training",
+        dedupeKey: `event:${updated.id}`,
       });
       return users;
     });
@@ -104,7 +105,7 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params }) 
       title: cancelled ? "Event cancelled" : "Event updated",
       body: updated.title,
       url: "/player/training",
-    });
+    }, "SCHEDULE");
   }
 
   return ok(updated);
@@ -140,10 +141,11 @@ export const DELETE = route<{ id: string }>(async (req: NextRequest, { params })
         title: "Event cancelled",
         message: `${updated.title} was cancelled.`,
         linkPath: "/player/training",
+        dedupeKey: `event:${updated.id}`,
       });
       return users;
     });
-    await sendPushToUsers(recipients, { title: "Event cancelled", body: updated.title, url: "/player/training" });
+    await sendPushToUsers(recipients, { title: "Event cancelled", body: updated.title, url: "/player/training" }, "SCHEDULE");
   }
 
   return ok(updated);

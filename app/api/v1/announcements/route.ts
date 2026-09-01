@@ -47,6 +47,7 @@ export const POST = route(async (req: NextRequest) => {
       title: `${body.requiresAck ? "Please read: " : "Announcement: "}${body.title}`,
       message: preview,
       linkPath: "/announcements",
+      dedupeKey: `announcement:${a.id}`,
     });
     return a;
   });
@@ -55,7 +56,7 @@ export const POST = route(async (req: NextRequest) => {
     title: `${body.requiresAck ? "Please read: " : "Announcement: "}${body.title}`,
     body: preview,
     url: "/announcements",
-  });
+  }, "ANNOUNCEMENTS");
 
   return created(announcement);
 });

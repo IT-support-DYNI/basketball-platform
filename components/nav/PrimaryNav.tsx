@@ -19,7 +19,7 @@ function isActive(pathname: string, href: string) {
 function NotificationBell({ unreadCount }: { unreadCount: number }) {
   return (
     <Link
-      href="/player/notifications"
+      href="/notifications"
       aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
       className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-dim transition hover:bg-surface-2 hover:text-ink"
     >

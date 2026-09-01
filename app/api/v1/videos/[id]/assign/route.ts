@@ -72,7 +72,7 @@ export const POST = route<{ id: string }>(async (req: NextRequest, { params }) =
     title: "New training video",
     body: `"${video.title}" was just added to your video library.`,
     url: "/player/videos",
-  });
+  }, "VIDEOS");
 
   return NextResponse.json({ ok: true }, { status: 201 });
 });

@@ -1,19 +1,29 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-import { route } from "@/lib/api";
+import { route, ok } from "@/lib/api";
 import { requireAuth } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 
-export const GET = route(async () => {
+/** GET /api/v1/notifications?category=&unread=1 — the caller's feed + unread count. */
+export const GET = route(async (req: NextRequest) => {
   const session = requireAuth(await getServerSession(authOptions));
+  const userId = Number(session.user.id);
+  const sp = req.nextUrl.searchParams;
+  const category = sp.get("category");
+  const unreadOnly = sp.get("unread") === "1";
 
-  const notifications = await prisma.notification.findMany({
-    where: { userId: Number(session.user.id) },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+  const where = {
+    userId,
+    ...(category ? { category: category as never } : {}),
+    ...(unreadOnly ? { isRead: false } : {}),
+  };
 
-  return NextResponse.json(notifications);
+  const [items, unreadCount] = await Promise.all([
+    prisma.notification.findMany({ where, orderBy: { createdAt: "desc" }, take: 80 }),
+    prisma.notification.count({ where: { userId, isRead: false } }),
+  ]);
+
+  return ok({ items, unreadCount });
 });

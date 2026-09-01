@@ -1,6 +1,8 @@
 import webpush from "web-push";
+import type { NotificationCategory } from "@prisma/client";
 
 import { prisma } from "./prisma";
+import { optedIn } from "./notifications";
 
 /*
  * Web Push (ARCHITECTURE.md §8 pulled forward). Fires *after* the DB
@@ -33,11 +35,19 @@ export interface PushPayload {
   url?: string;
 }
 
-export async function sendPushToUsers(userIds: number[], payload: PushPayload): Promise<void> {
+export async function sendPushToUsers(
+  userIds: number[],
+  payload: PushPayload,
+  /** When given, only users who want push for this category are messaged. */
+  category?: NotificationCategory,
+): Promise<void> {
   if (userIds.length === 0 || !ensureConfigured()) return;
 
+  const targets = category ? await optedIn(userIds, category, "push") : userIds;
+  if (targets.length === 0) return;
+
   const subscriptions = await prisma.pushSubscription.findMany({
-    where: { userId: { in: userIds } },
+    where: { userId: { in: targets } },
   });
 
   await Promise.all(
