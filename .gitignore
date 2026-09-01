@@ -8,6 +8,11 @@ npm-debug.log*
 .DS_Store
 *.tsbuildinfo
 
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
 # Claude Code tooling artifacts (skill caching) — not part of the app
 .agents/
 .claude/skills/

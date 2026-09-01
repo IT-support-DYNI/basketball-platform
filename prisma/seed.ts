@@ -407,7 +407,9 @@ async function main() {
   }
   // Everyone approved accepts everything, except two U16 players who still
   // owe the media consent (so the guardian dashboard has an outstanding item).
-  const owesMedia = new Set(["leah.b@example.com", "sam.o@example.com"]);
+  // These two also have a seeded RSVP, so `leah.b` / `noah.f` stay fully
+  // cleared for the schedule-RSVP E2E journey.
+  const owesMedia = new Set(["amara.k@example.com", "tomas.r@example.com"]);
   for (const [email, p] of Object.entries(players)) {
     for (const type of Object.keys(consentVersionId)) {
       if (type === "MEDIA_CONSENT" && owesMedia.has(email)) continue;
@@ -523,7 +525,7 @@ async function main() {
   const u16Roster = u16Players.map((p) => players[p.email]);
   const seniorRoster = seniorPlayers.map((p) => players[p.email]);
   for (const [i, p] of u16Roster.entries()) {
-    if (i >= 6) break; // a couple haven't responded yet
+    if (i >= 5) break; // leah.b / sam.o / noah.f haven't responded yet
     await prisma.availabilityResponse.create({
       data: {
         eventId: u16Match.id,
