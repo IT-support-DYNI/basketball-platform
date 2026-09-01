@@ -225,6 +225,7 @@ model Club {
   venues  Venue[]
   consentDocuments ConsentDocument[]
   safeguardingPolicy ClubSafeguardingPolicy?
+  drills  Drill[]
 }
 
 /// Per-club messaging safeguarding rules (brief §13). A row is created lazily
@@ -467,6 +468,7 @@ model User {
   guardianOf     GuardianRelationship[] @relation("Guardian")
   /// Populated when role = ADMIN and this admin has reviewed at least one registration.
   registrationsReviewed PlayerProfile[] @relation("RegistrationReviewer")
+  drillsCreated  Drill[]               @relation("DrillCreatedBy")
 }
 
 // WEB PUSH
@@ -1095,4 +1097,62 @@ model AnnouncementAck {
 
   @@unique([announcementId, userId])
   @@index([userId])
+}
+
+// TRAINING — session plans + a reusable drill library (brief §14, Phase 2).
+
+enum DrillCategory {
+  WARMUP
+  BALL_HANDLING
+  PASSING
+  SHOOTING
+  FINISHING
+  DEFENSE
+  REBOUNDING
+  TRANSITION
+  SET_PLAYS
+  CONDITIONING
+  SCRIMMAGE
+  COOLDOWN
+  OTHER
+}
+
+enum DrillDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+/// A reusable practice drill. `clubId` null = a shared/global drill visible to
+/// every club; a club's own drills are private to it. Coaches share one library
+/// per club and can edit any drill in it; only the author (or an admin) deletes.
+model Drill {
+  id              Int             @id @default(autoincrement())
+  clubId          Int?
+  club            Club?           @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  name            String
+  category        DrillCategory
+  difficulty      DrillDifficulty @default(INTERMEDIATE)
+  /// One-line summary shown in the library list.
+  summary         String?
+  /// Full setup + how to run it (markdown-ish plain text).
+  instructions    String?
+  coachingPoints  String[]        @default([])
+  commonMistakes  String[]        @default([])
+  durationMinutes Int?
+  minPlayers      Int?
+  maxPlayers      Int?
+  equipment       String[]        @default([])
+  /// Court-diagram annotations (players / cones / movement arrows), drawn by
+  /// components/training/CourtDiagram. Shape owned by that component.
+  courtDiagram    Json?
+  tags            String[]        @default([])
+  createdByUserId Int?
+  createdBy       User?           @relation("DrillCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  /// Soft-hide from pickers without losing plans that reference it.
+  archivedAt      DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([clubId, category])
 }

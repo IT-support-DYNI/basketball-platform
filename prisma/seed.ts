@@ -54,6 +54,7 @@ async function wipe() {
     prisma.videoAssignment.deleteMany(),
     prisma.video.deleteMany(),
     prisma.eventRecurrence.deleteMany(),
+    prisma.drill.deleteMany(),
     prisma.consentRecord.deleteMany(),
     prisma.consentDocumentVersion.deleteMany(),
     prisma.consentDocument.deleteMany(),
@@ -726,6 +727,63 @@ async function main() {
   }
   await prisma.notification.create({
     data: { userId: admin.id, type: "REGISTRATION_UPDATE", category: "REGISTRATION", title: "3 registrations awaiting review", message: "Ellie Fournier, Grace Mbeki and one other.", linkPath: "/admin/registrations", isRead: false },
+  });
+
+  /* ── Drill library (W9 part 1) ─────────────────────────────────────── */
+  await prisma.drill.createMany({
+    data: [
+      {
+        clubId: club.id, createdByUserId: headCoach.id, category: "WARMUP", difficulty: "BEGINNER",
+        name: "Dynamic warm-up circuit", summary: "Full-body activation before any session.",
+        instructions: "Two lengths of the court each: high knees, butt kicks, lateral shuffle, carioca, walking lunges, open/close the gate. Finish with 10 bodyweight squats and arm circles.",
+        coachingPoints: ["Controlled, not rushed", "Full range of motion on the lunges"],
+        durationMinutes: 8, minPlayers: 1, maxPlayers: 20, equipment: [], tags: ["warmup", "no-ball"],
+      },
+      {
+        clubId: club.id, createdByUserId: headCoach.id, category: "BALL_HANDLING", difficulty: "INTERMEDIATE",
+        name: "Two-ball stationary series", summary: "Simultaneous and alternating dribbles, low and controlled.",
+        instructions: "30s each: simultaneous pound, alternating pound, high-low, front-V, crossover. Keep eyes up the whole time — call out a colour the coach holds up.",
+        coachingPoints: ["Fingertips, not palms", "Stay in an athletic stance", "Eyes up"],
+        commonMistakes: ["Standing straight up", "Watching the ball"],
+        durationMinutes: 6, minPlayers: 2, maxPlayers: 16, equipment: ["2 balls per player"], tags: ["ball-handling"],
+      },
+      {
+        clubId: club.id, createdByUserId: assistantCoach.id, category: "SHOOTING", difficulty: "INTERMEDIATE",
+        name: "5-spot form shooting", summary: "Make 3 from each spot before moving on.",
+        instructions: "Start close, one dribble into the shot. Five spots around the arc. Make 3 in a row at each spot to advance; miss two and reset that spot. Track total makes.",
+        coachingPoints: ["Same routine every rep", "Hold the follow-through until it drops", "Land where you took off"],
+        commonMistakes: ["Rushing to the next spot", "Fading away"],
+        durationMinutes: 12, minPlayers: 1, maxPlayers: 12, equipment: ["1 ball per pair", "rebounder"], tags: ["shooting", "form"],
+      },
+      {
+        clubId: club.id, createdByUserId: headCoach.id, category: "DEFENSE", difficulty: "INTERMEDIATE",
+        name: "Closeout & mirror", summary: "Sprint the closeout, break down, mirror the offensive player.",
+        instructions: "Offense on the wing, defense under the rim with a ball. Defense passes out and closes out under control (chop steps, high hand). Live 1v1 to a stop or a score. Rotate.",
+        coachingPoints: ["Short choppy steps on the closeout", "Contest without fouling", "Nose on the ball"],
+        commonMistakes: ["Flying at the shooter", "Standing straight up in the stance"],
+        durationMinutes: 10, minPlayers: 4, maxPlayers: 16, equipment: ["1 ball"], tags: ["defense", "1v1"],
+      },
+      {
+        clubId: club.id, createdByUserId: assistantCoach.id, category: "TRANSITION", difficulty: "ADVANCED",
+        name: "3-on-2 continuous", summary: "Fast-break decision-making, both ends.",
+        instructions: "Three attackers vs two defenders. Score or turn it over, then the two defenders + the first player back go the other way 3-on-2. Continuous for 4 minutes, then swap groups.",
+        coachingPoints: ["Wings run wide and deep", "Attack the front foot of the top defender", "Second pass beats one defender"],
+        durationMinutes: 8, minPlayers: 9, maxPlayers: 15, equipment: ["1 ball"], tags: ["transition", "conditioning"],
+      },
+      {
+        clubId: club.id, createdByUserId: headCoach.id, category: "SCRIMMAGE", difficulty: "INTERMEDIATE",
+        name: "Constraint scrimmage — 3 passes", summary: "5-on-5, must complete 3 passes before a shot.",
+        instructions: "Normal 5-on-5 rules but every possession needs 3 completed passes before a shot counts. Encourages ball movement and off-ball cutting. Drop the constraint for the last 4 minutes.",
+        coachingPoints: ["Cut hard after you pass", "Space the floor", "Talk on defense"],
+        durationMinutes: 15, minPlayers: 10, maxPlayers: 12, equipment: ["1 ball", "pinnies"], tags: ["scrimmage", "team"],
+      },
+      {
+        clubId: club.id, createdByUserId: assistantCoach.id, category: "COOLDOWN", difficulty: "BEGINNER",
+        name: "Static stretch & session review", summary: "Wind down and set the next focus.",
+        instructions: "Hold each stretch 30s: calves, quads, hamstrings, hip flexors, glutes, shoulders, triceps. While stretching, each player names one thing they did well and one thing to work on.",
+        durationMinutes: 6, minPlayers: 1, maxPlayers: 20, equipment: [], tags: ["cooldown", "reflection"],
+      },
+    ],
   });
 
   /* ── Audit trail ───────────────────────────────────────────────────── */

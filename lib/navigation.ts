@@ -27,6 +27,7 @@ export type Capability =
   | "coach.attendance"
   | "coach.videos"
   | "coach.performance"
+  | "coach.drills"
   | "announcements"
   | "messages"
   | "admin.home"
@@ -68,6 +69,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "coach.attendance",
     "coach.videos",
     "coach.performance",
+    "coach.drills",
     "announcements",
     "messages",
   "account.security",
@@ -117,6 +119,7 @@ export type NavIconName =
   | "whistle"
   | "megaphone"
   | "chat"
+  | "clipboard"
   | "history"
   | "season"
   | "settings"
@@ -153,6 +156,7 @@ const NAV: NavItem[] = [
   { label: "Schedule", href: "/player/training", capability: "player.schedule", icon: "calendar", primary: true },
   { label: "Training", href: "/coach/training", capability: "coach.training", icon: "calendar", primary: true },
   { label: "Training", href: "/admin/training", capability: "admin.training", icon: "calendar" },
+  { label: "Drills", href: "/coach/drills", capability: "coach.drills", icon: "clipboard" },
 
   { label: "Attendance", href: "/coach/attendance", capability: "coach.attendance", icon: "attendance", primary: true },
   { label: "Attendance", href: "/admin/attendance", capability: "admin.attendance", icon: "attendance" },

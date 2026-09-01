@@ -25,6 +25,13 @@ describe("navigation", () => {
     }
   });
 
+  it("the drill library is a coach tool, not for players or guardians", () => {
+    expect(navFor("COACH").map((i) => i.href)).toContain("/coach/drills");
+    for (const role of ["PLAYER", "GUARDIAN"]) {
+      expect(navFor(role).map((i) => i.href)).not.toContain("/coach/drills");
+    }
+  });
+
   it("merges and de-duplicates for a user holding two roles", () => {
     const items = navFor(["COACH", "ADMIN"]);
     const hrefs = items.map((i) => i.href);

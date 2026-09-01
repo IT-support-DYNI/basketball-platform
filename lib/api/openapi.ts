@@ -145,6 +145,12 @@ const ENDPOINTS: Endpoint[] = [
   { method: "PATCH", path: "/evaluations/{id}", summary: "Update an evaluation", tag: "Development", auth: "coach" },
   { method: "POST", path: "/feedback", summary: "Write feedback", tag: "Development", auth: "coach" },
 
+  { method: "GET", path: "/drills", summary: "Drill library (?category=, ?difficulty=, ?q=, ?tag=, ?archived=1)", tag: "Training", auth: "coach", list: true },
+  { method: "POST", path: "/drills", summary: "Add a drill to the library", tag: "Training", auth: "coach" },
+  { method: "GET", path: "/drills/{id}", summary: "Get a drill", tag: "Training", auth: "coach" },
+  { method: "PATCH", path: "/drills/{id}", summary: "Edit a drill (or archive it)", tag: "Training", auth: "coach" },
+  { method: "DELETE", path: "/drills/{id}", summary: "Delete a drill (author / admin only)", tag: "Training", auth: "coach" },
+
   { method: "GET", path: "/videos", summary: "Videos visible to the caller", tag: "Video", auth: "user", list: true },
   { method: "POST", path: "/videos", summary: "Create a video record", tag: "Video", auth: "coach" },
   { method: "POST", path: "/videos/upload-url", summary: "Get a presigned upload URL", tag: "Video", auth: "coach" },

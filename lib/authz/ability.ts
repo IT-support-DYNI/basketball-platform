@@ -42,6 +42,7 @@ export type Subject =
   | "Attendance"
   | "Announcement"
   | "Video"
+  | "Drill"
   | "Evaluation"
   | "Feedback"
   | "Notification"
@@ -95,6 +96,12 @@ function applyRole(
 
     case "HEAD_COACH":
     case "ASSISTANT_COACH": {
+      // The drill library is a club-shared coaching tool, not team-scoped:
+      // every coach reads and contributes to one library; only the author
+      // (or an admin) deletes.
+      can(["read", "create", "update"], "Drill");
+      can("delete", "Drill", { createdByUserId: userId });
+
       const teamId = scope.teamId;
       if (teamId == null) {
         // Club-wide "is a coach" assignment — no resource rights on its own.
@@ -132,6 +139,7 @@ function applyRole(
     }
 
     case "TEAM_MANAGER": {
+      can("read", "Drill");
       const teamId = scope.teamId;
       if (teamId == null) break;
       can("access", "Team", { id: teamId });
