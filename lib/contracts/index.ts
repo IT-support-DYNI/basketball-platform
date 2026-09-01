@@ -21,7 +21,7 @@ export { bulkAttendanceSchema, checkinSchema, correctAttendanceSchema } from "./
 export { createFeedbackSchema } from "./feedback";
 export { createEvaluationSchema, updateEvaluationSchema } from "./performance";
 export { pushSubscribeSchema, pushUnsubscribeSchema } from "./push";
-export { registerSchema, reviewRegistrationSchema } from "./registration";
+export { registerSchema, registerGuardianSchema, reviewRegistrationSchema } from "./registration";
 export {
   createEventSchema,
   updateEventSchema,
@@ -43,7 +43,7 @@ import { createAnnouncementSchema } from "./announcement";
 import { bulkAttendanceSchema, checkinSchema, correctAttendanceSchema } from "./attendance";
 import { createFeedbackSchema } from "./feedback";
 import { createEvaluationSchema, updateEvaluationSchema } from "./performance";
-import { registerSchema, reviewRegistrationSchema } from "./registration";
+import { registerSchema, registerGuardianSchema, reviewRegistrationSchema } from "./registration";
 import {
   createEventSchema,
   updateEventSchema,
@@ -69,6 +69,7 @@ export type CreateFeedbackInput = z.infer<typeof createFeedbackSchema>;
 export type CreateEvaluationInput = z.infer<typeof createEvaluationSchema>;
 export type UpdateEvaluationInput = z.infer<typeof updateEvaluationSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type RegisterGuardianInput = z.infer<typeof registerGuardianSchema>;
 export type ReviewRegistrationInput = z.infer<typeof reviewRegistrationSchema>;
 export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 
 import { route, created, ConflictError, BadRequestError } from "@/lib/api";
 import { registerSchema } from "@/lib/contracts/registration";
+import { isMinor } from "@/lib/age";
 import { hashPassword } from "@/lib/password";
 import { issueAuthToken } from "@/lib/auth-tokens";
 import { sendMail } from "@/lib/mail";
@@ -31,9 +32,19 @@ export const POST = route(async (req: NextRequest, { requestId }) => {
     throw new ConflictError("An account with that email already exists — try signing in instead.");
   }
 
-  const team = await prisma.team.findUnique({ where: { id: body.teamId } });
+  const team = await prisma.team.findUnique({
+    where: { id: body.teamId },
+    include: { club: { select: { minorAgeThreshold: true } } },
+  });
   if (!team || team.status !== "ACTIVE") {
     throw new BadRequestError("That team isn't available for registration.");
+  }
+
+  const threshold = team.club?.minorAgeThreshold ?? 18;
+  if (isMinor(new Date(body.dateOfBirth), threshold)) {
+    throw new BadRequestError(
+      `Players under ${threshold} can't register themselves — a parent or guardian needs to do it. Choose "A parent or guardian is signing up" on the form.`,
+    );
   }
 
   const passwordHash = await hashPassword(body.password);

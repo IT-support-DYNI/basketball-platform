@@ -20,7 +20,8 @@ type Endpoint = {
 const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/openapi.json", summary: "This document", tag: "Meta", auth: "none" },
 
-  { method: "POST", path: "/register", summary: "Submit a player registration", tag: "Auth", auth: "none" },
+  { method: "POST", path: "/register", summary: "Submit a player registration (self, 18+)", tag: "Auth", auth: "none" },
+  { method: "POST", path: "/register/guardian", summary: "A guardian registers a minor", tag: "Auth", auth: "none" },
   { method: "POST", path: "/auth/forgot-password", summary: "Request a password-reset link", tag: "Auth", auth: "none" },
   { method: "POST", path: "/auth/reset-password", summary: "Set a new password from a reset token", tag: "Auth", auth: "none" },
   { method: "POST", path: "/auth/verify-email", summary: "Confirm an email address from its token", tag: "Auth", auth: "none" },

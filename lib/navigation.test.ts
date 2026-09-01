@@ -28,6 +28,13 @@ describe("navigation", () => {
     expect(new Set(hrefs).size).toBe(hrefs.length);
   });
 
+  it("a guardian gets only the children view + security", () => {
+    const hrefs = navFor("GUARDIAN").map((i) => i.href);
+    expect(hrefs).toContain("/guardian");
+    expect(hrefs).toContain("/settings/security");
+    expect(hrefs.some((h) => h.startsWith("/player/") || h.startsWith("/admin/") || h.startsWith("/coach/"))).toBe(false);
+  });
+
   it("unknown role grants nothing", () => {
     expect(capabilitiesFor("SUPPORTER").size).toBe(0);
     expect(navFor("SUPPORTER")).toEqual([]);

@@ -17,6 +17,26 @@ export const registerSchema = z.object({
   }),
 });
 
+/** Guardian-led registration for a minor (brief §25). Creates a GUARDIAN
+ *  account that logs in + a child PLAYER account it manages. */
+export const registerGuardianSchema = z.object({
+  guardianName: z.string().min(1),
+  guardianEmail: z.string().email(),
+  guardianPassword: z.string().min(8, "Password must be at least 8 characters"),
+  guardianPhone: z.string().max(40).optional(),
+  relationshipLabel: z.string().min(2).max(60),
+
+  childName: z.string().min(1),
+  childEmail: z.string().email().optional(),
+  childDateOfBirth: z.string().min(1, "Your child's date of birth is required"),
+  teamId: z.number().int().positive(),
+  position: z.enum(["PG", "SG", "SF", "PF", "C"]).optional(),
+
+  consentAccepted: z.literal(true, {
+    errorMap: () => ({ message: "You must accept the club's registration terms to continue" }),
+  }),
+});
+
 export const reviewRegistrationSchema = z.object({
   decision: z.enum(["APPROVE", "REJECT", "REQUEST_CHANGES"]),
   note: z.string().optional(),

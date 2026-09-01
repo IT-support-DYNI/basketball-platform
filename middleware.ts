@@ -12,12 +12,14 @@ const ROLE_HOME: Record<string, string> = {
   ADMIN: "/admin/dashboard",
   COACH: "/coach/dashboard",
   PLAYER: "/player/dashboard",
+  GUARDIAN: "/guardian",
 };
 
 const ROLE_PREFIX: Record<string, string> = {
   ADMIN: "/admin",
   COACH: "/coach",
   PLAYER: "/player",
+  GUARDIAN: "/guardian",
 };
 
 export async function middleware(req: NextRequest) {
@@ -93,7 +95,8 @@ export async function middleware(req: NextRequest) {
   const isProtectedArea =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/coach") ||
-    pathname.startsWith("/player");
+    pathname.startsWith("/player") ||
+    pathname.startsWith("/guardian");
 
   if (isProtectedArea && ownPrefix && !pathname.startsWith(ownPrefix)) {
     return NextResponse.redirect(new URL(homePath, req.url));

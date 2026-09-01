@@ -103,6 +103,51 @@ async function main() {
     include: { playerProfile: true },
   });
 
+  // A guardian account managing a minor child (registration still PENDING).
+  const guardianUser = await prisma.user.upsert({
+    where: { email: "guardian@example.com" },
+    update: { emailVerifiedAt: new Date() },
+    create: {
+      email: "guardian@example.com",
+      emailVerifiedAt: new Date(),
+      name: "Gina Guardian",
+      role: "GUARDIAN",
+      passwordHash,
+    },
+  });
+  const childUser = await prisma.user.upsert({
+    where: { email: "child@example.com" },
+    update: {},
+    create: {
+      email: "child@example.com",
+      emailVerifiedAt: new Date(),
+      name: "Kit Guardian",
+      role: "PLAYER",
+      passwordHash,
+      mustChangePassword: true,
+      playerProfile: {
+        create: {
+          registrationTeamId: team.id,
+          registrationPosition: "SG",
+          dateOfBirth: new Date("2013-06-20"),
+          guardianName: "Gina Guardian",
+          registrationStatus: "PENDING",
+          registrationSubmittedAt: new Date(),
+        },
+      },
+    },
+    include: { playerProfile: true },
+  });
+  await prisma.guardianRelationship.upsert({
+    where: { guardianUserId_playerProfileId: { guardianUserId: guardianUser.id, playerProfileId: childUser.playerProfile!.id } },
+    update: {},
+    create: {
+      guardianUserId: guardianUser.id,
+      playerProfileId: childUser.playerProfile!.id,
+      relationshipLabel: "Parent",
+    },
+  });
+
   // Season-scoped roster (W4 organisation model).
   for (const [p, jersey, pos] of [
     [player1.playerProfile!.id, 7, "PG"],

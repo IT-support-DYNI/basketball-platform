@@ -40,6 +40,7 @@ export type Capability =
   | "admin.seasons"
   | "admin.consent"
   | "admin.settings"
+  | "guardian.home"
   | "account.security";
 
 const ROLE_CAPABILITIES: Record<string, Capability[]> = {
@@ -79,6 +80,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "admin.settings",
   "account.security",
   ],
+  GUARDIAN: ["guardian.home", "account.security"],
 };
 
 export function capabilitiesFor(roles: string | string[]): Set<Capability> {
@@ -122,6 +124,7 @@ const NAV: NavItem[] = [
   { label: "Home", href: "/player/dashboard", capability: "player.home", icon: "home", primary: true },
   { label: "Dashboard", href: "/coach/dashboard", capability: "coach.home", icon: "home", primary: true },
   { label: "Dashboard", href: "/admin/dashboard", capability: "admin.home", icon: "home", primary: true },
+  { label: "My children", href: "/guardian", capability: "guardian.home", icon: "team", primary: true },
 
   { label: "Registrations", href: "/admin/registrations", capability: "admin.registrations", icon: "inbox", primary: true },
   { label: "Members", href: "/admin/users", capability: "admin.members", icon: "users" },
