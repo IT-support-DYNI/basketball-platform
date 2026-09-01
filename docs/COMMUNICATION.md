@@ -98,7 +98,30 @@ Known limitation: a group created *before* one of its members gained a guardian
 relationship isn't retro-synced (only team channels re-sync). New conversations
 and all DMs are covered.
 
-## Still to come (W7)
+## Dashboards & audit (W7 part 4)
 
-- Part 4 — dashboard polish (unacked announcements, unread messages, pending
-  RSVPs, outstanding consent) + the admin audit-log viewer.
+**Action band.** `lib/action-items.ts#actionItemsFor(session)` is the one
+resolver behind the "Needs your attention" band on all three dashboards
+(`components/dashboard/ActionItems.tsx` — renders nothing when the list is
+empty). It surfaces:
+
+| item | who | source |
+| --- | --- | --- |
+| announcements to acknowledge | all | `outstandingAckCount` |
+| unread messages | all | `conversationsFor` unread sum |
+| upcoming events not RSVP'd | players | `Event` with a future `rsvpDeadline` and no `AvailabilityResponse` |
+| registrations awaiting review | admin | `PlayerProfile` count `PENDING` |
+
+Outstanding consent isn't in the band: players are already redirected to
+`/consent` by the layout gate, and the guardian dashboard shows it per child.
+
+**Audit viewer.** `AuditLog` + `logAudit` (PRD §31) predate this; part 4 adds
+the read side. `lib/audit.ts`: `auditActionLabel` (friendly phrasing, humanised
+fallback for unknown actions), `recentAuditActivity(n)`, `listAuditLog({ page,
+pageSize, action?, entityType?, actorUserId? })`. `GET /api/v1/audit` (admin,
+`force-dynamic`) is paginated + filterable. `/admin/audit`
+(`components/admin/AuditLogViewer.tsx`) has the filter dropdowns, a table and
+prev/next paging; nav capability `admin.audit`. The admin dashboard gets a
+"Recent activity" card linking to it. Logged actions today: registration
+decisions (`REGISTRATION_*`), `ROSTER_EXPORTED`, `EMAIL_VERIFIED`,
+`PASSWORD_RESET_COMPLETED`, `MFA_ENABLED` / `MFA_DISABLED`.
