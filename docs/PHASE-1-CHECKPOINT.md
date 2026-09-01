@@ -1,5 +1,7 @@
 # Phase 1 checkpoint
 
+> Manager-facing summary: <https://claude.ai/code/artifact/17602f9c-7386-4744-a4af-5931c36d9336>
+
 **Milestone (build plan, end W8): a real club can run on this.**
 Register → get approved → see the schedule → RSVP → check in → get
 announcements → message the team. Deployed, seeded, tested, accessibility-passed.
