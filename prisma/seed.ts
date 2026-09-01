@@ -120,6 +120,47 @@ async function main() {
     create: { userId: coachUser.id, teamId: team.id, role: "HEAD_COACH", seasonId: season.id },
   });
 
+  // A welfare officer for the team (a COACH-role account assigned WELFARE_OFFICER),
+  // so the field-visibility engine has someone to test against.
+  const welfareUser = await prisma.user.upsert({
+    where: { email: "welfare@example.com" },
+    update: { emailVerifiedAt: new Date() },
+    create: {
+      email: "welfare@example.com",
+      emailVerifiedAt: new Date(),
+      name: "Wendy Welfare",
+      role: "COACH",
+      passwordHash,
+      coachProfile: { create: {} },
+    },
+  });
+  await prisma.staffAssignment.upsert({
+    where: { userId_teamId_role_seasonId: { userId: welfareUser.id, teamId: team.id, role: "WELFARE_OFFICER", seasonId: season.id } },
+    update: {},
+    create: { userId: welfareUser.id, teamId: team.id, role: "WELFARE_OFFICER", seasonId: season.id },
+  });
+
+  // Fill in a few field-visibility-sensitive details on player 1.
+  await prisma.playerProfile.update({
+    where: { id: player1.playerProfile!.id },
+    data: {
+      dateOfBirth: new Date("2011-03-14"),
+      contactPhone: "07700 900123",
+      address: "8 Baseline Avenue, Riverside",
+      nationality: "GB",
+      heightCm: 172,
+      preferredHand: "RIGHT",
+      bio: "Point guard. Lives for the fast break.",
+      emergencyContactName: "Anita Player",
+      emergencyContactPhone: "07700 900999",
+      emergencyContactRelation: "Mother",
+      guardianName: "Anita Player",
+      guardianContact: "07700 900999",
+      medicalNotes: "Mild asthma — blue inhaler in kit bag.",
+      welfareNotes: "Prefers not to be dropped off alone after evening sessions.",
+    },
+  });
+
   let venue = await prisma.venue.findFirst({ where: { clubId: club.id, name: "Community Sports Centre" } });
   if (!venue) {
     venue = await prisma.venue.create({

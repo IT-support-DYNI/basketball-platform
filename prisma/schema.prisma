@@ -61,6 +61,12 @@ enum PlayerPosition {
   C
 }
 
+enum PreferredHand {
+  LEFT
+  RIGHT
+  AMBIDEXTROUS
+}
+
 /// A player's status within a team for a season (brief §8).
 enum MembershipStatus {
   PENDING
@@ -471,13 +477,33 @@ model PlayerProfile {
   userId          Int            @unique
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   photoUrl        String?
+
+  /* --- profile facts. Server-side field-visibility (lib/authz/field-visibility.ts)
+     strips these per viewer before any response leaves the API. --- */
+
+  /// CLUB_MEMBER+
+  nationality     String?
+  heightCm        Int?
+  preferredHand   PreferredHand?
+  bio             String?
+
+  /// coaches of the player's team + welfare/admin + self/guardian
   dateOfBirth     DateTime?
-  /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
   contactPhone    String?
-  /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
   guardianName    String?
-  /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
   guardianContact String?
+  /// welfare/admin + self/guardian
+  address         String?
+  /// coaches + welfare + medical + admin + self/guardian
+  emergencyContactName     String?
+  emergencyContactPhone    String?
+  emergencyContactRelation String?
+  /// MEDICAL_OFFICER of the player's team + admin + self/guardian
+  medicalNotes    String?
+  /// WELFARE_OFFICER of the player's team + admin + self/guardian
+  welfareNotes    String?
+  /// Opt-in, then admin-confirmed, before anything renders on the public site.
+  publicProfileApproved Boolean @default(false)
 
   /// The team + position the applicant asked for at sign-up. Advisory only —
   /// the admin confirms the team and a coach assigns the jersey at approval,
