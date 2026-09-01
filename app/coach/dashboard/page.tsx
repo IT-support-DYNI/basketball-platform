@@ -91,13 +91,14 @@ export default async function CoachDashboardPage() {
         ) : (
           <ul className="mt-3 flex flex-wrap gap-2">
             {playersNeedingReview.map((p) => (
-              <Link
-                key={p.id}
-                href="/coach/performance"
-                className="rounded-full border border-warning/40 bg-warning/10 px-3 py-1 text-sm font-semibold text-warning hover:bg-warning/20"
-              >
-                {p.name}
-              </Link>
+              <li key={p.id}>
+                <Link
+                  href="/coach/performance"
+                  className="block rounded-full border border-warning/40 bg-warning/10 px-3 py-1 text-sm font-semibold text-warning hover:bg-warning/20"
+                >
+                  {p.name}
+                </Link>
+              </li>
             ))}
           </ul>
         )}

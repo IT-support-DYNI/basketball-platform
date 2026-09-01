@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-interface TeamOption { id: number; name: string; }
+import { Select } from "@/components/ui/Select";
+import { Button } from "@/components/ui/Button";
+import Alert from "@/components/ui/Alert";
+
+interface TeamOption {
+  id: number;
+  name: string;
+}
 
 export default function ReviewRegistrationForm({
   playerId,
@@ -48,36 +55,58 @@ export default function ReviewRegistrationForm({
     }
   }
 
-  return (
-    <div className="mt-3 space-y-3 rounded-xl bg-slate-50 p-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="text-sm font-medium text-slate-700">Assign to team:</label>
-        <select value={teamId} onChange={(e) => setTeamId(e.target.value)} className="rounded-lg border border-slate-200 px-2 py-1 text-sm outline-none focus:border-court-500">
-          {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-        </select>
-      </div>
-      <textarea
-        placeholder="Note to the applicant (required for reject/request changes, optional for approve)"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20"
-      />
+  const noteId = `review-note-${playerId}`;
 
-      {error && <p className="text-sm text-rose-700">{error}</p>}
+  return (
+    <div className="mt-4 flex flex-col gap-3 rounded-control border border-line bg-surface-2 p-4">
+      <div className="max-w-xs">
+        <Select label="Assign to team" value={teamId} onChange={(e) => setTeamId(e.target.value)}>
+          {teams.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.name}
+            </option>
+          ))}
+        </Select>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={noteId} className="text-sm font-semibold text-ink">
+          Note to the applicant
+        </label>
+        <p className="text-xs text-ink-dim">Required for reject / request changes, optional for approve.</p>
+        <textarea
+          id={noteId}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          rows={2}
+          className="w-full rounded-control border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-flame/50"
+        />
+      </div>
+
+      {error && <Alert tone="danger">{error}</Alert>}
 
       <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={!!loading} onClick={() => submit("APPROVE")}
-          className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-          {loading === "APPROVE" ? "Approving..." : "Approve"}
-        </button>
-        <button type="button" disabled={!!loading} onClick={() => submit("REQUEST_CHANGES")}
-          className="rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-          {loading === "REQUEST_CHANGES" ? "Sending..." : "Request changes"}
-        </button>
-        <button type="button" disabled={!!loading} onClick={() => submit("REJECT")}
-          className="rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-          {loading === "REJECT" ? "Rejecting..." : "Reject"}
-        </button>
+        <Button size="sm" loading={loading === "APPROVE"} disabled={!!loading} onClick={() => submit("APPROVE")}>
+          Approve
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          loading={loading === "REQUEST_CHANGES"}
+          disabled={!!loading}
+          onClick={() => submit("REQUEST_CHANGES")}
+        >
+          Request changes
+        </Button>
+        <Button
+          size="sm"
+          variant="destructive"
+          loading={loading === "REJECT"}
+          disabled={!!loading}
+          onClick={() => submit("REJECT")}
+        >
+          Reject
+        </Button>
       </div>
     </div>
   );

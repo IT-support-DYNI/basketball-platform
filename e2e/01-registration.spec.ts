@@ -49,7 +49,7 @@ test("Journey 1 — an applicant registers, an admin approves, and they get in",
   await login(page, "admin@example.com");
   await page.goto("/admin/registrations");
 
-  const card = page.locator("div.rounded-2xl").filter({ hasText: APPLICANT });
+  const card = page.getByRole("article").filter({ hasText: APPLICANT });
   await expect(card).toBeVisible();
   await card.getByRole("button", { name: "Approve" }).click();
   await expect(page.getByText(APPLICANT)).toBeHidden();
