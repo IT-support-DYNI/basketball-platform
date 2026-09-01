@@ -626,6 +626,31 @@ model ConsentRecord {
   @@index([playerProfileId])
 }
 
+// REGISTRATION DRAFTS
+// A multi-step, resumable registration lives here until the applicant submits.
+// Keyed by the primary email + an unguessable resume token (cookie / emailed
+// link), because the applicant has no account yet.
+
+enum RegistrationDraftStatus {
+  DRAFT
+  SUBMITTED
+}
+
+model RegistrationDraft {
+  id          Int                     @id @default(autoincrement())
+  email       String                  @unique
+  resumeToken String                  @unique
+  /// "self" (an adult player) or "guardian" (registering a minor).
+  mode        String                  @default("self")
+  currentStep Int                     @default(1)
+  /// Accumulated per-step form values.
+  data        Json                    @default("{}")
+  status      RegistrationDraftStatus  @default(DRAFT)
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  expiresAt   DateTime
+}
+
 // TEAM
 
 model Team {

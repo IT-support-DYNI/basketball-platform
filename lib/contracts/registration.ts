@@ -37,6 +37,21 @@ export const registerGuardianSchema = z.object({
   }),
 });
 
+/* --- Resumable multi-step registration (server-saved draft) --- */
+
+export const REGISTRATION_MODES = ["self", "guardian"] as const;
+
+export const startDraftSchema = z.object({
+  email: z.string().email(),
+  mode: z.enum(REGISTRATION_MODES),
+});
+
+export const patchDraftSchema = z.object({
+  currentStep: z.number().int().min(1).max(6).optional(),
+  /** Partial form values for this step; merged into the draft. */
+  data: z.record(z.unknown()).optional(),
+});
+
 export const reviewRegistrationSchema = z.object({
   decision: z.enum(["APPROVE", "REJECT", "REQUEST_CHANGES"]),
   note: z.string().optional(),

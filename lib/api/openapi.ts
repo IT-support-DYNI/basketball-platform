@@ -22,6 +22,10 @@ const ENDPOINTS: Endpoint[] = [
 
   { method: "POST", path: "/register", summary: "Submit a player registration (self, 18+)", tag: "Auth", auth: "none" },
   { method: "POST", path: "/register/guardian", summary: "A guardian registers a minor", tag: "Auth", auth: "none" },
+  { method: "POST", path: "/registration/draft", summary: "Begin / resume a saved registration", tag: "Auth", auth: "none" },
+  { method: "GET", path: "/registration/draft", summary: "The registration in progress (cookie)", tag: "Auth", auth: "none" },
+  { method: "PATCH", path: "/registration/draft", summary: "Save a registration step", tag: "Auth", auth: "none" },
+  { method: "POST", path: "/registration/draft/submit", summary: "Finish a saved registration", tag: "Auth", auth: "none" },
   { method: "POST", path: "/auth/forgot-password", summary: "Request a password-reset link", tag: "Auth", auth: "none" },
   { method: "POST", path: "/auth/reset-password", summary: "Set a new password from a reset token", tag: "Auth", auth: "none" },
   { method: "POST", path: "/auth/verify-email", summary: "Confirm an email address from its token", tag: "Auth", auth: "none" },

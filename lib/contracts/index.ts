@@ -21,7 +21,7 @@ export { bulkAttendanceSchema, checkinSchema, correctAttendanceSchema } from "./
 export { createFeedbackSchema } from "./feedback";
 export { createEvaluationSchema, updateEvaluationSchema } from "./performance";
 export { pushSubscribeSchema, pushUnsubscribeSchema } from "./push";
-export { registerSchema, registerGuardianSchema, reviewRegistrationSchema } from "./registration";
+export { registerSchema, registerGuardianSchema, startDraftSchema, patchDraftSchema, reviewRegistrationSchema } from "./registration";
 export {
   createEventSchema,
   updateEventSchema,
