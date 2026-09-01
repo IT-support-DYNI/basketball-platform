@@ -38,6 +38,7 @@ export type Capability =
   | "admin.attendance"
   | "admin.performance"
   | "admin.seasons"
+  | "admin.consent"
   | "admin.settings"
   | "account.security";
 
@@ -74,6 +75,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "admin.attendance",
     "admin.performance",
     "admin.seasons",
+    "admin.consent",
     "admin.settings",
   "account.security",
   ],
@@ -149,6 +151,7 @@ const NAV: NavItem[] = [
   { label: "Announcements", href: "/coach/announcements", capability: "coach.announcements", icon: "megaphone" },
 
   { label: "Seasons", href: "/admin/seasons", capability: "admin.seasons", icon: "season" },
+  { label: "Consent", href: "/admin/consent", capability: "admin.consent", icon: "shield" },
   { label: "Settings", href: "/admin/settings", capability: "admin.settings", icon: "settings" },
   { label: "Profile", href: "/player/profile", capability: "player.profile", icon: "user" },
   { label: "Security", href: "/settings/security", capability: "account.security", icon: "shield" },

@@ -52,8 +52,29 @@ The team roster (`GET /api/v1/teams/{id}/players`) still uses the coarser
 `canViewPlayerContactDetails` (admin + the team's coaches) — fine for that list;
 migrate it to the engine if a welfare/medical roster view is needed.
 
+## Consent gate (W6 part 2)
+
+Migration `20260901130000_consent`. `ConsentDocument` → ordered
+`ConsentDocumentVersion`s (latest = current) → append-only `ConsentRecord`
+(one per player per version, `acceptedByUserId` + `byGuardian`).
+
+- `lib/consent.ts` — `consentStatusFor` / `outstandingConsents` /
+  `hasOutstandingConsent` / `acceptConsent` / `publishConsentVersion` /
+  `resolveConsentSubject` (player → self; guardian → a linked child).
+- Admin: `GET|POST /api/v1/consent-documents`, `PATCH …/{id}` (rename / retire /
+  toggle required), `POST …/{id}/versions`. UI at `/admin/consent`
+  (`components/admin/ConsentManager.tsx`), nav cap `admin.consent`.
+- Player/guardian: `GET /api/v1/consent`, `POST /api/v1/consent/accept`
+  (rejects stale/superseded version ids with 400). UI at `/consent`
+  (`components/consent/ConsentForm.tsx`).
+- **Gate**: `app/player/layout.tsx` redirects an APPROVED player with any
+  outstanding *required* document to `/consent`. Publishing a new version
+  re-gates everyone.
+
+Verified: gate redirects → accept clears it → publishing v2 re-gates →
+accepting a stale version id is refused.
+
 ## Still to come (W6)
 
-- Consent-document acceptance gate (versioned docs, required-before-access).
 - Guardian accounts + the minor registration branch (`Club.minorAgeThreshold`).
 - Resumable multi-step registration (server-saved draft).

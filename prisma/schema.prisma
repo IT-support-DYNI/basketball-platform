@@ -213,6 +213,7 @@ model Club {
   teams   Team[]
   seasons Season[]
   venues  Venue[]
+  consentDocuments ConsentDocument[]
 }
 
 model Season {
@@ -433,6 +434,7 @@ model User {
   eventsCreated  Event[]               @relation("EventCreatedBy")
   availabilityResponses AvailabilityResponse[]
   attendanceAudits AttendanceAudit[]    @relation("AttendanceAuditBy")
+  consentsAccepted ConsentRecord[]      @relation("ConsentAcceptedBy")
   /// Populated when role = GUARDIAN — the player(s) this user manages.
   guardianOf     GuardianRelationship[] @relation("Guardian")
   /// Populated when role = ADMIN and this admin has reviewed at least one registration.
@@ -538,6 +540,7 @@ model PlayerProfile {
   videoAssignments  VideoAssignment[]
   guardians         GuardianRelationship[] @relation("Player")
   memberships       TeamMembership[]
+  consentRecords    ConsentRecord[]
 
   @@index([registrationStatus])
 }
@@ -556,6 +559,70 @@ model GuardianRelationship {
   createdAt       DateTime      @default(now())
 
   @@unique([guardianUserId, playerProfileId])
+  @@index([playerProfileId])
+}
+
+// CONSENT
+// DYNI Blazers PRD §24 — versioned, append-only consent. Publishing a new
+// version of a required document makes it outstanding for every player again.
+
+enum ConsentDocumentType {
+  CODE_OF_CONDUCT
+  PRIVACY_NOTICE
+  MEDIA_CONSENT
+  MEDICAL_CONSENT
+  DATA_PROCESSING
+  TRIP_CONSENT
+  OTHER
+}
+
+model ConsentDocument {
+  id                Int                 @id @default(autoincrement())
+  clubId            Int?
+  club              Club?               @relation(fields: [clubId], references: [id], onDelete: SetNull)
+  type              ConsentDocumentType
+  title             String
+  /// When true, a player can't get past the consent gate until the current
+  /// version is accepted (by them or their guardian).
+  requiredForPlayers Boolean            @default(true)
+  active            Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  versions ConsentDocumentVersion[]
+
+  @@index([clubId, active])
+}
+
+model ConsentDocumentVersion {
+  id          Int             @id @default(autoincrement())
+  documentId  Int
+  document    ConsentDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version     Int
+  body        String
+  publishedAt DateTime        @default(now())
+
+  records ConsentRecord[]
+
+  @@unique([documentId, version])
+  @@index([documentId, publishedAt])
+}
+
+model ConsentRecord {
+  id               Int                    @id @default(autoincrement())
+  documentVersionId Int
+  documentVersion  ConsentDocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  /// The player this consent is *about*.
+  playerProfileId  Int
+  player           PlayerProfile          @relation(fields: [playerProfileId], references: [id], onDelete: Cascade)
+  /// The account that clicked "I accept" — the player themselves, or a guardian.
+  acceptedByUserId Int
+  acceptedBy       User                   @relation("ConsentAcceptedBy", fields: [acceptedByUserId], references: [id])
+  /// True when accepted by a linked guardian rather than the player.
+  byGuardian       Boolean                @default(false)
+  acceptedAt       DateTime               @default(now())
+
+  @@unique([documentVersionId, playerProfileId])
   @@index([playerProfileId])
 }
 

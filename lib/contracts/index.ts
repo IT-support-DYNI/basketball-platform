@@ -11,6 +11,12 @@ export * from "./auth";
 export * from "./organisation";
 
 export { createAnnouncementSchema } from "./announcement";
+export {
+  createConsentDocumentSchema,
+  updateConsentDocumentSchema,
+  publishConsentVersionSchema,
+  acceptConsentSchema,
+} from "./consent";
 export { bulkAttendanceSchema, checkinSchema, correctAttendanceSchema } from "./attendance";
 export { createFeedbackSchema } from "./feedback";
 export { createEvaluationSchema, updateEvaluationSchema } from "./performance";

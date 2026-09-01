@@ -161,6 +161,57 @@ async function main() {
     },
   });
 
+  // Consent documents. player1 accepts both; player2 accepts only the code of
+  // conduct, so signing in as player2 shows the blocking consent gate.
+  const consentSeed = [
+    {
+      type: "CODE_OF_CONDUCT" as const,
+      title: "Player code of conduct",
+      body:
+        "As a member of DYNI Blazers you agree to:\n\n" +
+        "• Treat teammates, coaches, officials and opponents with respect.\n" +
+        "• Arrive on time and ready for training and matches.\n" +
+        "• Represent the club positively on and off the court.\n" +
+        "• Tell a coach or the welfare officer straight away if something isn't right.",
+    },
+    {
+      type: "MEDIA_CONSENT" as const,
+      title: "Photography & media consent",
+      body:
+        "The club sometimes takes photos and short videos at training and matches for the " +
+        "team channel, the club website and social media.\n\n" +
+        "By accepting you agree that images of you (or your child) may be used for those purposes. " +
+        "You can withdraw this at any time by contacting the club administrator.",
+    },
+  ];
+  const consentVersionByType: Record<string, number> = {};
+  for (const c of consentSeed) {
+    const existing = await prisma.consentDocument.findFirst({ where: { clubId: club.id, type: c.type } });
+    const doc =
+      existing ??
+      (await prisma.consentDocument.create({
+        data: {
+          clubId: club.id,
+          type: c.type,
+          title: c.title,
+          versions: { create: { version: 1, body: c.body } },
+        },
+      }));
+    const v = await prisma.consentDocumentVersion.findFirst({
+      where: { documentId: doc.id },
+      orderBy: { version: "desc" },
+    });
+    consentVersionByType[c.type] = v!.id;
+  }
+  await prisma.consentRecord.createMany({
+    data: [
+      { documentVersionId: consentVersionByType.CODE_OF_CONDUCT, playerProfileId: player1.playerProfile!.id, acceptedByUserId: player1.id },
+      { documentVersionId: consentVersionByType.MEDIA_CONSENT, playerProfileId: player1.playerProfile!.id, acceptedByUserId: player1.id },
+      { documentVersionId: consentVersionByType.CODE_OF_CONDUCT, playerProfileId: player2.playerProfile!.id, acceptedByUserId: player2.id },
+    ],
+    skipDuplicates: true,
+  });
+
   let venue = await prisma.venue.findFirst({ where: { clubId: club.id, name: "Community Sports Centre" } });
   if (!venue) {
     venue = await prisma.venue.create({
