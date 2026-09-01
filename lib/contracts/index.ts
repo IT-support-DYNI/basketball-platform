@@ -13,7 +13,17 @@ export * from "./organisation";
 export { createAnnouncementSchema } from "./announcement";
 export { deleteAccountSchema } from "./account";
 export { createConversationSchema, messageBodySchema } from "./chat";
-export { createDrillSchema, updateDrillSchema, DRILL_CATEGORIES, DRILL_DIFFICULTIES } from "./training";
+export {
+  createDrillSchema,
+  updateDrillSchema,
+  createTrainingPlanSchema,
+  updateTrainingPlanSchema,
+  trainingBlockSchema,
+  DRILL_CATEGORIES,
+  DRILL_DIFFICULTIES,
+  TRAINING_BLOCK_CATEGORIES,
+  TRAINING_PLAN_STATUSES,
+} from "./training";
 export {
   createConsentDocumentSchema,
   updateConsentDocumentSchema,
@@ -45,7 +55,12 @@ export { requestUploadSchema, createVideoSchema, assignVideoSchema } from "./vid
 import { createAnnouncementSchema } from "./announcement";
 import { deleteAccountSchema } from "./account";
 import { createConversationSchema, messageBodySchema } from "./chat";
-import { createDrillSchema, updateDrillSchema } from "./training";
+import {
+  createDrillSchema,
+  updateDrillSchema,
+  createTrainingPlanSchema,
+  updateTrainingPlanSchema,
+} from "./training";
 import { bulkAttendanceSchema, checkinSchema, correctAttendanceSchema } from "./attendance";
 import { createFeedbackSchema } from "./feedback";
 import { createEvaluationSchema, updateEvaluationSchema } from "./performance";
@@ -71,6 +86,8 @@ export type CreateAnnouncementInput = z.infer<typeof createAnnouncementSchema>;
 export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
 export type CreateDrillInput = z.infer<typeof createDrillSchema>;
 export type UpdateDrillInput = z.infer<typeof updateDrillSchema>;
+export type CreateTrainingPlanInput = z.infer<typeof createTrainingPlanSchema>;
+export type UpdateTrainingPlanInput = z.infer<typeof updateTrainingPlanSchema>;
 export type CreateConversationInput = z.infer<typeof createConversationSchema>;
 export type MessageBodyInput = z.infer<typeof messageBodySchema>;
 export type BulkAttendanceInput = z.infer<typeof bulkAttendanceSchema>;

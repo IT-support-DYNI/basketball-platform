@@ -30,13 +30,40 @@ shared/global drill every club sees), `name`, `category` (`DrillCategory`),
 - **Seed** — 7 drills across warm-up, ball-handling, shooting, defense,
   transition, scrimmage and cool-down.
 
+## Session plans (W9 part 2)
+
+Migration `20260903130000_training_plans`. `TrainingPlan` — `teamId` +
+`seasonId` (+ optional `squadId`), `title`, `objectives`, `date` (null for
+templates), `status` (`DRAFT` / `PUBLISHED` / `COMPLETED`), `isTemplate`,
+`coachingNotes`, `eventId` (`@unique` — the scheduled session it belongs to,
+wired in part 3), `effectivenessRating` + `postSessionNotes` (post-session),
+`templateOfId` (self-FK — "started from this template"), `createdByUserId`.
+`TrainingBlock` — `trainingPlanId`, `category` (`TrainingBlockCategory`:
+WARMUP / SKILL / TACTICAL / CONDITIONING / SCRIMMAGE / COOLDOWN / OTHER),
+`order`, `title`, `durationMinutes`, `notes`, `drillId` (optional library
+reference).
+
+- **authz** — subject `"TrainingPlan"`. `HEAD_COACH` / `ASSISTANT_COACH`:
+  full CRUD scoped to `{ teamId }`. `TEAM_MANAGER`: read. `PLAYER`: read
+  `{ teamId, status: "PUBLISHED" }` only. `CLUB_ADMIN`: manage all.
+- **API** — `GET /api/v1/training-plans` (`?status=&templates=1`; players get
+  only PUBLISHED), `POST` (optionally `fromTemplateId` — copies its blocks),
+  `GET|PATCH|DELETE /api/v1/training-plans/{id}`. **`PATCH` replaces the whole
+  block list** in order (delete-all + `createMany`), the same pattern consent
+  versions / evaluation category scores use. `lib/training-plans.ts` owns the
+  authz checks; `planDurationMinutes` (in `lib/training.ts`) sums block times.
+- **UI** — `/coach/training/plans` (grouped: upcoming/drafts, templates, past),
+  `/coach/training/plans/new` (`NewPlanForm` — title, objectives, date or
+  "save as template", optional start-from-template), `/coach/training/plans/{id}`
+  (`PlanBuilder` — inline header edit, block cards with category / title /
+  duration / notes / drill picker / reorder, running total, publish → complete
+  → post-session rating). Nav capability `coach.plans`.
+- **Seed** — a published U16 plan (6 blocks referencing the seeded drills) and
+  a reusable senior template.
+
 ## Still to come
 
-- Part 2 — `TrainingPlan` / `TrainingBlock`: ordered session sections
-  (warm-up → skill → tactical → conditioning → scrimmage → cool-down), each
-  referencing drills with durations and group notes; a duration roll-up.
-- Part 3 — attach a plan to a scheduled `Event`; a player-facing read view;
-  session templates + "duplicate session"; post-session notes + effectiveness
-  rating.
+- Part 3 — attach a plan to a scheduled `Event` from the calendar; a
+  player-facing read view of the published plan.
 - Part 4 — the `CourtDiagram` editor for drills (SVG half-court, players /
   cones / movement arrows serialised to `courtDiagram` jsonb).

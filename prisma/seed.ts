@@ -54,6 +54,8 @@ async function wipe() {
     prisma.videoAssignment.deleteMany(),
     prisma.video.deleteMany(),
     prisma.eventRecurrence.deleteMany(),
+    prisma.trainingBlock.deleteMany(),
+    prisma.trainingPlan.deleteMany(),
     prisma.drill.deleteMany(),
     prisma.consentRecord.deleteMany(),
     prisma.consentDocumentVersion.deleteMany(),
@@ -796,6 +798,48 @@ async function main() {
       { actorUserId: headCoach.id, action: "MFA_ENABLED", entityType: "User", entityId: headCoach.id, createdAt: daysFromNow(-30) },
       { actorUserId: welfare.id, action: "EMAIL_VERIFIED", entityType: "User", entityId: welfare.id, createdAt: daysFromNow(-44) },
     ],
+  });
+
+  /* ── Training session plans (W9 part 2) ────────────────────────────── */
+  const drillId = Object.fromEntries(
+    (await prisma.drill.findMany({ select: { id: true, name: true } })).map((d) => [d.name, d.id]),
+  );
+  // A published plan for the U16 team's next practice.
+  await prisma.trainingPlan.create({
+    data: {
+      teamId: u16.id, seasonId: season.id, createdByUserId: headCoach.id,
+      title: "U16 practice — spacing & closeouts", status: "PUBLISHED", date: daysFromNow(1, 18),
+      objectives: "Cleaner spacing in half-court offence; contest without fouling.",
+      coachingNotes: "Split into two groups for the skill block — Dev takes the guards.",
+      blocks: {
+        create: [
+          { order: 0, category: "WARMUP", durationMinutes: 8, drillId: drillId["Dynamic warm-up circuit"] },
+          { order: 1, category: "SKILL", title: "Ball handling", durationMinutes: 6, drillId: drillId["Two-ball stationary series"] },
+          { order: 2, category: "SKILL", title: "Shooting", durationMinutes: 12, drillId: drillId["5-spot form shooting"] },
+          { order: 3, category: "TACTICAL", title: "Closeouts", durationMinutes: 10, notes: "Whole group. Emphasise chop steps.", drillId: drillId["Closeout & mirror"] },
+          { order: 4, category: "SCRIMMAGE", durationMinutes: 15, drillId: drillId["Constraint scrimmage — 3 passes"] },
+          { order: 5, category: "COOLDOWN", durationMinutes: 6, drillId: drillId["Static stretch & session review"] },
+        ],
+      },
+    },
+  });
+  // A reusable template.
+  await prisma.trainingPlan.create({
+    data: {
+      teamId: seniors.id, seasonId: season.id, createdByUserId: headCoach.id,
+      title: "Standard 90-minute template", isTemplate: true, status: "DRAFT",
+      objectives: "The default shape for a mid-week senior session.",
+      blocks: {
+        create: [
+          { order: 0, category: "WARMUP", durationMinutes: 10, drillId: drillId["Dynamic warm-up circuit"] },
+          { order: 1, category: "SKILL", durationMinutes: 20, notes: "Rotate two stations." },
+          { order: 2, category: "TACTICAL", durationMinutes: 20 },
+          { order: 3, category: "CONDITIONING", durationMinutes: 8, drillId: drillId["3-on-2 continuous"] },
+          { order: 4, category: "SCRIMMAGE", durationMinutes: 25 },
+          { order: 5, category: "COOLDOWN", durationMinutes: 7, drillId: drillId["Static stretch & session review"] },
+        ],
+      },
+    },
   });
 
   const counts = {

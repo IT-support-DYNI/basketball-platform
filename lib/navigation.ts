@@ -28,6 +28,7 @@ export type Capability =
   | "coach.videos"
   | "coach.performance"
   | "coach.drills"
+  | "coach.plans"
   | "announcements"
   | "messages"
   | "admin.home"
@@ -69,6 +70,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "coach.attendance",
     "coach.videos",
     "coach.performance",
+    "coach.plans",
     "coach.drills",
     "announcements",
     "messages",
@@ -156,7 +158,8 @@ const NAV: NavItem[] = [
   { label: "Schedule", href: "/player/training", capability: "player.schedule", icon: "calendar", primary: true },
   { label: "Training", href: "/coach/training", capability: "coach.training", icon: "calendar", primary: true },
   { label: "Training", href: "/admin/training", capability: "admin.training", icon: "calendar" },
-  { label: "Drills", href: "/coach/drills", capability: "coach.drills", icon: "clipboard" },
+  { label: "Session plans", href: "/coach/training/plans", capability: "coach.plans", icon: "clipboard" },
+  { label: "Drills", href: "/coach/drills", capability: "coach.drills", icon: "whistle" },
 
   { label: "Attendance", href: "/coach/attendance", capability: "coach.attendance", icon: "attendance", primary: true },
   { label: "Attendance", href: "/admin/attendance", capability: "admin.attendance", icon: "attendance" },
