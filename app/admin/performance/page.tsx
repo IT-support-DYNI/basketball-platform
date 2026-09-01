@@ -1,15 +1,22 @@
 import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
+import { getActiveSeason } from "@/lib/season";
 
 export default async function AdminPerformancePage() {
+  const season = await getActiveSeason();
   const teams = await prisma.team.findMany({
     orderBy: { name: "asc" },
     include: {
-      players: {
+      memberships: {
+        where: { seasonId: season.id, status: { notIn: ["FORMER", "INACTIVE"] } },
         include: {
-          user: { select: { name: true } },
-          evaluations: { orderBy: { periodStart: "desc" }, take: 1 },
+          player: {
+            include: {
+              user: { select: { name: true } },
+              evaluations: { orderBy: { periodStart: "desc" }, take: 1 },
+            },
+          },
         },
       },
     },
@@ -22,18 +29,20 @@ export default async function AdminPerformancePage() {
 
       <div className="mt-6 space-y-6">
         {teams.map((team) => (
-          <section key={team.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+          <section key={team.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
             <Link href={`/admin/teams/${team.id}`} className="font-bold text-slate-900 hover:text-court-700">{team.name}</Link>
             <ul className="mt-3 divide-y divide-slate-100">
-              {team.players.map((p) => (
-                <li key={p.id} className="flex items-center justify-between py-2 text-sm">
-                  <span className="font-medium text-slate-800">{p.user.name}</span>
+              {team.memberships.map((m) => (
+                <li key={m.id} className="flex items-center justify-between py-2 text-sm">
+                  <span className="font-medium text-slate-800">{m.player.user.name}</span>
                   <span className="text-slate-600">
-                    {p.evaluations[0] ? `${p.evaluations[0].overallScore}/10 (${p.evaluations[0].periodType.toLowerCase()})` : "No evaluations yet"}
+                    {m.player.evaluations[0]
+                      ? `${m.player.evaluations[0].overallScore}/10 (${m.player.evaluations[0].periodType.toLowerCase()})`
+                      : "No evaluations yet"}
                   </span>
                 </li>
               ))}
-              {team.players.length === 0 && <p className="py-2 text-sm text-slate-500">No players on this team.</p>}
+              {team.memberships.length === 0 && <p className="py-2 text-sm text-slate-500">No players on this team.</p>}
             </ul>
           </section>
         ))}

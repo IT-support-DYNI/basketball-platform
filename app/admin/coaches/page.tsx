@@ -1,45 +1,63 @@
 import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
+import PageHeader from "@/components/ui/PageHeader";
+import Card from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/states";
 
 export default async function AdminCoachesPage() {
-  const coaches = await prisma.coachProfile.findMany({
-    include: { user: true, teams: { include: { team: { select: { id: true, name: true } } } } },
-    orderBy: { user: { name: "asc" } },
+  const coaches = await prisma.user.findMany({
+    where: { role: "COACH" },
+    orderBy: { name: "asc" },
+    include: { staffAssignments: { include: { team: { select: { id: true, name: true } } } } },
   });
 
   return (
-    <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Coaches</h1>
-      <p className="mt-1 text-slate-600">
-        Every coach on the platform and the teams they manage. Create new coach accounts from{" "}
-        <Link href="/admin/users" className="font-semibold text-court-700 hover:text-court-800">Users</Link>.
-      </p>
+    <main className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow="Administrator"
+        title="Coaches"
+        lead={
+          <>
+            Every coach and the teams they&apos;re on. Create accounts from{" "}
+            <Link href="/admin/users" className="font-semibold text-flame-ink hover:underline">
+              Members
+            </Link>
+            ; assign them on each team&apos;s page.
+          </>
+        }
+      />
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {coaches.map((c) => (
-          <div key={c.id} className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="font-bold text-slate-900">{c.user.name}</p>
-            <p className="text-sm text-slate-500">{c.user.email}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {c.teams.length === 0 ? (
-                <span className="text-xs text-slate-400">No teams assigned</span>
-              ) : (
-                c.teams.map((tc) => (
-                  <Link
-                    key={tc.id}
-                    href={`/admin/teams/${tc.team.id}`}
-                    className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
-                  >
-                    {tc.team.name}
-                  </Link>
-                ))
-              )}
-            </div>
-          </div>
-        ))}
-        {coaches.length === 0 && <p className="text-sm text-slate-500">No coaches yet.</p>}
-      </div>
+      {coaches.length === 0 ? (
+        <EmptyState title="No coaches yet" />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {coaches.map((c) => {
+            const teams = [...new Map(c.staffAssignments.map((a) => [a.team.id, a.team])).values()];
+            return (
+              <Card key={c.id}>
+                <p className="font-display font-bold text-ink">{c.name}</p>
+                <p className="text-sm text-ink-faint">{c.email}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {teams.length === 0 ? (
+                    <span className="text-xs text-ink-faint">No teams assigned</span>
+                  ) : (
+                    teams.map((t) => (
+                      <Link
+                        key={t.id}
+                        href={`/admin/teams/${t.id}`}
+                        className="rounded-full border border-line bg-surface-2 px-2.5 py-1 text-xs font-semibold text-ink-dim hover:text-ink"
+                      >
+                        {t.name}
+                      </Link>
+                    ))
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </main>
   );
 }

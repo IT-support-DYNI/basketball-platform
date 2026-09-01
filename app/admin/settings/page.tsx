@@ -16,7 +16,7 @@ export default async function AdminSettingsPage() {
       <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Settings</h1>
       <p className="mt-1 text-slate-600">Platform-wide settings and announcements.</p>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-surface p-5">
         <h2 className="font-bold text-slate-900">Announcements</h2>
         <p className="mt-1 text-sm text-slate-500">
           Post a platform-wide announcement (every player sees it) or one for a specific team. You can
@@ -47,7 +47,7 @@ export default async function AdminSettingsPage() {
         </ul>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6">
+      <section className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-surface p-6">
         <p className="text-sm font-semibold text-slate-700">Planned for later</p>
         <p className="mt-1 text-sm text-slate-500">
           Multi-club configuration, configurable performance categories, and notification channels

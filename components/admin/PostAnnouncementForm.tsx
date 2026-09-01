@@ -21,7 +21,7 @@ export default function PostAnnouncementForm({ teams }: { teams: TeamOption[] })
     setLoading(true);
 
     try {
-      const res = await fetch("/api/announcements", {
+      const res = await fetch("/api/v1/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -56,7 +56,7 @@ export default function PostAnnouncementForm({ teams }: { teams: TeamOption[] })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-surface p-5 space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-1.5 text-sm font-medium">
           <input type="radio" checked={scope === "PLATFORM"} onChange={() => setScope("PLATFORM")} /> Platform-wide

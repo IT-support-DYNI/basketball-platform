@@ -5,11 +5,18 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import AuthShell from "@/components/auth/AuthShell";
+import { Button } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/TextField";
+import Alert from "@/components/ui/Alert";
+
 export default function LoginPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [totp, setTotp] = useState("");
+  const [needsMfa, setNeedsMfa] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -19,88 +26,140 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", { email, password, redirect: false });
+      const result = await signIn("credentials", {
+        email,
+        password,
+        totp: needsMfa ? totp : undefined,
+        redirect: false,
+      });
 
-      if (!result || result.error) {
-        setError("Invalid email or password.");
+      if (result && !result.error) {
+        router.push("/");
+        router.refresh();
         return;
       }
 
-      router.push("/");
-      router.refresh();
+      const code = result?.error ?? "";
+
+      if (code === "MFA_REQUIRED") {
+        setNeedsMfa(true);
+        setError("");
+        return;
+      }
+      if (code === "MFA_INVALID") {
+        setNeedsMfa(true);
+        setError("That authentication code didn't match. Try the current one from your app.");
+        return;
+      }
+
+      // Distinguish a lockout from a bad password (NextAuth won't carry that
+      // detail through, so ask the status endpoint).
+      try {
+        const status = await fetch(
+          `/api/v1/auth/login-status?email=${encodeURIComponent(email)}`,
+        ).then((r) => r.json());
+        if (status?.locked) {
+          setError(
+            `Too many sign-in attempts. Try again in about ${status.retryAfterMinutes} minute${
+              status.retryAfterMinutes === 1 ? "" : "s"
+            }.`,
+          );
+          return;
+        }
+      } catch {
+        /* fall through to the generic message */
+      }
+      setError("That email and password don't match. Check them and try again.");
+      setNeedsMfa(false);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError("Something went wrong signing you in. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-65px)] items-center justify-center bg-gradient-to-b from-orange-50 via-white to-white px-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-court-500 to-court-700 text-lg shadow-sm shadow-court-500/30">
-          🏀
-        </span>
-
-        <h1 className="mb-2 mt-4 text-3xl font-extrabold tracking-tight text-slate-900">Log in</h1>
-        <p className="mb-6 text-slate-600">
-          Sign in with the email and password your admin or coach gave you.
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700">
-              Email
-            </label>
-            <input
-              id="email"
+    <AuthShell
+      title={needsMfa ? "Authentication code" : "Club sign in"}
+      subtitle={needsMfa ? "Enter the 6-digit code from your authenticator app." : "Members and staff only."}
+      footer={
+        needsMfa ? (
+          <button
+            type="button"
+            onClick={() => {
+              setNeedsMfa(false);
+              setTotp("");
+              setError("");
+            }}
+            className="font-semibold text-flame-ink hover:underline"
+          >
+            Start over
+          </button>
+        ) : (
+          <>
+            New player or parent?{" "}
+            <Link href="/register" className="font-semibold text-flame-ink hover:underline">
+              Start registration
+            </Link>
+            <span className="mt-1 block text-xs text-ink-faint">
+              An administrator reviews every registration before full access is granted.
+            </span>
+          </>
+        )
+      }
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {!needsMfa && (
+          <>
+            <TextField
+              label="Email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none transition focus:border-court-500 focus:ring-2 focus:ring-court-500/20"
               placeholder="you@example.com"
             />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-700">
-              Password
-            </label>
-            <input
-              id="password"
+            <TextField
+              label="Password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none transition focus:border-court-500 focus:ring-2 focus:ring-court-500/20"
               placeholder="Your password"
             />
-          </div>
+          </>
+        )}
 
-          {error && (
-            <div className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700" role="alert">
-              {error}
-            </div>
-          )}
+        {needsMfa && (
+          <TextField
+            label="6-digit code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            value={totp}
+            onChange={(e) => setTotp(e.target.value)}
+            required
+            autoFocus
+            placeholder="123456"
+            hint="Or enter one of your recovery codes."
+          />
+        )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-full bg-gradient-to-r from-court-500 to-court-700 px-4 py-2.5 font-bold text-white shadow-sm shadow-court-500/30 transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading ? "Logging in..." : "Log in"}
-          </button>
-        </form>
+        {error && <Alert tone="danger">{error}</Alert>}
 
-        <p className="mt-6 text-center text-sm text-slate-500">
-          New player? <Link href="/register" className="font-semibold text-court-700 hover:text-court-800">Register here</Link> — an
-          administrator reviews every registration before you get full access. Coach and admin accounts are still
-          created directly by the club.
-        </p>
-      </div>
-    </main>
+        <Button type="submit" size="lg" fullWidth loading={loading}>
+          {loading ? "Signing in" : needsMfa ? "Verify" : "Sign in"}
+        </Button>
+
+        {!needsMfa && (
+          <p className="text-center text-xs text-ink-faint">
+            <Link href="/forgot-password" className="font-semibold text-flame-ink hover:underline">
+              Forgot your password?
+            </Link>
+          </p>
+        )}
+      </form>
+    </AuthShell>
   );
 }

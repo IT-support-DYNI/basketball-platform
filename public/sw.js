@@ -1,5 +1,5 @@
-const CACHE_NAME = "basketball-platform-shell-v1";
-const PRECACHE_URLS = ["/icons/icon.svg", "/manifest.webmanifest"];
+const CACHE_NAME = "dyni-blazers-shell-v2";
+const PRECACHE_URLS = ["/icons/icon-192.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -41,7 +41,7 @@ self.addEventListener("fetch", (event) => {
  * (the browser mandates one visible notification per push event).
  */
 self.addEventListener("push", (event) => {
-  let data = { title: "Basketball Platform", body: "You have a new notification.", url: "/" };
+  let data = { title: "DYNI Blazers", body: "You have a new notification.", url: "/" };
   if (event.data) {
     try {
       data = { ...data, ...event.data.json() };
@@ -53,8 +53,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: "/icons/icon.svg",
-      badge: "/icons/icon.svg",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
       data: { url: data.url },
     })
   );

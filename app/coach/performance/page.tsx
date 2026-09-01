@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import RecordEvaluationForm from "@/components/coach/RecordEvaluationForm";
+import { rosterPlayerFilter } from "@/lib/roster";
 import WriteFeedbackForm from "@/components/coach/WriteFeedbackForm";
 
 export default async function CoachPerformancePage() {
@@ -10,7 +11,7 @@ export default async function CoachPerformancePage() {
   const teamIds = session!.user.teamIds ?? [];
 
   const players = await prisma.playerProfile.findMany({
-    where: { teamId: { in: teamIds } },
+    where: rosterPlayerFilter(teamIds),
     include: { user: { select: { name: true } }, evaluations: { orderBy: { periodStart: "desc" }, take: 1 } },
     orderBy: { user: { name: "asc" } },
   });
@@ -27,8 +28,8 @@ export default async function CoachPerformancePage() {
         <WriteFeedbackForm players={options} />
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <table className="w-full text-sm">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-surface">
+        <table className="w-full min-w-[38rem] text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-4 py-3">Player</th>

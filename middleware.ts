@@ -12,12 +12,14 @@ const ROLE_HOME: Record<string, string> = {
   ADMIN: "/admin/dashboard",
   COACH: "/coach/dashboard",
   PLAYER: "/player/dashboard",
+  GUARDIAN: "/guardian",
 };
 
 const ROLE_PREFIX: Record<string, string> = {
   ADMIN: "/admin",
   COACH: "/coach",
   PLAYER: "/player",
+  GUARDIAN: "/guardian",
 };
 
 export async function middleware(req: NextRequest) {
@@ -28,17 +30,35 @@ export async function middleware(req: NextRequest) {
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/set-password" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password" ||
+    pathname === "/verify-email" ||
+    pathname === "/api/v1" ||
+    pathname === "/api/v1/openapi.json" ||
     pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/register") ||
-    pathname.startsWith("/api/public");
+    pathname.startsWith("/api/v1/auth/") ||
+    pathname.startsWith("/api/v1/register") ||
+    pathname.startsWith("/api/v1/registration/") ||
+    pathname.startsWith("/api/v1/public") ||
+    pathname.startsWith("/api/v1/cron/"); // guarded by CRON_SECRET in the route
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const isApiRequest = pathname.startsWith("/api/");
 
   if (isPublic) {
     return NextResponse.next();
   }
 
   if (!token || token.isActive === false) {
+    // API callers get a JSON 401, not an HTML redirect, so the client sees a
+    // real error to handle (consistent error responses, brief §37).
+    if (isApiRequest) {
+      const requestId = req.headers.get("x-request-id") || crypto.randomUUID();
+      return NextResponse.json(
+        { error: "You need to sign in to do that.", code: "UNAUTHORIZED", requestId },
+        { status: 401, headers: { "x-request-id": requestId } },
+      );
+    }
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
@@ -51,8 +71,6 @@ export async function middleware(req: NextRequest) {
   // registration-status gate below was silently breaking a pending
   // player's own AJAX calls, since a plain pathname check redirected them
   // too — see git history for the fix.)
-  const isApiRequest = pathname.startsWith("/api/");
-
   if (!isApiRequest && token.mustChangePassword && pathname !== "/set-password") {
     return NextResponse.redirect(new URL("/set-password", req.url));
   }
@@ -78,7 +96,8 @@ export async function middleware(req: NextRequest) {
   const isProtectedArea =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/coach") ||
-    pathname.startsWith("/player");
+    pathname.startsWith("/player") ||
+    pathname.startsWith("/guardian");
 
   if (isProtectedArea && ownPrefix && !pathname.startsWith(ownPrefix)) {
     return NextResponse.redirect(new URL(homePath, req.url));
@@ -92,5 +111,7 @@ export const config = {
   // beacon requests to /_vercel/insights/* and /_vercel/speed-insights/* on
   // this same origin, and those aren't authenticated — routing them through
   // the auth redirect above would 307 the beacon instead of recording it.
-  matcher: ["/((?!_next/static|_next/image|_vercel|icons|favicon.ico|sw.js).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|_vercel|icons|brand|favicon.ico|icon.png|apple-icon.png|sw.js|manifest.webmanifest).*)",
+  ],
 };

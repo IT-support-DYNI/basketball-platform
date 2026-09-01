@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Archivo, Inter, Barlow_Condensed, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -7,29 +7,58 @@ import "./globals.css";
 import Providers from "./providers";
 import NavBar from "@/components/NavBar";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import ThemeScript from "@/components/theme/ThemeScript";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const archivo = Archivo({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-archivo",
+  display: "swap",
+});
+const barlow = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-barlow",
+  display: "swap",
+});
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Basketball Team Platform",
-  description: "Team management and player development for basketball coaches and players.",
+  title: {
+    default: "DYNI Blazers",
+    template: "%s · DYNI Blazers",
+  },
+  description:
+    "DYNI Blazers club platform — registration, schedule, attendance, communication and player development for members and staff.",
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/icons/icon.svg", apple: "/icons/icon.svg" },
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Hoops" },
+  applicationName: "DYNI Blazers",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "DYNI Blazers" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#ea580c",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0f" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f4ef" },
+  ],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={plusJakartaSans.variable}>
-      <body className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${archivo.variable} ${barlow.variable} ${plexMono.variable}`}
+    >
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="min-h-screen bg-ground font-sans text-ink antialiased">
         <Providers>
           <ServiceWorkerRegistration />
           <NavBar />

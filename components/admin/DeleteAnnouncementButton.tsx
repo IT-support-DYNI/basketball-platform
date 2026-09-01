@@ -11,7 +11,7 @@ export default function DeleteAnnouncementButton({ id }: { id: number }) {
     if (!confirm("Remove this announcement?")) return;
     setLoading(true);
     try {
-      await fetch(`/api/announcements/${id}`, { method: "DELETE" });
+      await fetch(`/api/v1/announcements/${id}`, { method: "DELETE" });
       router.refresh();
     } finally {
       setLoading(false);

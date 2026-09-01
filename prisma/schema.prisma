@@ -6,12 +6,14 @@
  *   Team             — roster + owning entity for sessions/videos/announcements
  *   TeamCoach        — many-to-many: a team can have several coaches, a
  *                       coach can manage several teams
- *   TrainingSession  — created/managed by a coach, scoped to a team
- *   AttendanceRecord — one row per (session, player)
+ *   Venue            — a place events happen; club-scoped, optional map coords
+ *   Event            — training/match/meeting/deadline; team- or club-scoped,
+ *                       optionally recurring (EventRecurrence)
+ *   AttendanceRecord — one row per (event, player)
  *   Video            — uploaded by a coach/admin, assigned via VideoAssignment
  *   PerformanceEvaluation — weekly/monthly, one per (player, coach, period)
  *   PerformanceCategoryScore — one row per scored category per evaluation
- *   Feedback         — written note, optionally tied to a session or evaluation
+ *   Feedback         — written note, optionally tied to an event or evaluation
  *   Notification     — in-app only for MVP
  *   Announcement     — platform-wide (admin) or team-scoped (coach/admin)
  */
@@ -59,9 +61,31 @@ enum PlayerPosition {
   C
 }
 
-enum PlayerStatus {
+enum PreferredHand {
+  LEFT
+  RIGHT
+  AMBIDEXTROUS
+}
+
+/// A player's status within a team for a season (brief §8).
+enum MembershipStatus {
+  PENDING
   ACTIVE
+  INJURED
+  SUSPENDED
   INACTIVE
+  TRIALIST
+  FORMER
+}
+
+/// A staff member's role on a team (brief §8: "assign coaches and managers").
+enum StaffRole {
+  HEAD_COACH
+  ASSISTANT_COACH
+  TEAM_MANAGER
+  STATISTICIAN
+  MEDICAL_OFFICER
+  WELFARE_OFFICER
 }
 
 enum TeamStatus {
@@ -69,10 +93,42 @@ enum TeamStatus {
   ARCHIVED
 }
 
-enum SessionStatus {
+enum EventStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
+  POSTPONED
+}
+
+enum EventType {
+  TRAINING
+  MATCH
+  TOURNAMENT
+  TEAM_MEETING
+  FITNESS_TEST
+  SOCIAL
+  MEDICAL
+  REGISTRATION_DEADLINE
+  PAYMENT_DEADLINE
+  OTHER
+}
+
+enum EventVisibility {
+  TEAM
+  CLUB
+  PUBLIC
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum RsvpResponse {
+  ATTENDING
+  NOT_ATTENDING
+  UNSURE
 }
 
 enum AttendanceStatus {
@@ -80,6 +136,12 @@ enum AttendanceStatus {
   ABSENT
   LATE
   EXCUSED
+}
+
+enum AttendanceMethod {
+  COACH
+  QR
+  PIN
 }
 
 enum VideoCategory {
@@ -120,6 +182,16 @@ enum NotificationType {
   REGISTRATION_UPDATE
 }
 
+/// Coarse grouping a user can set channel preferences for.
+enum NotificationCategory {
+  SCHEDULE
+  ANNOUNCEMENTS
+  PERFORMANCE
+  VIDEOS
+  REGISTRATION
+  MESSAGES
+}
+
 enum AnnouncementScope {
   PLATFORM
   TEAM
@@ -150,6 +222,22 @@ model Club {
 
   teams   Team[]
   seasons Season[]
+  venues  Venue[]
+  consentDocuments ConsentDocument[]
+  safeguardingPolicy ClubSafeguardingPolicy?
+  drills  Drill[]
+}
+
+/// Per-club messaging safeguarding rules (brief §13). A row is created lazily
+/// with safe defaults; a club administrator can loosen them.
+model ClubSafeguardingPolicy {
+  clubId Int  @id
+  club   Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  /// No 1:1 direct message between an adult and a minor.
+  blockAdultMinorDirectMessages Boolean @default(true)
+  /// When a minor joins a conversation, their guardian(s) are added too.
+  guardianAutoIncludedWithMinor Boolean @default(true)
+  updatedAt DateTime @updatedAt
 }
 
 model Season {
@@ -162,7 +250,81 @@ model Season {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
+  squads           Squad[]
+  memberships      TeamMembership[]
+  staffAssignments StaffAssignment[]
+
   @@index([clubId, isActive])
+}
+
+// ORGANISATION — squads, season-scoped memberships, staff assignments (brief §5, §8).
+
+/// A roster grouping within a team for a season (e.g. "Senior A", "U16 B").
+/// Optional layer — a team with a single squad per season is fine.
+model Squad {
+  id        Int      @id @default(autoincrement())
+  teamId    Int
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  seasonId  Int
+  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  name      String
+  ageGroup  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships TeamMembership[]
+
+  @@unique([teamId, seasonId, name])
+  @@index([seasonId])
+}
+
+/// A player's membership of a team for one season. Jersey number, position and
+/// status live here, never on PlayerProfile (brief §5). A player can have many
+/// memberships across seasons/teams — the historical record.
+model TeamMembership {
+  id                Int              @id @default(autoincrement())
+  playerProfileId   Int
+  player            PlayerProfile    @relation(fields: [playerProfileId], references: [id], onDelete: Cascade)
+  teamId            Int
+  team              Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  seasonId          Int
+  season            Season           @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  squadId           Int?
+  squad             Squad?           @relation(fields: [squadId], references: [id], onDelete: SetNull)
+  jerseyNumber      Int?
+  position          PlayerPosition?
+  secondaryPosition PlayerPosition?
+  status            MembershipStatus @default(ACTIVE)
+  joinedAt          DateTime         @default(now())
+  leftAt            DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // One membership per player per team per season.
+  @@unique([playerProfileId, teamId, seasonId])
+  @@index([teamId, seasonId])
+  @@index([seasonId, status])
+  // The "no two active players share a jersey in the same team+season" rule is a
+  // partial unique index (status = ACTIVE AND jerseyNumber IS NOT NULL), added
+  // by raw SQL in the migration — Prisma can't express a filtered unique index.
+}
+
+/// A staff member assigned to a team, optionally for a specific season.
+/// Supersedes TeamCoach; TeamCoach stays authoritative until its readers are
+/// migrated (W4 part 2).
+model StaffAssignment {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId    Int
+  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  seasonId  Int?
+  season    Season?   @relation(fields: [seasonId], references: [id], onDelete: SetNull)
+  role      StaffRole
+  createdAt DateTime  @default(now())
+
+  @@unique([userId, teamId, role, seasonId])
+  @@index([teamId])
 }
 
 // AUDIT LOG
@@ -188,6 +350,74 @@ model AuditLog {
   @@index([actorUserId])
 }
 
+// AUTH — email verification, password reset, brute-force protection (brief §32).
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+/// Single-use, expiring token for email verification and password reset. Only
+/// the SHA-256 hash is stored — the raw token exists solely in the emailed link,
+/// so a database read can't be used to take over an account.
+model AuthToken {
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      AuthTokenType
+  tokenHash String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  @@index([userId, type])
+}
+
+/// One row per sign-in attempt, for rate limiting / account lockout. `email` is
+/// whatever was submitted (may not be a real account); `ipHash` is hashed so the
+/// table isn't a plaintext IP log.
+model LoginAttempt {
+  id        Int      @id @default(autoincrement())
+  email     String
+  ipHash    String?
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}
+
+/// A signed-in device/browser. The JWT carries `tokenId`; the session is
+/// revoked (from another device, or on password reset) by setting `revokedAt`,
+/// which the jwt callback checks on every request. This is what makes an
+/// otherwise-stateless JWT session revocable (brief §32: session revocation).
+model AuthSession {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenId    String    @unique
+  userAgent  String?
+  ipHash     String?
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+
+  @@index([userId])
+}
+
+/// TOTP multi-factor auth. Mandatory for administrators (Doc 6 §19.5),
+/// optional for everyone else. `secret` is the base32 TOTP seed; the managed
+/// database is encrypted at rest, and a column-level encryption pass is a
+/// follow-up if club policy requires it. `recoveryCodes` are bcrypt hashes,
+/// each removed as it is used.
+model UserMfa {
+  userId        Int       @id
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  secret        String
+  enabledAt     DateTime?
+  recoveryCodes String[]
+  createdAt     DateTime  @default(now())
+}
+
 // USERS
 
 model User {
@@ -201,6 +431,15 @@ model User {
   /// password (ARCHITECTURE.md §6.1 — no public self-registration).
   /// Cleared once the user sets their own password.
   mustChangePassword Boolean @default(false)
+  /// Set when the user confirms their email via the verification link
+  /// (brief §6, Journey A). Null = unverified. Admin/Coach-provisioned
+  /// accounts are seeded verified; self-registrations must verify before an
+  /// administrator can approve them.
+  emailVerifiedAt DateTime?
+  /// Opaque secret in the personal ICS subscription URL
+  /// (/api/v1/calendar/feed.ics?token=…). Null until the user first reveals
+  /// their feed; rotating it invalidates the old URL. Not a login credential.
+  calendarToken String? @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -209,13 +448,27 @@ model User {
 
   uploadedVideos Video[]        @relation("VideoUploader")
   notifications  Notification[]
+  notificationPrefs NotificationPreference[] @relation("NotificationPrefs")
   announcements  Announcement[] @relation("AnnouncementAuthor")
   pushSubscriptions PushSubscription[]
+  authTokens    AuthToken[]
+  authSessions  AuthSession[]
+  mfa           UserMfa?
+  staffAssignments StaffAssignment[]
   auditLogsActed AuditLog[]
+  eventsCreated  Event[]               @relation("EventCreatedBy")
+  availabilityResponses AvailabilityResponse[]
+  attendanceAudits AttendanceAudit[]    @relation("AttendanceAuditBy")
+  consentsAccepted ConsentRecord[]      @relation("ConsentAcceptedBy")
+  announcementAcks AnnouncementAck[]    @relation("AnnouncementAckUser")
+  conversationsCreated Conversation[]   @relation("ConversationCreatedBy")
+  conversationParticipations ConversationParticipant[] @relation("ConversationParticipant")
+  messagesAuthored Message[]            @relation("MessageAuthor")
   /// Populated when role = GUARDIAN — the player(s) this user manages.
   guardianOf     GuardianRelationship[] @relation("Guardian")
   /// Populated when role = ADMIN and this admin has reviewed at least one registration.
   registrationsReviewed PlayerProfile[] @relation("RegistrationReviewer")
+  drillsCreated  Drill[]               @relation("DrillCreatedBy")
 }
 
 // WEB PUSH
@@ -243,9 +496,8 @@ model CoachProfile {
   phone   String?
   bio     String?
 
-  teams                TeamCoach[]
-  sessionsCreated      TrainingSession[]        @relation("SessionCreatedBy")
   attendanceRecorded   AttendanceRecord[]       @relation("AttendanceRecordedBy")
+  attendanceVerified   AttendanceRecord[]       @relation("AttendanceVerifiedBy")
   evaluationsGiven     PerformanceEvaluation[]  @relation("EvaluationCoach")
   feedbackGiven        Feedback[]               @relation("FeedbackCoach")
 }
@@ -256,19 +508,41 @@ model PlayerProfile {
   id              Int            @id @default(autoincrement())
   userId          Int            @unique
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teamId          Int?
-  team            Team?          @relation(fields: [teamId], references: [id], onDelete: SetNull)
   photoUrl        String?
-  position        PlayerPosition?
-  jerseyNumber    Int?
+
+  /* --- profile facts. Server-side field-visibility (lib/authz/field-visibility.ts)
+     strips these per viewer before any response leaves the API. --- */
+
+  /// CLUB_MEMBER+
+  nationality     String?
+  heightCm        Int?
+  preferredHand   PreferredHand?
+  bio             String?
+
+  /// coaches of the player's team + welfare/admin + self/guardian
   dateOfBirth     DateTime?
-  /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
   contactPhone    String?
-  /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
   guardianName    String?
-  /// Visible only to Admin and the player's own coach(es) — see ARCHITECTURE.md §6.4.
   guardianContact String?
-  status          PlayerStatus   @default(ACTIVE)
+  /// welfare/admin + self/guardian
+  address         String?
+  /// coaches + welfare + medical + admin + self/guardian
+  emergencyContactName     String?
+  emergencyContactPhone    String?
+  emergencyContactRelation String?
+  /// MEDICAL_OFFICER of the player's team + admin + self/guardian
+  medicalNotes    String?
+  /// WELFARE_OFFICER of the player's team + admin + self/guardian
+  welfareNotes    String?
+  /// Opt-in, then admin-confirmed, before anything renders on the public site.
+  publicProfileApproved Boolean @default(false)
+
+  /// The team + position the applicant asked for at sign-up. Advisory only —
+  /// the admin confirms the team and a coach assigns the jersey at approval,
+  /// which creates the authoritative TeamMembership.
+  registrationTeamId     Int?
+  registrationTeam       Team?          @relation("RegistrationApplicant", fields: [registrationTeamId], references: [id], onDelete: SetNull)
+  registrationPosition   PlayerPosition?
 
   /// Self-service registration lifecycle (DYNI Blazers PRD §6). Defaults to
   /// APPROVED so every existing/admin-created player is unaffected — this
@@ -295,8 +569,9 @@ model PlayerProfile {
   feedback          Feedback[]
   videoAssignments  VideoAssignment[]
   guardians         GuardianRelationship[] @relation("Player")
+  memberships       TeamMembership[]
+  consentRecords    ConsentRecord[]
 
-  @@index([teamId])
   @@index([registrationStatus])
 }
 
@@ -317,6 +592,163 @@ model GuardianRelationship {
   @@index([playerProfileId])
 }
 
+// MESSAGING
+// Two-way chat, distinct from announcements (one-way) and notifications (feed).
+// Transport is polling today (zero-budget); a realtime adapter can slot in later.
+
+enum ConversationType {
+  TEAM
+  EVENT
+  GROUP
+  DIRECT
+}
+
+model Conversation {
+  id              Int              @id @default(autoincrement())
+  type            ConversationType
+  /// For GROUP; TEAM / EVENT / DIRECT derive their title from context.
+  name            String?
+  teamId          Int?
+  team            Team?            @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  eventId         Int?
+  event           Event?           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdByUserId Int
+  createdBy       User             @relation("ConversationCreatedBy", fields: [createdByUserId], references: [id])
+  /// Computed at creation: a minor is (or may be) present, so the safeguarding
+  /// constraints apply.
+  safeguarded     Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  /// Bumped on every new message — the conversation list sorts by this.
+  lastMessageAt   DateTime         @default(now())
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@unique([type, teamId])
+  @@index([lastMessageAt])
+}
+
+model ConversationParticipant {
+  id             Int          @id @default(autoincrement())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         Int
+  user           User         @relation("ConversationParticipant", fields: [userId], references: [id], onDelete: Cascade)
+  /// "member" | "admin" (can rename a group, add/remove people)
+  role           String       @default("member")
+  /// Added because they are the guardian of a minor participant, not directly.
+  viaGuardianship Boolean     @default(false)
+  lastReadAt     DateTime?
+  addedAt        DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  authorUserId   Int
+  author         User         @relation("MessageAuthor", fields: [authorUserId], references: [id])
+  body           String
+  createdAt      DateTime     @default(now())
+  editedAt       DateTime?
+  /// Soft delete — safeguarding retention means chat is never hard-deleted.
+  deletedAt      DateTime?
+
+  @@index([conversationId, createdAt])
+}
+
+// CONSENT
+// DYNI Blazers PRD §24 — versioned, append-only consent. Publishing a new
+// version of a required document makes it outstanding for every player again.
+
+enum ConsentDocumentType {
+  CODE_OF_CONDUCT
+  PRIVACY_NOTICE
+  MEDIA_CONSENT
+  MEDICAL_CONSENT
+  DATA_PROCESSING
+  TRIP_CONSENT
+  OTHER
+}
+
+model ConsentDocument {
+  id                Int                 @id @default(autoincrement())
+  clubId            Int?
+  club              Club?               @relation(fields: [clubId], references: [id], onDelete: SetNull)
+  type              ConsentDocumentType
+  title             String
+  /// When true, a player can't get past the consent gate until the current
+  /// version is accepted (by them or their guardian).
+  requiredForPlayers Boolean            @default(true)
+  active            Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  versions ConsentDocumentVersion[]
+
+  @@index([clubId, active])
+}
+
+model ConsentDocumentVersion {
+  id          Int             @id @default(autoincrement())
+  documentId  Int
+  document    ConsentDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version     Int
+  body        String
+  publishedAt DateTime        @default(now())
+
+  records ConsentRecord[]
+
+  @@unique([documentId, version])
+  @@index([documentId, publishedAt])
+}
+
+model ConsentRecord {
+  id               Int                    @id @default(autoincrement())
+  documentVersionId Int
+  documentVersion  ConsentDocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  /// The player this consent is *about*.
+  playerProfileId  Int
+  player           PlayerProfile          @relation(fields: [playerProfileId], references: [id], onDelete: Cascade)
+  /// The account that clicked "I accept" — the player themselves, or a guardian.
+  acceptedByUserId Int
+  acceptedBy       User                   @relation("ConsentAcceptedBy", fields: [acceptedByUserId], references: [id])
+  /// True when accepted by a linked guardian rather than the player.
+  byGuardian       Boolean                @default(false)
+  acceptedAt       DateTime               @default(now())
+
+  @@unique([documentVersionId, playerProfileId])
+  @@index([playerProfileId])
+}
+
+// REGISTRATION DRAFTS
+// A multi-step, resumable registration lives here until the applicant submits.
+// Keyed by the primary email + an unguessable resume token (cookie / emailed
+// link), because the applicant has no account yet.
+
+enum RegistrationDraftStatus {
+  DRAFT
+  SUBMITTED
+}
+
+model RegistrationDraft {
+  id          Int                     @id @default(autoincrement())
+  email       String                  @unique
+  resumeToken String                  @unique
+  /// "self" (an adult player) or "guardian" (registering a minor).
+  mode        String                  @default("self")
+  currentStep Int                     @default(1)
+  /// Accumulated per-step form values.
+  data        Json                    @default("{}")
+  status      RegistrationDraftStatus  @default(DRAFT)
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  expiresAt   DateTime
+}
+
 // TEAM
 
 model Team {
@@ -334,66 +766,176 @@ model Team {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  coaches          TeamCoach[]
-  players          PlayerProfile[]
-  trainingSessions TrainingSession[]
+  events           Event[]
   videoAssignments VideoAssignment[]
   announcements    Announcement[]
+  squads           Squad[]
+  memberships      TeamMembership[]
+  staffAssignments StaffAssignment[]
+  registrationApplicants PlayerProfile[] @relation("RegistrationApplicant")
+  conversations    Conversation[]
 }
 
-model TeamCoach {
-  id             Int          @id @default(autoincrement())
-  teamId         Int
-  team           Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  coachProfileId Int
-  coach          CoachProfile @relation(fields: [coachProfileId], references: [id], onDelete: Cascade)
-  isPrimary      Boolean      @default(false)
-  createdAt      DateTime     @default(now())
+// VENUES
 
-  @@unique([teamId, coachProfileId])
-  @@index([coachProfileId])
+model Venue {
+  id         Int      @id @default(autoincrement())
+  clubId     Int?
+  club       Club?    @relation(fields: [clubId], references: [id], onDelete: SetNull)
+  name       String
+  address    String?
+  mapLat     Float?
+  mapLng     Float?
+  notes      String?
+  /// Static fallback PIN a coach can read out for check-in when a player
+  /// can't scan the rotating QR (W5 part 4). Null = QR only.
+  checkInPin String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  events Event[]
+
+  @@index([clubId])
 }
 
-// TRAINING SESSIONS
+// EVENTS & SCHEDULING
 
-model TrainingSession {
-  id               Int           @id @default(autoincrement())
-  teamId           Int
-  team             Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  title            String
-  notes            String?
-  date             DateTime
-  startTime        String
-  endTime          String
-  location         String
-  status           SessionStatus @default(SCHEDULED)
-  createdByCoachId Int
-  createdBy        CoachProfile  @relation("SessionCreatedBy", fields: [createdByCoachId], references: [id])
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+/// An RRULE-lite recurrence rule. When an Event carries a `recurrenceId`, the
+/// concrete occurrences are materialised as their own Event rows (each with the
+/// same `recurrenceId`) at creation time — editing or cancelling one occurrence
+/// only touches that row, never the series (brief §14).
+model EventRecurrence {
+  id        Int                 @id @default(autoincrement())
+  frequency RecurrenceFrequency
+  interval  Int                 @default(1)
+  /// 0=Sunday … 6=Saturday. Used for WEEKLY; empty = same weekday as the first occurrence.
+  byWeekday Int[]               @default([])
+  until     DateTime?
+  count     Int?
+  createdAt DateTime            @default(now())
 
-  attendanceRecords AttendanceRecord[]
-  feedback          Feedback[]
+  events Event[]
+}
 
-  @@index([teamId, date])
+model Event {
+  id              Int             @id @default(autoincrement())
+  /// Null = a club-wide event (deadlines, socials) not tied to one team.
+  teamId          Int?
+  team            Team?           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  type            EventType       @default(TRAINING)
+  title           String
+  description     String?
+  venueId         Int?
+  venue           Venue?          @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  /// Free-text location used when there is no Venue row (kept from the old model).
+  locationText    String?
+  startAt         DateTime
+  endAt           DateTime
+  /// "Be there by" — shown to players, distinct from the official start.
+  arrivalTime     DateTime?
+  rsvpDeadline    DateTime?
+  capacity        Int?
+  /// Set by the reminder cron once it has nudged non-responders for this event,
+  /// so a player is nudged at most once per event (lib/reminders.ts).
+  rsvpReminderSentAt DateTime?
+  dressCode       String?
+  visibility      EventVisibility @default(TEAM)
+  status          EventStatus     @default(SCHEDULED)
+  recurrenceId    Int?
+  recurrence      EventRecurrence? @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
+  createdByUserId Int
+  createdBy       User            @relation("EventCreatedBy", fields: [createdByUserId], references: [id])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  attendanceRecords     AttendanceRecord[]
+  feedback              Feedback[]
+  availabilityResponses AvailabilityResponse[]
+  qrTokens              QrCheckInToken[]
+  conversations         Conversation[]
+
+  @@index([teamId, startAt])
+  @@index([startAt])
+  @@index([recurrenceId])
+}
+
+/// A player's (or staff's) RSVP to an event — kept deliberately separate from
+/// AttendanceRecord: an RSVP is an intention, attendance is what happened
+/// (brief §11 — "do not treat RSVP as confirmed attendance").
+model AvailabilityResponse {
+  id          Int          @id @default(autoincrement())
+  eventId     Int
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  response    RsvpResponse
+  note        String?
+  respondedAt DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([eventId, userId])
+  @@index([eventId])
 }
 
 // ATTENDANCE
 
 model AttendanceRecord {
   id                 Int              @id @default(autoincrement())
-  sessionId          Int
-  session            TrainingSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  eventId            Int
+  event              Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   playerId           Int
   player             PlayerProfile    @relation(fields: [playerId], references: [id], onDelete: Cascade)
   status             AttendanceStatus
   note               String?
-  recordedByCoachId  Int
-  recordedBy         CoachProfile     @relation("AttendanceRecordedBy", fields: [recordedByCoachId], references: [id])
+  /// How the row got here. COACH = a coach marked it; QR / PIN = the player
+  /// checked themselves in at the venue.
+  method             AttendanceMethod @default(COACH)
+  checkInAt          DateTime?
+  checkOutAt         DateTime?
+  /// Set (with recordedBy) when a coach marks/edits; null for a pure self-check-in.
+  recordedByCoachId  Int?
+  recordedBy         CoachProfile?    @relation("AttendanceRecordedBy", fields: [recordedByCoachId], references: [id])
   recordedAt         DateTime         @default(now())
+  /// A coach can "verify" a self-check-in (spot-check the register).
+  verifiedByCoachId  Int?
+  verifiedBy         CoachProfile?    @relation("AttendanceVerifiedBy", fields: [verifiedByCoachId], references: [id])
+  verifiedAt         DateTime?
 
-  @@unique([sessionId, playerId])
+  audits AttendanceAudit[]
+
+  @@unique([eventId, playerId])
   @@index([playerId])
+}
+
+/// Before/after diff for every correction to an AttendanceRecord — a routine,
+/// frequent operation that needs its own fast, structured trail and its own UI
+/// (brief §11 — "attendance correction with audit history").
+model AttendanceAudit {
+  id              Int              @id @default(autoincrement())
+  recordId        Int
+  record          AttendanceRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  changedByUserId Int
+  changedBy       User             @relation("AttendanceAuditBy", fields: [changedByUserId], references: [id])
+  before          Json
+  after           Json
+  reason          String
+  changedAt       DateTime         @default(now())
+
+  @@index([recordId])
+}
+
+/// Short-lived rotating token rendered as a QR code on the venue check-in
+/// screen. Verified server-side against the event + a time window; the raw
+/// token is never stored, only its SHA-256 hash.
+model QrCheckInToken {
+  id        Int      @id @default(autoincrement())
+  eventId   Int
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
 }
 
 // VIDEOS
@@ -478,8 +1020,8 @@ model Feedback {
   coach        CoachProfile            @relation("FeedbackCoach", fields: [coachId], references: [id])
   evaluationId Int?
   evaluation   PerformanceEvaluation?  @relation(fields: [evaluationId], references: [id], onDelete: SetNull)
-  sessionId    Int?
-  session      TrainingSession?        @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  eventId      Int?
+  event        Event?                  @relation(fields: [eventId], references: [id], onDelete: SetNull)
   message      String
   createdAt    DateTime                @default(now())
 
@@ -489,17 +1031,37 @@ model Feedback {
 // NOTIFICATIONS
 
 model Notification {
-  id        Int              @id @default(autoincrement())
+  id        Int                  @id @default(autoincrement())
   userId    Int
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      NotificationType
+  category  NotificationCategory  @default(ANNOUNCEMENTS)
   title     String
   message   String
   linkPath  String?
-  isRead    Boolean          @default(false)
-  createdAt DateTime         @default(now())
+  /// Set when a notification is about a specific thing (an event, an
+  /// announcement). A fresh notification with the same key replaces any earlier
+  /// unread one for that user, so repeat edits don't stack (Doc 10 — "digested
+  /// / de-duplicated, not one-per-event").
+  dedupeKey String?
+  isRead    Boolean              @default(false)
+  createdAt DateTime             @default(now())
 
   @@index([userId, isRead])
+  @@index([userId, dedupeKey])
+}
+
+/// Per-user channel choice for a notification category. In-app is always on;
+/// only email + push are opt-in/out. A missing row means the category default.
+model NotificationPreference {
+  id       Int                  @id @default(autoincrement())
+  userId   Int
+  user     User                 @relation("NotificationPrefs", fields: [userId], references: [id], onDelete: Cascade)
+  category NotificationCategory
+  email    Boolean              @default(false)
+  push     Boolean              @default(true)
+
+  @@unique([userId, category])
 }
 
 // ANNOUNCEMENTS
@@ -513,7 +1075,84 @@ model Announcement {
   team         Team?             @relation(fields: [teamId], references: [id], onDelete: Cascade)
   title        String
   body         String
+  /// When true, readers see an "acknowledge" prompt and the author gets a
+  /// who-hasn't-read-it list (brief §12).
+  requiresAck  Boolean           @default(false)
+  /// Shown above the fold on the announcements surface until this passes.
+  pinnedUntil  DateTime?
   createdAt    DateTime          @default(now())
 
+  acks AnnouncementAck[]
+
   @@index([scope, teamId])
+}
+
+model AnnouncementAck {
+  id             Int          @id @default(autoincrement())
+  announcementId Int
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  userId         Int
+  user           User         @relation("AnnouncementAckUser", fields: [userId], references: [id], onDelete: Cascade)
+  acknowledgedAt DateTime     @default(now())
+
+  @@unique([announcementId, userId])
+  @@index([userId])
+}
+
+// TRAINING — session plans + a reusable drill library (brief §14, Phase 2).
+
+enum DrillCategory {
+  WARMUP
+  BALL_HANDLING
+  PASSING
+  SHOOTING
+  FINISHING
+  DEFENSE
+  REBOUNDING
+  TRANSITION
+  SET_PLAYS
+  CONDITIONING
+  SCRIMMAGE
+  COOLDOWN
+  OTHER
+}
+
+enum DrillDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+/// A reusable practice drill. `clubId` null = a shared/global drill visible to
+/// every club; a club's own drills are private to it. Coaches share one library
+/// per club and can edit any drill in it; only the author (or an admin) deletes.
+model Drill {
+  id              Int             @id @default(autoincrement())
+  clubId          Int?
+  club            Club?           @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  name            String
+  category        DrillCategory
+  difficulty      DrillDifficulty @default(INTERMEDIATE)
+  /// One-line summary shown in the library list.
+  summary         String?
+  /// Full setup + how to run it (markdown-ish plain text).
+  instructions    String?
+  coachingPoints  String[]        @default([])
+  commonMistakes  String[]        @default([])
+  durationMinutes Int?
+  minPlayers      Int?
+  maxPlayers      Int?
+  equipment       String[]        @default([])
+  /// Court-diagram annotations (players / cones / movement arrows), drawn by
+  /// components/training/CourtDiagram. Shape owned by that component.
+  courtDiagram    Json?
+  tags            String[]        @default([])
+  createdByUserId Int?
+  createdBy       User?           @relation("DrillCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  /// Soft-hide from pickers without losing plans that reference it.
+  archivedAt      DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([clubId, category])
 }

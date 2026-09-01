@@ -1,195 +1,302 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+
+import { cn } from "@/lib/cn";
+import AuthShell from "@/components/auth/AuthShell";
+import { Button } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/TextField";
+import { Select } from "@/components/ui/Select";
+import Alert from "@/components/ui/Alert";
 
 interface TeamOption {
   id: number;
   name: string;
   ageGroup: string | null;
 }
+type Mode = "self" | "guardian";
+type Data = Record<string, string>;
 
 const POSITIONS = ["PG", "SG", "SF", "PF", "C"] as const;
+
+const STEP_TITLES: Record<Mode, string[]> = {
+  self: ["Your account", "About you", "Your team", "Agreement", "Review"],
+  guardian: ["Your account", "Your child", "Their team", "Agreement", "Review"],
+};
 
 export default function RegisterPage() {
   const router = useRouter();
   const [teams, setTeams] = useState<TeamOption[]>([]);
-  const [teamsError, setTeamsError] = useState("");
+  const [ready, setReady] = useState(false);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [teamId, setTeamId] = useState("");
-  const [position, setPosition] = useState("");
-  const [jerseyNumber, setJerseyNumber] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [guardianName, setGuardianName] = useState("");
-  const [guardianContact, setGuardianContact] = useState("");
-  const [consentAccepted, setConsentAccepted] = useState(false);
-
+  const [mode, setMode] = useState<Mode>("self");
+  const [step, setStep] = useState(0); // 0 = the email/mode entry screen
+  const [d, setD] = useState<Data>({});
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const set = (k: string) => (e: { target: { value: string } }) => setD((p) => ({ ...p, [k]: e.target.value }));
 
   useEffect(() => {
-    fetch("/api/public/teams")
-      .then((res) => res.json())
-      .then((data) => setTeams(data))
-      .catch(() => setTeamsError("Couldn't load the team list — refresh to try again."));
+    fetch("/api/v1/public/teams")
+      .then((r) => r.json())
+      .then(setTeams)
+      .catch(() => {});
+    fetch("/api/v1/registration/draft")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((view) => {
+        if (view) {
+          setMode(view.mode);
+          setD({ ...(view.data ?? {}), email: view.email });
+          setStep(Math.min(Math.max(view.currentStep, 1), 5));
+        }
+      })
+      .finally(() => setReady(true));
   }, []);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function api(method: string, path: string, body?: unknown) {
+    const res = await fetch(path, {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error ?? "Something went wrong.");
+    return json;
+  }
+
+  async function startDraft(e: FormEvent) {
     e.preventDefault();
     setError("");
-
-    if (!consentAccepted) {
-      setError("You must accept the club's registration terms to continue.");
-      return;
-    }
-    if (!teamId) {
-      setError("Choose a team.");
-      return;
-    }
-
-    setLoading(true);
+    setBusy(true);
     try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          teamId: Number(teamId),
-          position: position || undefined,
-          jerseyNumber: jerseyNumber ? Number(jerseyNumber) : undefined,
-          dateOfBirth,
-          contactPhone: contactPhone || undefined,
-          guardianName: guardianName || undefined,
-          guardianContact: guardianContact || undefined,
-          consentAccepted: true,
-        }),
-      });
-
-      const body = await res.json();
-      if (!res.ok) {
-        setError(body.error ?? "Something went wrong.");
-        return;
-      }
-
-      const signInResult = await signIn("credentials", { email, password, redirect: false });
-      if (!signInResult || signInResult.error) {
-        // Account was created fine; sign-in just didn't complete automatically — send them to log in manually.
-        router.push("/login");
-        return;
-      }
-
-      router.push("/registration-status");
-      router.refresh();
-    } catch {
-      setError("Something went wrong. Please try again.");
+      const view = await api("POST", "/api/v1/registration/draft", { email: d.email, mode });
+      setD({ ...view.data, email: d.email });
+      setStep(1);
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   }
 
+  async function next(fields: string[]) {
+    setError("");
+    setBusy(true);
+    try {
+      const patch = Object.fromEntries(fields.map((k) => [k, d[k] ?? ""]));
+      await api("PATCH", "/api/v1/registration/draft", { currentStep: step + 1, data: patch });
+      setStep(step + 1);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submit() {
+    setError("");
+    setBusy(true);
+    try {
+      await api("POST", "/api/v1/registration/draft/submit");
+      const email = mode === "self" ? d.email : d.email;
+      const password = mode === "self" ? d.password : d.guardianPassword;
+      const r = await signIn("credentials", { email, password, redirect: false });
+      if (!r || r.error) return router.push("/login");
+      router.push(mode === "self" ? "/registration-status" : "/guardian");
+      router.refresh();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const titles = STEP_TITLES[mode];
+
+  const teamSelect = (
+    <Select label="Team" value={d.teamId ?? ""} onChange={set("teamId")} required>
+      <option value="">Select a team…</option>
+      {teams.map((t) => (
+        <option key={t.id} value={t.id}>
+          {t.name}{t.ageGroup ? ` (${t.ageGroup})` : ""}
+        </option>
+      ))}
+    </Select>
+  );
+  const positionSelect = (
+    <Select label="Preferred position" hint="Optional" value={d.position ?? ""} onChange={set("position")}>
+      <option value="">Not sure yet</option>
+      {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+    </Select>
+  );
+
+  const review = useMemo(() => {
+    const rows: [string, string | undefined][] =
+      mode === "self"
+        ? [
+            ["Name", d.name],
+            ["Email", d.email],
+            ["Date of birth", d.dateOfBirth],
+            ["Phone", d.contactPhone],
+            ["Team", teams.find((t) => String(t.id) === d.teamId)?.name],
+            ["Position", d.position],
+          ]
+        : [
+            ["Guardian", d.guardianName],
+            ["Guardian email", d.email],
+            ["Relationship", d.relationshipLabel],
+            ["Child", d.childName],
+            ["Child DOB", d.childDateOfBirth],
+            ["Child email", d.childEmail || "— (no login)"],
+            ["Team", teams.find((t) => String(t.id) === d.teamId)?.name],
+            ["Position", d.position],
+          ];
+    return rows.filter(([, v]) => v);
+  }, [mode, d, teams]);
+
   return (
-    <main className="flex min-h-[calc(100vh-65px)] items-center justify-center bg-gradient-to-b from-orange-50 via-white to-white px-4 py-10">
-      <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-court-500 to-court-700 text-lg shadow-sm shadow-court-500/30">
-          🏀
-        </span>
-        <h1 className="mb-2 mt-4 text-3xl font-extrabold tracking-tight text-slate-900">Register to join</h1>
-        <p className="mb-6 text-slate-600">
-          Submit your details below. An administrator reviews every registration before you get full access —
-          you'll be able to check your status as soon as you sign up.
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Full name</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} required
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} autoComplete="new-password"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Date of birth</label>
-              <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Team</label>
-              <select value={teamId} onChange={(e) => setTeamId(e.target.value)} required
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20">
-                <option value="">Select a team...</option>
-                {teams.map((t) => (
-                  <option key={t.id} value={t.id}>{t.name}{t.ageGroup ? ` (${t.ageGroup})` : ""}</option>
-                ))}
-              </select>
-              {teamsError && <p className="mt-1 text-xs text-rose-600">{teamsError}</p>}
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Position (optional)</label>
-              <select value={position} onChange={(e) => setPosition(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20">
-                <option value="">Not sure yet</option>
-                {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Jersey number (optional)</label>
-              <input type="number" min={0} max={99} value={jerseyNumber} onChange={(e) => setJerseyNumber(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Your phone (optional)</label>
-              <input type="tel" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Parent/guardian name (if under 18)</label>
-              <input type="text" value={guardianName} onChange={(e) => setGuardianName(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Parent/guardian contact</label>
-              <input type="text" value={guardianContact} onChange={(e) => setGuardianContact(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20" />
-            </div>
+    <AuthShell
+      width="lg"
+      title="Register to join"
+      subtitle="Your progress is saved as you go — you can leave and come back to finish."
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link href="/login" className="font-semibold text-flame-ink hover:underline">Sign in</Link>
+        </>
+      }
+    >
+      {!ready ? (
+        <p className="text-sm text-ink-dim">Loading…</p>
+      ) : step === 0 ? (
+        <form onSubmit={startDraft} className="flex flex-col gap-4">
+          <div className="flex rounded-full border border-line p-0.5 text-sm font-semibold">
+            {(["self", "guardian"] as Mode[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                className={cn("flex-1 rounded-full px-3 py-1.5 transition", mode === m ? "bg-flame/15 text-flame-ink" : "text-ink-dim hover:text-ink")}
+              >
+                {m === "self" ? "I'm the player (18+)" : "I'm a parent or guardian"}
+              </button>
+            ))}
           </div>
-
-          <label className="flex items-start gap-2 text-sm text-slate-600">
-            <input type="checkbox" checked={consentAccepted} onChange={(e) => setConsentAccepted(e.target.checked)} className="mt-1" required />
-            <span>
-              I agree to the club's code of conduct and consent to my (or my child's) information being processed
-              for the purposes of team administration, in line with the club's privacy notice.
-            </span>
-          </label>
-
-          {error && <div className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700" role="alert">{error}</div>}
-
-          <button type="submit" disabled={loading}
-            className="w-full rounded-full bg-gradient-to-r from-court-500 to-court-700 px-4 py-2.5 font-bold text-white shadow-sm shadow-court-500/30 transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50">
-            {loading ? "Submitting..." : "Submit registration"}
-          </button>
+          <TextField
+            label={mode === "self" ? "Your email" : "Your email (the guardian's)"}
+            type="email"
+            value={d.email ?? ""}
+            onChange={set("email")}
+            required
+            autoComplete="email"
+          />
+          {error && <Alert tone="danger">{error}</Alert>}
+          <Button type="submit" size="lg" fullWidth loading={busy}>Start</Button>
         </form>
+      ) : (
+        <div className="flex flex-col gap-5">
+          <ol className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold uppercase tracking-wider">
+            {titles.map((t, i) => (
+              <li key={t} className={cn(i + 1 === step ? "text-flame-ink" : i + 1 < step ? "text-ink-dim" : "text-ink-faint")}>
+                {i + 1}. {t}
+              </li>
+            ))}
+          </ol>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
-          Already have an account? <Link href="/login" className="font-semibold text-court-700 hover:text-court-800">Log in</Link>
-        </p>
-      </div>
-    </main>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (step === 5) return submit();
+              const fieldsByStep: Record<number, string[]> =
+                mode === "self"
+                  ? { 1: ["name", "password"], 2: ["dateOfBirth", "contactPhone"], 3: ["teamId", "position"], 4: [] }
+                  : {
+                      1: ["guardianName", "guardianPassword", "guardianPhone", "relationshipLabel"],
+                      2: ["childName", "childDateOfBirth", "childEmail"],
+                      3: ["teamId", "position"],
+                      4: [],
+                    };
+              next(fieldsByStep[step] ?? []);
+            }}
+            className="flex flex-col gap-4"
+          >
+            {mode === "self" && step === 1 && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <TextField label="Full name" value={d.name ?? ""} onChange={set("name")} required />
+                <TextField label="Password" type="password" value={d.password ?? ""} onChange={set("password")} required minLength={8} autoComplete="new-password" hint="At least 8 characters." />
+              </div>
+            )}
+            {mode === "self" && step === 2 && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <TextField label="Date of birth" type="date" value={d.dateOfBirth ?? ""} onChange={set("dateOfBirth")} required />
+                <TextField label="Your phone" hint="Optional" type="tel" value={d.contactPhone ?? ""} onChange={set("contactPhone")} />
+              </div>
+            )}
+
+            {mode === "guardian" && step === 1 && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <TextField label="Your full name" value={d.guardianName ?? ""} onChange={set("guardianName")} required />
+                <TextField label="Password" type="password" value={d.guardianPassword ?? ""} onChange={set("guardianPassword")} required minLength={8} autoComplete="new-password" hint="At least 8 characters." />
+                <TextField label="Your phone" hint="Optional" type="tel" value={d.guardianPhone ?? ""} onChange={set("guardianPhone")} />
+                <TextField label="Relationship to the player" value={d.relationshipLabel ?? "Parent"} onChange={set("relationshipLabel")} required />
+              </div>
+            )}
+            {mode === "guardian" && step === 2 && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <TextField label="Child's full name" value={d.childName ?? ""} onChange={set("childName")} required />
+                <TextField label="Child's date of birth" type="date" value={d.childDateOfBirth ?? ""} onChange={set("childDateOfBirth")} required />
+                <TextField label="Child's email" hint="Optional — leave blank if they won't have a login" type="email" value={d.childEmail ?? ""} onChange={set("childEmail")} autoComplete="off" />
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {teamSelect}
+                {positionSelect}
+              </div>
+            )}
+
+            {step === 4 && (
+              <label className="flex items-start gap-2.5 text-sm text-ink-dim">
+                <input type="checkbox" checked={d.consent === "yes"} onChange={(e) => setD((p) => ({ ...p, consent: e.target.checked ? "yes" : "" }))} className="mt-1 h-4 w-4 accent-flame" required />
+                <span>
+                  I agree to the club&apos;s code of conduct and consent to my (or my child&apos;s) information being
+                  processed for team administration, in line with the club&apos;s privacy notice. The full documents
+                  are shown once you sign in.
+                </span>
+              </label>
+            )}
+
+            {step === 5 && (
+              <dl className="rounded-card border border-line bg-surface-2 p-4 text-sm">
+                {review.map(([k, v]) => (
+                  <div key={k} className="flex gap-3 py-1">
+                    <dt className="w-32 flex-none font-mono text-[11px] uppercase tracking-wider text-ink-faint">{k}</dt>
+                    <dd className="text-ink">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+
+            {error && <Alert tone="danger">{error}</Alert>}
+
+            <div className="flex items-center gap-3">
+              {step > 1 && (
+                <button type="button" onClick={() => setStep(step - 1)} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink-dim hover:text-ink">
+                  Back
+                </button>
+              )}
+              <Button type="submit" loading={busy} disabled={step === 4 && d.consent !== "yes"}>
+                {step === 5 ? "Submit registration" : "Continue"}
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
+    </AuthShell>
   );
 }

@@ -26,7 +26,7 @@ export default function RecordEvaluationForm({ players }: { players: PlayerOptio
     setLoading(true);
 
     try {
-      const res = await fetch("/api/evaluations", {
+      const res = await fetch("/api/v1/evaluations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -68,7 +68,7 @@ export default function RecordEvaluationForm({ players }: { players: PlayerOptio
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-surface p-5 space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <select value={playerId} onChange={(e) => setPlayerId(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20">
           {players.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}

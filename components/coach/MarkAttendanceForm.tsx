@@ -12,7 +12,7 @@ interface PlayerRow {
   currentStatus: Status | null;
 }
 
-export default function MarkAttendanceForm({ sessionId, players }: { sessionId: number; players: PlayerRow[] }) {
+export default function MarkAttendanceForm({ eventId, players }: { eventId: number; players: PlayerRow[] }) {
   const router = useRouter();
   const [statuses, setStatuses] = useState<Record<number, Status>>(
     Object.fromEntries(players.map((p) => [p.id, p.currentStatus ?? "PRESENT"]))
@@ -24,7 +24,7 @@ export default function MarkAttendanceForm({ sessionId, players }: { sessionId: 
     setSaving(true);
     setSaved(false);
     try {
-      await fetch(`/api/sessions/${sessionId}/attendance`, {
+      await fetch(`/api/v1/events/${eventId}/attendance`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

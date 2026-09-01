@@ -16,12 +16,12 @@ export default function NotificationsList({ initial }: { initial: NotificationIt
 
   async function markRead(id: number) {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
-    await fetch(`/api/notifications/${id}/read`, { method: "PATCH" });
+    await fetch(`/api/v1/notifications/${id}/read`, { method: "PATCH" });
   }
 
   async function markAllRead() {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    await fetch("/api/notifications/read-all", { method: "PATCH" });
+    await fetch("/api/v1/notifications/read-all", { method: "PATCH" });
   }
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -34,7 +34,7 @@ export default function NotificationsList({ initial }: { initial: NotificationIt
         </button>
       )}
 
-      <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-surface">
         {notifications.map((n) => (
           <li
             key={n.id}

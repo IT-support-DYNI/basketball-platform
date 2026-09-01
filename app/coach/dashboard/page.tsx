@@ -3,94 +3,118 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { getCoachDashboard } from "@/lib/dashboard";
+import { actionItemsFor } from "@/lib/action-items";
+import { eventDayLabel } from "@/lib/events";
 import StatTile from "@/components/StatTile";
+import ActionItems from "@/components/dashboard/ActionItems";
+import PageHeader from "@/components/ui/PageHeader";
+import Card from "@/components/ui/Card";
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink">{children}</h2>;
+}
+
+const quickLink =
+  "rounded-full border border-line bg-surface-2 px-3 py-1.5 text-sm font-semibold text-ink-dim transition hover:border-line-strong hover:text-ink";
 
 export default async function CoachDashboardPage() {
   const session = await getServerSession(authOptions);
-  const { numberOfPlayers, nextSession, attendanceSummary, recentAnnouncements, recentVideos, playersNeedingReview } =
-    await getCoachDashboard(session!);
+  const [
+    { numberOfPlayers, nextSession, attendanceSummary, recentAnnouncements, recentVideos, playersNeedingReview },
+    actionItems,
+  ] = await Promise.all([getCoachDashboard(session!), actionItemsFor(session!)]);
 
   return (
-    <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Welcome back, {session?.user?.name} 🏀</h1>
-      <p className="mt-1 text-slate-600">Here's what's happening across your team(s).</p>
+    <main className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow="Coach"
+        title={`Welcome back, ${session?.user?.name?.split(" ")[0] ?? "coach"}`}
+        lead="What's happening across your team."
+      />
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <StatTile label="Number of Players" value={numberOfPlayers} icon="🧑‍🤝‍🧑" accent="orange" href="/coach/players" />
+      <ActionItems items={actionItems} />
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatTile label="Players" value={numberOfPlayers} accent="flame" href="/coach/players" />
         <StatTile
-          label="Next Training Session"
-          value={nextSession ? `${nextSession.title} · ${new Date(nextSession.date).toLocaleDateString()}` : "None scheduled"}
-          icon="📅"
-          accent="sky"
+          label="Next session"
+          value={nextSession ? nextSession.title : "None scheduled"}
+          sub={nextSession ? eventDayLabel(nextSession.startAt) : undefined}
+          accent="info"
           href="/coach/training"
         />
         <StatTile
-          label="Attendance Summary"
-          value={attendanceSummary.percentage != null ? `${attendanceSummary.percentage}%` : "No data yet"}
-          icon="✅"
-          accent="emerald"
+          label="Team attendance"
+          value={attendanceSummary.percentage != null ? `${attendanceSummary.percentage}%` : "—"}
+          sub={attendanceSummary.percentage != null ? "this season" : "no data yet"}
+          accent="success"
           href="/coach/attendance"
         />
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h2 className="font-bold text-slate-900">Recent Announcements</h2>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card as="section">
+          <SectionTitle>Recent announcements</SectionTitle>
           {recentAnnouncements.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500">Nothing posted yet.</p>
+            <p className="mt-3 text-sm text-ink-dim">Nothing posted yet.</p>
           ) : (
             <ul className="mt-3 space-y-3">
               {recentAnnouncements.slice(0, 5).map((a) => (
                 <li key={a.id} className="text-sm">
-                  <p className="font-semibold text-slate-800">{a.title}</p>
-                  <p className="text-slate-500">{new Date(a.createdAt).toLocaleDateString()}</p>
+                  <p className="font-semibold text-ink">{a.title}</p>
+                  <p className="text-ink-faint">{new Date(a.createdAt).toLocaleDateString()}</p>
                 </li>
               ))}
             </ul>
           )}
-        </section>
+        </Card>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h2 className="font-bold text-slate-900">Recently Added Videos</h2>
+        <Card as="section">
+          <SectionTitle>Recently added videos</SectionTitle>
           {recentVideos.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500">You haven't uploaded any videos yet.</p>
+            <p className="mt-3 text-sm text-ink-dim">You haven't uploaded any videos yet.</p>
           ) : (
             <ul className="mt-3 space-y-2">
               {recentVideos.map((v) => (
-                <li key={v.id} className="text-sm font-medium text-slate-800">{v.title}</li>
+                <li key={v.id} className="text-sm font-medium text-ink">{v.title}</li>
               ))}
             </ul>
           )}
-        </section>
+        </Card>
       </div>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-bold text-slate-900">Players Requiring Performance Review</h2>
-        <p className="mt-1 text-xs text-slate-500">No evaluation recorded in the last 30 days.</p>
+      <Card as="section">
+        <SectionTitle>Players requiring a performance review</SectionTitle>
+        <p className="mt-1 text-xs text-ink-faint">No evaluation recorded in the last 30 days.</p>
         {playersNeedingReview.length === 0 ? (
-          <p className="mt-3 text-sm text-emerald-700">Everyone's up to date 🎉</p>
+          <p className="mt-3 text-sm text-success">Everyone's up to date.</p>
         ) : (
           <ul className="mt-3 flex flex-wrap gap-2">
             {playersNeedingReview.map((p) => (
-              <Link key={p.id} href="/coach/performance" className="rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-800 hover:bg-amber-100">
-                {p.name}
-              </Link>
+              <li key={p.id}>
+                <Link
+                  href="/coach/performance"
+                  className="block rounded-full border border-warning/40 bg-warning/10 px-3 py-1 text-sm font-semibold text-warning hover:bg-warning/20"
+                >
+                  {p.name}
+                </Link>
+              </li>
             ))}
           </ul>
         )}
-      </section>
+      </Card>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-bold text-slate-900">Quick Actions</h2>
+      <Card as="section">
+        <SectionTitle>Quick actions</SectionTitle>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Link href="/coach/training" className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Create Training</Link>
-          <Link href="/coach/attendance" className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Mark Attendance</Link>
-          <Link href="/coach/players" className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Add Player</Link>
-          <Link href="/coach/videos" className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Upload Video</Link>
-          <Link href="/coach/performance" className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Record Performance</Link>
-          <Link href="/coach/announcements" className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Send Announcement</Link>
+          <Link href="/coach/training" className={quickLink}>Create training</Link>
+          <Link href="/coach/attendance" className={quickLink}>Mark attendance</Link>
+          <Link href="/coach/players" className={quickLink}>Add player</Link>
+          <Link href="/coach/videos" className={quickLink}>Upload video</Link>
+          <Link href="/coach/performance" className={quickLink}>Record performance</Link>
+          <Link href="/coach/announcements" className={quickLink}>Send announcement</Link>
         </div>
-      </section>
+      </Card>
     </main>
   );
 }

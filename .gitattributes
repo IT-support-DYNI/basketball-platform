@@ -1,0 +1,11 @@
+# Prisma migration checksums are computed over exact file bytes — keep them LF
+# on every platform so `prisma migrate` doesn't see a "modified" migration.
+prisma/migrations/**/*.sql text eol=lf
+prisma/schema.prisma      text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.js   text eol=lf
+*.mjs  text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.md   text eol=lf

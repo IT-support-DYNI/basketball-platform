@@ -2,14 +2,158 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * DYNI Blazers design tokens.
+ *
+ * Dark-first: the bare :root block is the dark palette (the club identity).
+ * Light is an override, applied when the OS prefers light AND the user has not
+ * forced dark, or when the user explicitly picks light. The [data-theme] blocks
+ * let the in-app toggle win over the OS preference in both directions.
+ *
+ * Solid colours are stored as space-separated RGB channels (not hex) so Tailwind
+ * can apply opacity modifiers — `bg-flame/10`, `ring-flame/25` etc. Consume them
+ * as `rgb(var(--token))` in hand-written CSS. `--line*` are pre-baked rgba.
+ *
+ * Canonical values and rationale: lib/design/tokens.ts. Brand colours are
+ * sampled from the club logo.
+ */
+
 :root {
+  color-scheme: dark;
+
+  --ground: 11 11 15;
+  --surface: 20 20 25;
+  --surface-2: 28 28 35;
+  --surface-3: 38 38 47;
+
+  --ink: 244 241 236;
+  --ink-dim: 155 155 166;
+  --ink-faint: 107 107 119;
+
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  --flame: 240 72 0;        /* primary — buttons, active nav, key figures */
+  --flame-ink: 255 122 61;  /* orange text / links on dark (lighter for contrast) */
+  --ember: 245 133 31;      /* secondary accent, gradients */
+  --gold: 245 196 81;       /* flame-tip highlight, live indicator */
+  --on-flame: 255 255 255;  /* text on a flame-filled surface */
+
+  --success: 53 193 94;
+  --warning: 224 164 23;
+  --danger: 240 80 60;
+  --info: 91 155 240;
+
+  --radius-card: 12px;
+  --radius-control: 8px;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 26px -14px rgba(0, 0, 0, 0.55);
+  --shadow-pop: 0 12px 40px -12px rgba(0, 0, 0, 0.7);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --ground: 247 244 239;
+    --surface: 255 255 255;
+    --surface-2: 242 238 231;
+    --surface-3: 233 227 217;
+    --ink: 24 23 28;
+    --ink-dim: 78 75 86;
+    --ink-faint: 105 101 116;
+    --line: rgba(20, 16, 12, 0.12);
+    --line-strong: rgba(20, 16, 12, 0.22);
+    --flame: 196 56 0;
+    --flame-ink: 168 48 0;
+    --ember: 196 103 11;
+    --gold: 169 118 26;
+    --success: 18 112 48;
+    --warning: 138 90 0;
+    --danger: 192 48 31;
+    --info: 29 85 173;
+    --shadow-card: 0 1px 2px rgba(60, 40, 20, 0.08), 0 12px 28px -16px rgba(60, 40, 20, 0.18);
+    --shadow-pop: 0 16px 44px -14px rgba(60, 40, 20, 0.28);
+  }
+}
+
+:root[data-theme="light"] {
   color-scheme: light;
+  --ground: 247 244 239;
+  --surface: 255 255 255;
+  --surface-2: 242 238 231;
+  --surface-3: 233 227 217;
+  --ink: 24 23 28;
+  --ink-dim: 78 75 86;
+  --ink-faint: 105 101 116;
+  --line: rgba(20, 16, 12, 0.12);
+  --line-strong: rgba(20, 16, 12, 0.22);
+  --flame: 196 56 0;
+  --flame-ink: 168 48 0;
+  --ember: 196 103 11;
+  --gold: 169 118 26;
+  --success: 18 112 48;
+  --warning: 138 90 0;
+  --danger: 192 48 31;
+  --info: 29 85 173;
+  --shadow-card: 0 1px 2px rgba(60, 40, 20, 0.08), 0 12px 28px -16px rgba(60, 40, 20, 0.18);
+  --shadow-pop: 0 16px 44px -14px rgba(60, 40, 20, 0.28);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: 11 11 15;
+  --surface: 20 20 25;
+  --surface-2: 28 28 35;
+  --surface-3: 38 38 47;
+  --ink: 244 241 236;
+  --ink-dim: 155 155 166;
+  --ink-faint: 107 107 119;
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --flame: 240 72 0;
+  --flame-ink: 255 122 61;
+  --ember: 245 133 31;
+  --gold: 245 196 81;
+  --success: 53 193 94;
+  --warning: 224 164 23;
+  --danger: 240 80 60;
+  --info: 91 155 240;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 26px -14px rgba(0, 0, 0, 0.55);
+  --shadow-pop: 0 12px 40px -12px rgba(0, 0, 0, 0.7);
+}
+
+* {
+  border-color: var(--line);
 }
 
 html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: rgb(var(--ground));
+  color: rgb(var(--ink));
+}
+
 ::selection {
-  @apply bg-court-100 text-court-700;
+  background: rgb(var(--flame) / 0.3);
+  color: rgb(var(--ink));
+}
+
+/* Focus ring — visible, brand-coloured, consistent everywhere. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid rgb(var(--flame-ink));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Number-heavy cells line up. */
+.tabular {
+  font-variant-numeric: tabular-nums;
 }

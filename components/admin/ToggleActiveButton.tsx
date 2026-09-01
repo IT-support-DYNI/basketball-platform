@@ -10,7 +10,7 @@ export default function ToggleActiveButton({ userId, isActive }: { userId: numbe
   async function toggle() {
     setLoading(true);
     try {
-      await fetch(`/api/users/${userId}`, {
+      await fetch(`/api/v1/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !isActive }),

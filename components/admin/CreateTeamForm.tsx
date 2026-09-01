@@ -18,7 +18,7 @@ export default function CreateTeamForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/teams", {
+      const res = await fetch("/api/v1/teams", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, ageGroup: ageGroup || undefined, description: description || undefined }),
@@ -53,7 +53,7 @@ export default function CreateTeamForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-surface p-5 space-y-4">
       <input
         type="text"
         placeholder="Team name"

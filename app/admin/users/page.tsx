@@ -17,8 +17,8 @@ export default async function AdminUsersPage() {
         <CreateStaffUserForm />
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <table className="w-full text-sm">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-surface">
+        <table className="w-full min-w-[38rem] text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-4 py-3">Name</th>

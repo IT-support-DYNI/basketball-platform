@@ -55,7 +55,7 @@ export default function PushNotificationToggle() {
       });
 
       const json = subscription.toJSON();
-      await fetch("/api/push/subscribe", {
+      await fetch("/api/v1/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
@@ -76,7 +76,7 @@ export default function PushNotificationToggle() {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
       if (subscription) {
-        await fetch("/api/push/subscribe", {
+        await fetch("/api/v1/push/subscribe", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ endpoint: subscription.endpoint }),

@@ -2,17 +2,18 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Basketball Team Platform",
-    short_name: "Hoops",
+    name: "DYNI Blazers",
+    short_name: "DYNI Blazers",
     description:
-      "Team management and player development for basketball coaches and players.",
+      "DYNI Blazers club platform — schedule, attendance, communication and player development for members and staff.",
     start_url: "/",
     display: "standalone",
-    background_color: "#f8fafc",
-    theme_color: "#ea580c",
+    background_color: "#0b0b0f",
+    theme_color: "#0b0b0f",
     icons: [
-      { src: "/icons/icon.svg", sizes: "any", type: "image/svg+xml" },
-      { src: "/icons/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" },
+      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }

@@ -2,6 +2,10 @@ import { Session } from "next-auth";
 
 import { computeAttendanceStats } from "./attendance";
 import { prisma } from "./prisma";
+import { rosterPlayerFilter } from "./roster";
+
+/** Membership statuses that don't count towards a team's live roster size. */
+const OFF_ROSTER = ["FORMER", "INACTIVE"] as const;
 
 /*
  * Shared by app/api/dashboard/route.ts (for any future non-web client)
@@ -12,7 +16,7 @@ import { prisma } from "./prisma";
  */
 
 export async function getAdminDashboard() {
-  const [totalUsers, totalTeams, totalCoaches, totalPlayers, pendingRegistrations, activeTeams, recentAnnouncements] =
+  const [totalUsers, totalTeams, totalCoaches, totalPlayers, pendingRegistrations, teams, recentAnnouncements] =
     await Promise.all([
       prisma.user.count(),
       prisma.team.count(),
@@ -21,7 +25,7 @@ export async function getAdminDashboard() {
       prisma.playerProfile.count({ where: { registrationStatus: { not: "APPROVED" } } }),
       prisma.team.findMany({
         orderBy: { name: "asc" },
-        include: { _count: { select: { players: true } } },
+        include: { _count: { select: { memberships: { where: { status: { notIn: [...OFF_ROSTER] } } } } } },
       }),
       prisma.announcement.findMany({
         orderBy: { createdAt: "desc" },
@@ -29,6 +33,8 @@ export async function getAdminDashboard() {
         include: { author: { select: { name: true } } },
       }),
     ]);
+
+  const activeTeams = teams.map((t) => ({ ...t, playerCount: t._count.memberships }));
 
   return {
     stats: { totalUsers, totalTeams, totalCoaches, totalPlayers, pendingRegistrations },
@@ -43,16 +49,16 @@ export async function getCoachDashboard(session: Session) {
 
   const [players, nextSession, recentAnnouncements, recentVideos, recentAttendance] = await Promise.all([
     prisma.playerProfile.findMany({
-      where: { teamId: { in: teamIds } },
+      where: rosterPlayerFilter(teamIds),
       include: {
         user: { select: { name: true } },
         evaluations: { orderBy: { periodStart: "desc" }, take: 1 },
       },
     }),
-    prisma.trainingSession.findFirst({
-      where: { teamId: { in: teamIds }, date: { gte: now }, status: "SCHEDULED" },
-      orderBy: { date: "asc" },
-      include: { team: { select: { name: true } } },
+    prisma.event.findFirst({
+      where: { teamId: { in: teamIds }, startAt: { gte: now }, status: "SCHEDULED" },
+      orderBy: { startAt: "asc" },
+      include: { team: { select: { name: true } }, venue: { select: { name: true } } },
     }),
     prisma.announcement.findMany({
       where: { OR: [{ scope: "PLATFORM" }, { teamId: { in: teamIds } }] },
@@ -65,7 +71,7 @@ export async function getCoachDashboard(session: Session) {
       take: 5,
     }),
     prisma.attendanceRecord.findMany({
-      where: { session: { teamId: { in: teamIds } } },
+      where: { event: { teamId: { in: teamIds } } },
       orderBy: { recordedAt: "desc" },
       take: 200,
     }),
@@ -105,9 +111,14 @@ export async function getPlayerDashboard(session: Session) {
   const [nextSession, attendanceRecords, evaluations, latestVideo, latestFeedback, notifications] =
     await Promise.all([
       session.user.teamId
-        ? prisma.trainingSession.findFirst({
-            where: { teamId: session.user.teamId, date: { gte: now }, status: "SCHEDULED" },
-            orderBy: { date: "asc" },
+        ? prisma.event.findFirst({
+            where: {
+              OR: [{ teamId: session.user.teamId }, { teamId: null }],
+              startAt: { gte: now },
+              status: "SCHEDULED",
+            },
+            orderBy: { startAt: "asc" },
+            include: { venue: { select: { name: true } } },
           })
         : null,
       prisma.attendanceRecord.findMany({ where: { playerId } }),

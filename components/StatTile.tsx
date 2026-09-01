@@ -1,38 +1,70 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
-type Accent = "orange" | "sky" | "violet" | "amber" | "rose" | "slate" | "emerald";
+/** Canonical accents plus legacy aliases kept so pages not yet migrated to the
+ *  DYNI system keep working. New code should use the canonical names. */
+type Accent =
+  | "flame"
+  | "ember"
+  | "info"
+  | "success"
+  | "warning"
+  | "danger"
+  | "neutral"
+  // legacy
+  | "orange"
+  | "sky"
+  | "violet"
+  | "amber"
+  | "rose"
+  | "slate"
+  | "emerald";
 
-const ACCENT_STYLES: Record<Accent, string> = {
-  orange: "bg-court-50 text-court-700 ring-court-100",
-  sky: "bg-sky-50 text-sky-700 ring-sky-100",
-  violet: "bg-violet-50 text-violet-700 ring-violet-100",
-  amber: "bg-amber-50 text-amber-700 ring-amber-100",
-  rose: "bg-rose-50 text-rose-700 ring-rose-100",
-  slate: "bg-slate-50 text-slate-700 ring-slate-100",
-  emerald: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+const ACCENT_TEXT: Record<Accent, string> = {
+  flame: "text-flame-ink",
+  ember: "text-ember",
+  info: "text-info",
+  success: "text-success",
+  warning: "text-warning",
+  danger: "text-danger",
+  neutral: "text-ink",
+  orange: "text-flame-ink",
+  sky: "text-info",
+  violet: "text-info",
+  amber: "text-warning",
+  rose: "text-danger",
+  slate: "text-ink",
+  emerald: "text-success",
 };
 
 type Props = {
   label: string;
   value: string | number;
-  icon?: string;
+  sub?: ReactNode;
   accent?: Accent;
   href?: string;
+  /** @deprecated emoji icons are being removed from the DYNI design */
+  icon?: string;
 };
 
-export default function StatTile({ label, value, icon, accent = "slate", href }: Props) {
+/** Dashboard KPI tile: big value, small label, optional link + sub-line. */
+export default function StatTile({ label, value, sub, accent = "neutral", href }: Props) {
   const content = (
-    <div
-      className={`flex items-center gap-4 rounded-2xl p-5 ring-1 transition hover:-translate-y-0.5 hover:shadow-md ${ACCENT_STYLES[accent]}`}
-    >
-      {icon && <span className="text-2xl leading-none">{icon}</span>}
-      <div>
-        <p className="text-2xl font-extrabold tracking-tight">{value}</p>
-        <p className="text-sm font-medium opacity-80">{label}</p>
-      </div>
+    <div className="h-full rounded-card border border-line bg-surface p-4 transition hover:border-line-strong">
+      <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">{label}</p>
+      <p className={`mt-1.5 font-condensed text-3xl font-bold leading-none tabular ${ACCENT_TEXT[accent]}`}>
+        {value}
+      </p>
+      {sub && <p className="mt-1.5 text-xs text-ink-dim">{sub}</p>}
     </div>
   );
 
-  if (href) return <Link href={href}>{content}</Link>;
+  if (href) {
+    return (
+      <Link href={href} className="block">
+        {content}
+      </Link>
+    );
+  }
   return content;
 }

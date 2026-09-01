@@ -15,7 +15,7 @@ export default function AssignVideoForm({ videoId, teams }: { videoId: number; t
     if (!teamId) return;
     setLoading(true);
     try {
-      await fetch(`/api/videos/${videoId}/assign`, {
+      await fetch(`/api/v1/videos/${videoId}/assign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ teamIds: [Number(teamId)] }),
@@ -33,7 +33,7 @@ export default function AssignVideoForm({ videoId, teams }: { videoId: number; t
         <option value="">Assign to team...</option>
         {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
       </select>
-      <button type="button" onClick={handleAssign} disabled={loading || !teamId} className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-white disabled:opacity-50">
+      <button type="button" onClick={handleAssign} disabled={loading || !teamId} className="rounded-full bg-flame px-3 py-1 text-xs font-semibold text-white disabled:opacity-50">
         {loading ? "..." : done ? "Assigned ✓" : "Assign"}
       </button>
     </div>
