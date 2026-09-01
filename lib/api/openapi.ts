@@ -83,6 +83,8 @@ const ENDPOINTS: Endpoint[] = [
   { method: "PATCH", path: "/consent-documents/{id}", summary: "Rename / retire / toggle required", tag: "Consent", auth: "admin" },
   { method: "POST", path: "/consent-documents/{id}/versions", summary: "Publish a new version", tag: "Consent", auth: "admin" },
   { method: "GET", path: "/audit", summary: "Append-only activity log (?action=, ?entityType=, ?actorUserId=)", tag: "Auth", auth: "admin", list: true },
+  { method: "GET", path: "/account/export", summary: "Download your own data as JSON", tag: "Auth", auth: "user" },
+  { method: "DELETE", path: "/account", summary: "Close your own account (anonymises; password-confirmed)", tag: "Auth", auth: "user" },
   { method: "GET", path: "/notifications", summary: "Your feed (?category=, ?unread=1) + unread count", tag: "Communication", auth: "user" },
   { method: "GET", path: "/notifications/preferences", summary: "Your per-category channel preferences", tag: "Communication", auth: "user" },
   { method: "PATCH", path: "/notifications/preferences", summary: "Set a category's channels", tag: "Communication", auth: "user" },

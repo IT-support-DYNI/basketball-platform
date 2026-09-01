@@ -43,11 +43,12 @@ describe("navigation", () => {
     expect(hrefs.some((h) => h.startsWith("/player/") || h.startsWith("/admin/") || h.startsWith("/coach/"))).toBe(false);
   });
 
-  it("every role can reach announcements and messages", () => {
+  it("every role can reach announcements, messages and their data settings", () => {
     for (const role of ["PLAYER", "COACH", "ADMIN", "GUARDIAN"]) {
       const hrefs = navFor(role).map((i) => i.href);
       expect(hrefs).toContain("/announcements");
       expect(hrefs).toContain("/messages");
+      expect(hrefs).toContain("/settings/account");
     }
   });
 
