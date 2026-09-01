@@ -369,14 +369,35 @@ async function main() {
     },
   });
 
-  await prisma.announcement.create({
-    data: {
-      authorUserId: admin.id,
-      scope: "PLATFORM",
-      title: "Welcome to the platform",
-      body: "This is a seeded platform-wide announcement.",
-    },
-  });
+  if ((await prisma.announcement.count()) === 0) {
+    await prisma.announcement.createMany({
+      data: [
+        {
+          authorUserId: admin.id,
+          scope: "PLATFORM",
+          title: "Welcome to the DYNI Blazers platform",
+          body: "This is where the club and your coaches post notices. Check back regularly.",
+        },
+        {
+          authorUserId: admin.id,
+          scope: "PLATFORM",
+          title: "Updated safeguarding policy — please confirm you've read it",
+          body:
+            "We've refreshed the club's safeguarding policy for the new season. Every member and guardian " +
+            "needs to confirm they've read it. Full document on the club noticeboard and website.",
+          requiresAck: true,
+          pinnedUntil: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
+        },
+        {
+          authorUserId: coachUser.id,
+          scope: "TEAM",
+          teamId: team.id,
+          title: "Kit collection this Saturday",
+          body: "New home shirts are in. Pick yours up from the coaches' table before Saturday's session.",
+        },
+      ],
+    });
+  }
 
   console.log("Seeded:");
   console.log("  Admin  → admin@example.com / password123");

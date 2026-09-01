@@ -28,11 +28,18 @@ describe("navigation", () => {
     expect(new Set(hrefs).size).toBe(hrefs.length);
   });
 
-  it("a guardian gets only the children view + security", () => {
+  it("a guardian gets the children view, announcements + security only", () => {
     const hrefs = navFor("GUARDIAN").map((i) => i.href);
     expect(hrefs).toContain("/guardian");
+    expect(hrefs).toContain("/announcements");
     expect(hrefs).toContain("/settings/security");
     expect(hrefs.some((h) => h.startsWith("/player/") || h.startsWith("/admin/") || h.startsWith("/coach/"))).toBe(false);
+  });
+
+  it("every role can reach announcements", () => {
+    for (const role of ["PLAYER", "COACH", "ADMIN", "GUARDIAN"]) {
+      expect(navFor(role).map((i) => i.href)).toContain("/announcements");
+    }
   });
 
   it("unknown role grants nothing", () => {

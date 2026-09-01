@@ -27,7 +27,7 @@ export type Capability =
   | "coach.attendance"
   | "coach.videos"
   | "coach.performance"
-  | "coach.announcements"
+  | "announcements"
   | "admin.home"
   | "admin.registrations"
   | "admin.members"
@@ -52,6 +52,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "player.performance",
     "player.feedback",
     "player.profile",
+    "announcements",
   "account.security",
   ],
   COACH: [
@@ -62,7 +63,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "coach.attendance",
     "coach.videos",
     "coach.performance",
-    "coach.announcements",
+    "announcements",
   "account.security",
   ],
   ADMIN: [
@@ -77,10 +78,11 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "admin.performance",
     "admin.seasons",
     "admin.consent",
+    "announcements",
     "admin.settings",
   "account.security",
   ],
-  GUARDIAN: ["guardian.home", "account.security"],
+  GUARDIAN: ["guardian.home", "announcements", "account.security"],
 };
 
 export function capabilitiesFor(roles: string | string[]): Set<Capability> {
@@ -151,7 +153,7 @@ const NAV: NavItem[] = [
   { label: "Performance", href: "/admin/performance", capability: "admin.performance", icon: "chart" },
   { label: "Feedback", href: "/player/feedback", capability: "player.feedback", icon: "feedback" },
 
-  { label: "Announcements", href: "/coach/announcements", capability: "coach.announcements", icon: "megaphone" },
+  { label: "Announcements", href: "/announcements", capability: "announcements", icon: "megaphone" },
 
   { label: "Seasons", href: "/admin/seasons", capability: "admin.seasons", icon: "season" },
   { label: "Consent", href: "/admin/consent", capability: "admin.consent", icon: "shield" },

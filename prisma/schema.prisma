@@ -435,6 +435,7 @@ model User {
   availabilityResponses AvailabilityResponse[]
   attendanceAudits AttendanceAudit[]    @relation("AttendanceAuditBy")
   consentsAccepted ConsentRecord[]      @relation("ConsentAcceptedBy")
+  announcementAcks AnnouncementAck[]    @relation("AnnouncementAckUser")
   /// Populated when role = GUARDIAN — the player(s) this user manages.
   guardianOf     GuardianRelationship[] @relation("Guardian")
   /// Populated when role = ADMIN and this admin has reviewed at least one registration.
@@ -955,7 +956,26 @@ model Announcement {
   team         Team?             @relation(fields: [teamId], references: [id], onDelete: Cascade)
   title        String
   body         String
+  /// When true, readers see an "acknowledge" prompt and the author gets a
+  /// who-hasn't-read-it list (brief §12).
+  requiresAck  Boolean           @default(false)
+  /// Shown above the fold on the announcements surface until this passes.
+  pinnedUntil  DateTime?
   createdAt    DateTime          @default(now())
 
+  acks AnnouncementAck[]
+
   @@index([scope, teamId])
+}
+
+model AnnouncementAck {
+  id             Int          @id @default(autoincrement())
+  announcementId Int
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  userId         Int
+  user           User         @relation("AnnouncementAckUser", fields: [userId], references: [id], onDelete: Cascade)
+  acknowledgedAt DateTime     @default(now())
+
+  @@unique([announcementId, userId])
+  @@index([userId])
 }
