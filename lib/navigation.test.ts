@@ -15,7 +15,14 @@ describe("navigation", () => {
   it("gives an admin the admin menu, no player items", () => {
     const hrefs = navFor("ADMIN").map((i) => i.href);
     expect(hrefs).toContain("/admin/registrations");
+    expect(hrefs).toContain("/admin/audit");
     expect(hrefs.some((h) => h.startsWith("/player/"))).toBe(false);
+  });
+
+  it("the audit log is admin-only", () => {
+    for (const role of ["PLAYER", "COACH", "GUARDIAN"]) {
+      expect(navFor(role).map((i) => i.href)).not.toContain("/admin/audit");
+    }
   });
 
   it("merges and de-duplicates for a user holding two roles", () => {

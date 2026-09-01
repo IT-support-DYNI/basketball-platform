@@ -42,6 +42,12 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
     </>
   ),
   megaphone: <path d="M4 10v4h3l9 5V5l-9 5H4Zm13 .5a3 3 0 0 1 0 3" />,
+  history: (
+    <>
+      <path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1M3.5 4.5V9H8" />
+      <path d="M12 8v4.5l3 1.8" />
+    </>
+  ),
   season: (
     <>
       <circle cx="12" cy="12" r="8.5" />

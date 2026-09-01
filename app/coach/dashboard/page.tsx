@@ -3,8 +3,10 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { getCoachDashboard } from "@/lib/dashboard";
+import { actionItemsFor } from "@/lib/action-items";
 import { eventDayLabel } from "@/lib/events";
 import StatTile from "@/components/StatTile";
+import ActionItems from "@/components/dashboard/ActionItems";
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
 
@@ -17,8 +19,10 @@ const quickLink =
 
 export default async function CoachDashboardPage() {
   const session = await getServerSession(authOptions);
-  const { numberOfPlayers, nextSession, attendanceSummary, recentAnnouncements, recentVideos, playersNeedingReview } =
-    await getCoachDashboard(session!);
+  const [
+    { numberOfPlayers, nextSession, attendanceSummary, recentAnnouncements, recentVideos, playersNeedingReview },
+    actionItems,
+  ] = await Promise.all([getCoachDashboard(session!), actionItemsFor(session!)]);
 
   return (
     <main className="flex flex-col gap-8">
@@ -27,6 +31,8 @@ export default async function CoachDashboardPage() {
         title={`Welcome back, ${session?.user?.name?.split(" ")[0] ?? "coach"}`}
         lead="What's happening across your team."
       />
+
+      <ActionItems items={actionItems} />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatTile label="Players" value={numberOfPlayers} accent="flame" href="/coach/players" />

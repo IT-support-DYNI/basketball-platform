@@ -3,8 +3,10 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { getPlayerDashboard } from "@/lib/dashboard";
+import { actionItemsFor } from "@/lib/action-items";
 import { eventDayLabel, eventTimeRange } from "@/lib/events";
 import StatTile from "@/components/StatTile";
+import ActionItems from "@/components/dashboard/ActionItems";
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
 
@@ -14,8 +16,10 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 export default async function PlayerDashboardPage() {
   const session = await getServerSession(authOptions);
-  const { nextSession, attendance, weeklyEvaluation, monthlyEvaluation, monthlyTrend, latestVideo, latestFeedback, notifications } =
-    await getPlayerDashboard(session!);
+  const [
+    { nextSession, attendance, weeklyEvaluation, monthlyEvaluation, monthlyTrend, latestVideo, latestFeedback, notifications },
+    actionItems,
+  ] = await Promise.all([getPlayerDashboard(session!), actionItemsFor(session!)]);
 
   return (
     <main className="flex flex-col gap-8">
@@ -24,6 +28,8 @@ export default async function PlayerDashboardPage() {
         title={`Welcome back, ${session?.user?.name?.split(" ")[0] ?? "player"}`}
         lead="Your training and development at a glance."
       />
+
+      <ActionItems items={actionItems} />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatTile

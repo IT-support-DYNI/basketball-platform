@@ -443,6 +443,42 @@ async function main() {
     });
   }
 
+  if ((await prisma.auditLog.count()) === 0) {
+    await prisma.auditLog.createMany({
+      data: [
+        {
+          actorUserId: player1.id,
+          action: "REGISTRATION_SUBMITTED",
+          entityType: "PlayerProfile",
+          entityId: player1.playerProfile!.id,
+          createdAt: new Date(Date.now() - 6 * 24 * 3600e3),
+        },
+        {
+          actorUserId: admin.id,
+          action: "REGISTRATION_APPROVED",
+          entityType: "PlayerProfile",
+          entityId: player1.playerProfile!.id,
+          metadata: { note: "Welcome to the club.", teamId: team.id },
+          createdAt: new Date(Date.now() - 5 * 24 * 3600e3),
+        },
+        {
+          actorUserId: coachUser.id,
+          action: "ROSTER_EXPORTED",
+          entityType: "Team",
+          entityId: team.id,
+          createdAt: new Date(Date.now() - 2 * 24 * 3600e3),
+        },
+        {
+          actorUserId: coachUser.id,
+          action: "MFA_ENABLED",
+          entityType: "User",
+          entityId: coachUser.id,
+          createdAt: new Date(Date.now() - 1 * 24 * 3600e3),
+        },
+      ],
+    });
+  }
+
   console.log("Seeded:");
   console.log("  Admin  → admin@example.com / password123");
   console.log("  Coach  → coach@example.com / password123");

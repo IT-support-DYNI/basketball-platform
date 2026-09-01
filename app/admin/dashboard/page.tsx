@@ -3,8 +3,11 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { getAdminDashboard } from "@/lib/dashboard";
+import { actionItemsFor } from "@/lib/action-items";
+import { recentAuditActivity } from "@/lib/audit";
 import StatTile from "@/components/StatTile";
 import StatusBadge from "@/components/StatusBadge";
+import ActionItems from "@/components/dashboard/ActionItems";
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
 
@@ -17,7 +20,11 @@ const quickLink =
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
-  const { stats, activeTeams, recentAnnouncements } = await getAdminDashboard();
+  const [{ stats, activeTeams, recentAnnouncements }, actionItems, recentActivity] = await Promise.all([
+    getAdminDashboard(),
+    actionItemsFor(session!),
+    recentAuditActivity(6),
+  ]);
 
   return (
     <main className="flex flex-col gap-8">
@@ -26,6 +33,8 @@ export default async function AdminDashboardPage() {
         title="Club overview"
         lead={`Welcome back, ${session?.user?.name?.split(" ")[0] ?? ""}. Everything happening across the club.`}
       />
+
+      <ActionItems items={actionItems} />
 
       <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
         <StatTile label="Members" value={stats.totalUsers} accent="info" href="/admin/users" />
@@ -82,10 +91,42 @@ export default async function AdminDashboardPage() {
       </div>
 
       <Card as="section">
+        <div className="flex items-center justify-between">
+          <SectionTitle>Recent activity</SectionTitle>
+          <Link href="/admin/audit" className="text-sm font-semibold text-flame-ink hover:underline">
+            Full log →
+          </Link>
+        </div>
+        {recentActivity.length === 0 ? (
+          <p className="mt-3 text-sm text-ink-dim">Nothing recorded yet.</p>
+        ) : (
+          <ul className="mt-3 divide-y divide-line">
+            {recentActivity.map((e) => (
+              <li key={e.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+                <span className="text-ink">
+                  <span className="font-medium">{e.actorName ?? "System"}</span>{" "}
+                  <span className="text-ink-dim">{e.actionLabel}</span>
+                </span>
+                <span className="flex-none text-xs text-ink-faint">
+                  {new Date(e.createdAt).toLocaleString(undefined, {
+                    day: "numeric",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card as="section">
         <SectionTitle>Quick links</SectionTitle>
         <div className="mt-3 flex flex-wrap gap-2">
           <Link href="/admin/teams" className={quickLink}>+ Create team</Link>
           <Link href="/admin/users" className={quickLink}>+ Add coach</Link>
+          <Link href="/admin/audit" className={quickLink}>Audit log</Link>
           <Link href="/admin/settings" className={quickLink}>Club settings</Link>
         </div>
       </Card>

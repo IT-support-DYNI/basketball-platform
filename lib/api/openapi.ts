@@ -82,6 +82,7 @@ const ENDPOINTS: Endpoint[] = [
   { method: "POST", path: "/consent-documents", summary: "Create a consent document (+ first version)", tag: "Consent", auth: "admin" },
   { method: "PATCH", path: "/consent-documents/{id}", summary: "Rename / retire / toggle required", tag: "Consent", auth: "admin" },
   { method: "POST", path: "/consent-documents/{id}/versions", summary: "Publish a new version", tag: "Consent", auth: "admin" },
+  { method: "GET", path: "/audit", summary: "Append-only activity log (?action=, ?entityType=, ?actorUserId=)", tag: "Auth", auth: "admin", list: true },
   { method: "GET", path: "/notifications", summary: "Your feed (?category=, ?unread=1) + unread count", tag: "Communication", auth: "user" },
   { method: "GET", path: "/notifications/preferences", summary: "Your per-category channel preferences", tag: "Communication", auth: "user" },
   { method: "PATCH", path: "/notifications/preferences", summary: "Set a category's channels", tag: "Communication", auth: "user" },

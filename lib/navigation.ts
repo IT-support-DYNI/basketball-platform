@@ -40,6 +40,7 @@ export type Capability =
   | "admin.performance"
   | "admin.seasons"
   | "admin.consent"
+  | "admin.audit"
   | "admin.settings"
   | "guardian.home"
   | "account.security";
@@ -81,6 +82,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "admin.performance",
     "admin.seasons",
     "admin.consent",
+    "admin.audit",
     "announcements",
     "messages",
     "admin.settings",
@@ -111,6 +113,7 @@ export type NavIconName =
   | "whistle"
   | "megaphone"
   | "chat"
+  | "history"
   | "season"
   | "settings"
   | "shield"
@@ -163,6 +166,7 @@ const NAV: NavItem[] = [
 
   { label: "Seasons", href: "/admin/seasons", capability: "admin.seasons", icon: "season" },
   { label: "Consent", href: "/admin/consent", capability: "admin.consent", icon: "shield" },
+  { label: "Audit log", href: "/admin/audit", capability: "admin.audit", icon: "history" },
   { label: "Settings", href: "/admin/settings", capability: "admin.settings", icon: "settings" },
   { label: "Profile", href: "/player/profile", capability: "player.profile", icon: "user" },
   { label: "Security", href: "/settings/security", capability: "account.security", icon: "shield" },
