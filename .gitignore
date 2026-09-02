@@ -13,6 +13,10 @@ npm-debug.log*
 /playwright-report/
 /playwright/.cache/
 
+# Generated deliverable docs (not source)
+/DYNI-Blazers-Technical-Overview.*
+/doc-shots/
+
 # Claude Code tooling artifacts (skill caching) — not part of the app
 .agents/
 .claude/skills/
