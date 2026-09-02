@@ -19,10 +19,13 @@ export {
   createTrainingPlanSchema,
   updateTrainingPlanSchema,
   trainingBlockSchema,
+  courtDiagramSchema,
   DRILL_CATEGORIES,
   DRILL_DIFFICULTIES,
   TRAINING_BLOCK_CATEGORIES,
   TRAINING_PLAN_STATUSES,
+  MARKER_KINDS,
+  ARROW_KINDS,
 } from "./training";
 export {
   createConsentDocumentSchema,

@@ -764,6 +764,18 @@ async function main() {
         coachingPoints: ["Short choppy steps on the closeout", "Contest without fouling", "Nose on the ball"],
         commonMistakes: ["Flying at the shooter", "Standing straight up in the stance"],
         durationMinutes: 10, minPlayers: 4, maxPlayers: 16, equipment: ["1 ball"], tags: ["defense", "1v1"],
+        courtDiagram: {
+          markers: [
+            { id: "o1", kind: "player", x: 0.84, y: 0.36, label: "1" },
+            { id: "b1", kind: "ball", x: 0.8, y: 0.4 },
+            { id: "x1", kind: "opponent", x: 0.5, y: 0.17 },
+            { id: "c1", kind: "cone", x: 0.66, y: 0.28 },
+          ],
+          arrows: [
+            { id: "a1", kind: "pass", from: { x: 0.5, y: 0.19 }, to: { x: 0.82, y: 0.37 } },
+            { id: "a2", kind: "move", from: { x: 0.5, y: 0.2 }, to: { x: 0.74, y: 0.33 } },
+          ],
+        },
       },
       {
         clubId: club.id, createdByUserId: assistantCoach.id, category: "TRANSITION", difficulty: "ADVANCED",

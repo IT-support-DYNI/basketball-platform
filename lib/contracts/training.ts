@@ -23,6 +23,39 @@ const drillDifficulty = z.enum(DRILL_DIFFICULTIES);
 
 const shortLines = z.array(z.string().trim().min(1).max(200)).max(20);
 
+/* ── Court diagram ────────────────────────────────────────────────────
+ * All coordinates are normalised 0–1 within a half-court box (basket at
+ * the top). The shape is owned by components/training/CourtDiagram.
+ */
+export const MARKER_KINDS = ["player", "opponent", "cone", "ball", "coach"] as const;
+export const ARROW_KINDS = ["move", "pass", "dribble", "screen"] as const;
+const norm = z.number().min(0).max(1);
+
+export const courtDiagramSchema = z.object({
+  markers: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(24),
+        kind: z.enum(MARKER_KINDS),
+        x: norm,
+        y: norm,
+        label: z.string().trim().max(3).optional(),
+      }),
+    )
+    .max(30),
+  arrows: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(24),
+        kind: z.enum(ARROW_KINDS),
+        from: z.object({ x: norm, y: norm }),
+        to: z.object({ x: norm, y: norm }),
+      }),
+    )
+    .max(30),
+});
+export type CourtDiagram = z.infer<typeof courtDiagramSchema>;
+
 export const createDrillSchema = z.object({
   name: z.string().trim().min(2).max(120),
   category: drillCategory,
@@ -35,7 +68,7 @@ export const createDrillSchema = z.object({
   minPlayers: z.number().int().min(1).max(30).optional(),
   maxPlayers: z.number().int().min(1).max(30).optional(),
   equipment: z.array(z.string().trim().min(1).max(60)).max(20).optional(),
-  courtDiagram: z.unknown().optional(),
+  courtDiagram: courtDiagramSchema.nullable().optional(),
   tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
 });
 

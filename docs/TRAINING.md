@@ -84,7 +84,28 @@ No migration — uses the existing `TrainingPlan.eventId @unique`.
   for their team's published plans only). The event list + detail API now carry
   `trainingPlan { id, title, status }`.
 
-## Still to come
+## Court-diagram editor (W9 part 4)
 
-- Part 4 — the `CourtDiagram` editor for drills (SVG half-court, players /
-  cones / movement arrows serialised to `courtDiagram` jsonb).
+No migration — fills the `Drill.courtDiagram` jsonb column.
+
+- **Shape** — `courtDiagramSchema` in `lib/contracts/training.ts`:
+  `{ markers: [{ id, kind, x, y, label? }], arrows: [{ id, kind, from, to }] }`.
+  `kind` is `player` / `opponent` / `cone` / `ball` / `coach` for markers and
+  `move` / `pass` / `dribble` / `screen` for arrows. **All coordinates are
+  normalised 0–1** within a half-court box (basket at the top). The drill
+  create/update schemas validate `courtDiagram` against this.
+- **Component** — `components/training/CourtDiagram.tsx` is both the editor and
+  the read view (editor when passed `onChange`). It draws the half-court
+  markings in SVG, then the arrows and markers. Editing: pick a tool, tap the
+  court to drop a marker (drag to move it), or tap twice to draw an arrow;
+  select + Delete/Backspace or the toolbar removes one; a selected player has a
+  jersey-label input.
+- **Accessibility** — the SVG carries `role="img"` and an `aria-label` from
+  `describeDiagram()` ("Court diagram: 1 player, 1 defender, 1 movement
+  arrow."), and the editor shows the same text hint. The freehand editing
+  itself is pointer-only — a known limitation noted here rather than solved.
+- **Wiring** — `DrillForm` has a "Court diagram" section; `DrillDetail` shows
+  "Court setup" read-only when the drill has one (`diagramHasContent`). Seed:
+  the "Closeout & mirror" drill ships with a diagram.
+
+## W9 complete — training plans + drill library.
