@@ -804,11 +804,13 @@ async function main() {
   const drillId = Object.fromEntries(
     (await prisma.drill.findMany({ select: { id: true, name: true } })).map((d) => [d.name, d.id]),
   );
-  // A published plan for the U16 team's next practice.
+  // A published plan for the U16 team's next practice, linked to that session.
+  const nextU16Session = u16Training.find((e) => e.startAt > NOW) ?? u16Training[0];
   await prisma.trainingPlan.create({
     data: {
       teamId: u16.id, seasonId: season.id, createdByUserId: headCoach.id,
-      title: "U16 practice — spacing & closeouts", status: "PUBLISHED", date: daysFromNow(1, 18),
+      eventId: nextU16Session.id,
+      title: "U16 practice — spacing & closeouts", status: "PUBLISHED", date: nextU16Session.startAt,
       objectives: "Cleaner spacing in half-court offence; contest without fouling.",
       coachingNotes: "Split into two groups for the skill block — Dev takes the guards.",
       blocks: {

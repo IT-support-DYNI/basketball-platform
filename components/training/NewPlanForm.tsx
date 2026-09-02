@@ -11,15 +11,17 @@ import Alert from "@/components/ui/Alert";
 export default function NewPlanForm({
   teams,
   templates,
+  forEvent,
 }: {
   teams: { id: number; name: string }[];
   templates: { id: number; title: string; teamId: number }[];
+  forEvent?: { id: number; title: string; startAt: string; teamId: number; teamName: string } | null;
 }) {
   const router = useRouter();
-  const [teamId, setTeamId] = useState(teams[0]?.id.toString() ?? "");
-  const [title, setTitle] = useState("");
+  const [teamId, setTeamId] = useState((forEvent?.teamId ?? teams[0]?.id)?.toString() ?? "");
+  const [title, setTitle] = useState(forEvent ? forEvent.title : "");
   const [objectives, setObjectives] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(forEvent ? forEvent.startAt.slice(0, 10) : "");
   const [fromTemplateId, setFromTemplateId] = useState("");
   const [isTemplate, setIsTemplate] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -42,6 +44,7 @@ export default function NewPlanForm({
           date: !isTemplate && date ? new Date(date).toISOString() : undefined,
           isTemplate,
           fromTemplateId: fromTemplateId ? Number(fromTemplateId) : undefined,
+          eventId: forEvent && !isTemplate ? forEvent.id : undefined,
         }),
       });
       const body = await res.json().catch(() => ({}));
@@ -60,7 +63,14 @@ export default function NewPlanForm({
     <form onSubmit={submit} className="flex flex-col gap-4">
       {error && <Alert tone="danger">{error}</Alert>}
 
-      {teams.length > 1 && (
+      {forEvent && (
+        <p className="rounded-control border border-flame/30 bg-flame/10 px-3 py-2 text-sm text-flame-ink">
+          Planning the <strong>{forEvent.teamName}</strong> session on{" "}
+          {new Date(forEvent.startAt).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}.
+        </p>
+      )}
+
+      {teams.length > 1 && !forEvent && (
         <Select label="Team" value={teamId} onChange={(e) => setTeamId(e.target.value)}>
           {teams.map((t) => (
             <option key={t.id} value={t.id}>{t.name}</option>
@@ -81,12 +91,14 @@ export default function NewPlanForm({
         />
       </label>
 
-      <label className="flex items-center gap-2 text-sm text-ink-dim">
-        <input type="checkbox" checked={isTemplate} onChange={(e) => setIsTemplate(e.target.checked)} className="h-4 w-4 accent-flame" />
-        Save this as a reusable template (no date)
-      </label>
+      {!forEvent && (
+        <label className="flex items-center gap-2 text-sm text-ink-dim">
+          <input type="checkbox" checked={isTemplate} onChange={(e) => setIsTemplate(e.target.checked)} className="h-4 w-4 accent-flame" />
+          Save this as a reusable template (no date)
+        </label>
+      )}
 
-      {!isTemplate && (
+      {!isTemplate && !forEvent && (
         <TextField label="Session date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       )}
 

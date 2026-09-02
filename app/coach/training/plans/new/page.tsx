@@ -9,9 +9,18 @@ import NewPlanForm from "@/components/training/NewPlanForm";
 
 export const metadata = { title: "New session plan" };
 
-export default async function NewPlanPage() {
+export default async function NewPlanPage({ searchParams }: { searchParams: { eventId?: string } }) {
   const session = await getServerSession(authOptions);
   const teamIds = session!.user.teamIds ?? [];
+
+  const eventId = searchParams.eventId ? Number(searchParams.eventId) : null;
+  const forEvent = eventId
+    ? await prisma.event.findFirst({
+        where: { id: eventId, teamId: { in: teamIds }, trainingPlan: { is: null } },
+        select: { id: true, title: true, startAt: true, teamId: true, team: { select: { name: true } } },
+      })
+    : null;
+
   const [teams, templates] = await Promise.all([
     prisma.team.findMany({ where: { id: { in: teamIds } }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     listPlans(teamIds, { templates: true }),
@@ -24,6 +33,11 @@ export default async function NewPlanPage() {
         <NewPlanForm
           teams={teams}
           templates={templates.map((t) => ({ id: t.id, title: t.title, teamId: t.teamId }))}
+          forEvent={
+            forEvent && forEvent.teamId != null
+              ? { id: forEvent.id, title: forEvent.title, startAt: forEvent.startAt.toISOString(), teamId: forEvent.teamId, teamName: forEvent.team?.name ?? "" }
+              : null
+          }
         />
       </Card>
     </main>

@@ -72,12 +72,16 @@ export const createTrainingPlanSchema = z.object({
   date: z.string().datetime().optional(),
   isTemplate: z.boolean().optional(),
   fromTemplateId: z.number().int().positive().optional(),
+  /** The scheduled session this plan is for. */
+  eventId: z.number().int().positive().optional(),
 });
 
 export const updateTrainingPlanSchema = z.object({
   title: z.string().trim().min(2).max(120).optional(),
   objectives: z.string().trim().max(2000).nullable().optional(),
   date: z.string().datetime().nullable().optional(),
+  /** Link (number) or unlink (null) the scheduled session. */
+  eventId: z.number().int().positive().nullable().optional(),
   status: z.enum(TRAINING_PLAN_STATUSES).optional(),
   coachingNotes: z.string().trim().max(2000).nullable().optional(),
   effectivenessRating: z.number().int().min(1).max(5).nullable().optional(),

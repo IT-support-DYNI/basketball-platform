@@ -61,9 +61,30 @@ reference).
 - **Seed** — a published U16 plan (6 blocks referencing the seeded drills) and
   a reusable senior template.
 
+## Attach to a session + player view (W9 part 3)
+
+No migration — uses the existing `TrainingPlan.eventId @unique`.
+
+- **Link / unlink** — `createTrainingPlanSchema` + `updateTrainingPlanSchema`
+  take `eventId` (number to link, `null` to unlink). `lib/training-plans.ts`
+  `resolveEventLink` validates it: the event is on the plan's team, isn't a
+  deadline type, and isn't already taken by another plan (→ `409`). Linking
+  also fills the plan's `date` from the event when it's blank. Templates can't
+  be linked. `linkableSessionsFor(teamId, currentPlanId?)` lists the team's
+  recent + upcoming training / matches that are free (or already this plan's).
+- **Where it's set** — the `PlanBuilder` header has a "Linked session" select.
+  The calendar event dialog (`components/calendar/CalendarView.tsx`), for a
+  coach on a plannable team event, shows the linked plan (a link) or a
+  "Build a session plan →" link to `/coach/training/plans/new?eventId=…`, which
+  pre-fills the team + date and links on create.
+- **Player read view** — `components/training/PlanReadView.tsx` renders a plan
+  read-only (objectives, blocks with durations + drill names, running total).
+  The calendar dialog embeds it for a player when the event's plan is
+  `PUBLISHED` — it fetches `/api/v1/training-plans/{id}` (players are authorised
+  for their team's published plans only). The event list + detail API now carry
+  `trainingPlan { id, title, status }`.
+
 ## Still to come
 
-- Part 3 — attach a plan to a scheduled `Event` from the calendar; a
-  player-facing read view of the published plan.
 - Part 4 — the `CourtDiagram` editor for drills (SVG half-court, players /
   cones / movement arrows serialised to `courtDiagram` jsonb).

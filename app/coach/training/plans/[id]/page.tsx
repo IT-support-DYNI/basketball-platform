@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { getTenantContext } from "@/lib/tenant";
-import { planForCaller } from "@/lib/training-plans";
+import { planForCaller, linkableSessionsFor } from "@/lib/training-plans";
 import { listDrills } from "@/lib/drills";
 import { ApiError } from "@/lib/api/errors";
 import PageHeader from "@/components/ui/PageHeader";
@@ -21,7 +21,10 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
   }
 
   const { clubId } = await getTenantContext(session!);
-  const drills = await listDrills(clubId);
+  const [drills, sessions] = await Promise.all([
+    listDrills(clubId),
+    plan.isTemplate ? Promise.resolve([]) : linkableSessionsFor(plan.teamId, plan.id),
+  ]);
 
   return (
     <main className="flex flex-col gap-8">
@@ -38,6 +41,7 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
           coachingNotes: plan.coachingNotes,
           effectivenessRating: plan.effectivenessRating,
           postSessionNotes: plan.postSessionNotes,
+          eventId: plan.eventId,
           eventTitle: plan.event?.title ?? null,
           blocks: plan.blocks.map((b) => ({
             category: b.category,
@@ -51,6 +55,7 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
         drills={drills
           .filter((d) => d.archivedAt == null)
           .map((d) => ({ id: d.id, name: d.name, category: d.category, durationMinutes: d.durationMinutes }))}
+        sessions={sessions.map((s) => ({ id: s.id, title: s.title, startAt: s.startAt.toISOString() }))}
       />
     </main>
   );

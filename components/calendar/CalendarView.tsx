@@ -8,6 +8,7 @@ import { EVENT_TYPE_LABEL } from "@/lib/events";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { useToast } from "@/components/ui/toast";
 import RsvpControl from "./RsvpControl";
+import PlanReadView from "@/components/training/PlanReadView";
 
 type EventType = keyof typeof EVENT_TYPE_LABEL;
 
@@ -23,6 +24,15 @@ type ApiEvent = {
   venue: { id: number; name: string; address: string | null } | null;
   locationText?: string | null;
   recurrenceId?: number | null;
+  trainingPlan?: { id: number; title: string; status: string } | null;
+};
+
+const PLANNABLE = new Set(["TRAINING", "MATCH", "FITNESS_TEST", "TEAM_MEETING"]);
+
+type PlanReadDetail = {
+  title: string;
+  objectives: string | null;
+  blocks: { category: string; title: string | null; durationMinutes: number | null; notes: string | null; drillName: string | null }[];
 };
 
 const ACCENT: Record<string, string> = {
@@ -364,6 +374,34 @@ function EventDialog({
   const end = new Date(event.endAt);
   const isDeadline = start.getTime() === end.getTime();
   const showRsvp = canRsvp && event.team != null && !isDeadline && event.status !== "CANCELLED";
+
+  const isCoach = manageBasePath != null;
+  const plan = event.trainingPlan ?? null;
+  const [planDetail, setPlanDetail] = useState<PlanReadDetail | null>(null);
+  useEffect(() => {
+    if (isCoach || !plan || plan.status !== "PUBLISHED") return;
+    let off = false;
+    fetch(`/api/v1/training-plans/${plan.id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (off || !d) return;
+        setPlanDetail({
+          title: d.title,
+          objectives: d.objectives ?? null,
+          blocks: (d.blocks ?? []).map((b: { category: string; title: string | null; durationMinutes: number | null; notes: string | null; drill: { name: string } | null }) => ({
+            category: b.category,
+            title: b.title,
+            durationMinutes: b.durationMinutes,
+            notes: b.notes,
+            drillName: b.drill?.name ?? null,
+          })),
+        });
+      })
+      .catch(() => {});
+    return () => {
+      off = true;
+    };
+  }, [isCoach, plan]);
   // Check-in opens 2h before the event and closes 1h after it ends.
   const now = Date.now();
   const showCheckIn =
@@ -404,6 +442,32 @@ function EventDialog({
         {showRsvp && (
           <div className="mt-4">
             <RsvpControl eventId={event.id} />
+          </div>
+        )}
+
+        {/* Session plan */}
+        {isCoach && event.team && PLANNABLE.has(event.type) && (
+          <div className="mt-4 rounded-control border border-line bg-surface-2 p-3">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">Session plan</p>
+            {plan ? (
+              <Link href={`/coach/training/plans/${plan.id}`} className="mt-1 block text-sm font-semibold text-flame-ink hover:underline">
+                {plan.title} →
+              </Link>
+            ) : (
+              <Link href={`/coach/training/plans/new?eventId=${event.id}`} className="mt-1 block text-sm font-semibold text-flame-ink hover:underline">
+                Build a session plan →
+              </Link>
+            )}
+          </div>
+        )}
+        {!isCoach && plan?.status === "PUBLISHED" && (
+          <div className="mt-4">
+            <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-ink-faint">What&rsquo;s planned</p>
+            {planDetail ? (
+              <PlanReadView plan={planDetail} />
+            ) : (
+              <p className="text-xs text-ink-faint">Loading the session plan…</p>
+            )}
           </div>
         )}
 

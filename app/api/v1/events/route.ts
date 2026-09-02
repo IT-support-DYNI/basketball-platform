@@ -17,6 +17,7 @@ import { prisma } from "@/lib/prisma";
 const listInclude = {
   team: { select: { id: true, name: true } },
   venue: { select: { id: true, name: true, address: true } },
+  trainingPlan: { select: { id: true, title: true, status: true } },
 } as const;
 
 /**

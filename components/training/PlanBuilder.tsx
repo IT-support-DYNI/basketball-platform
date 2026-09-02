@@ -36,6 +36,7 @@ export type PlanView = {
   coachingNotes: string | null;
   effectivenessRating: number | null;
   postSessionNotes: string | null;
+  eventId: number | null;
   eventTitle: string | null;
   blocks: {
     category: string;
@@ -48,11 +49,20 @@ export type PlanView = {
 };
 
 type DrillOption = { id: number; name: string; category: string; durationMinutes: number | null };
+type SessionOption = { id: number; title: string; startAt: string };
 
 const field =
   "w-full rounded-control border border-line bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-flame/50";
 
-export default function PlanBuilder({ plan, drills }: { plan: PlanView; drills: DrillOption[] }) {
+export default function PlanBuilder({
+  plan,
+  drills,
+  sessions,
+}: {
+  plan: PlanView;
+  drills: DrillOption[];
+  sessions: SessionOption[];
+}) {
   const router = useRouter();
   const toast = useToast();
 
@@ -154,7 +164,6 @@ export default function PlanBuilder({ plan, drills }: { plan: PlanView; drills: 
             {plan.isTemplate ? "Template" : TRAINING_PLAN_STATUS_LABEL[plan.status as keyof typeof TRAINING_PLAN_STATUS_LABEL]}
           </span>
           <span className="text-xs text-ink-faint">{plan.teamName}</span>
-          {plan.eventTitle && <span className="text-xs text-ink-faint">· linked to {plan.eventTitle}</span>}
         </div>
         <input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-3 w-full bg-transparent font-display text-xl font-extrabold uppercase tracking-tight text-ink outline-none" />
         <label className="mt-3 block">
@@ -162,10 +171,27 @@ export default function PlanBuilder({ plan, drills }: { plan: PlanView; drills: 
           <textarea value={objectives} onChange={(e) => setObjectives(e.target.value)} rows={2} className={cn(field, "mt-1")} />
         </label>
         {!plan.isTemplate && (
-          <label className="mt-3 block max-w-xs">
-            <span className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Session date</span>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={cn(field, "mt-1")} />
-          </label>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Session date</span>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={cn(field, "mt-1")} />
+            </label>
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Linked session</span>
+              <select
+                value={plan.eventId ?? ""}
+                onChange={(e) => patch({ eventId: e.target.value ? Number(e.target.value) : null }, "Session linked")}
+                className={cn(field, "mt-1")}
+              >
+                <option value="">Not linked to a session</option>
+                {sessions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.title} · {new Date(s.startAt).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         )}
       </div>
 

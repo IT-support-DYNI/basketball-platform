@@ -16,6 +16,7 @@ const include = {
   team: { select: { id: true, name: true } },
   venue: { select: { id: true, name: true, address: true, mapLat: true, mapLng: true } },
   recurrence: true,
+  trainingPlan: { select: { id: true, title: true, status: true } },
 } as const;
 
 /** A caller may touch this event if it's a club-wide event they can read, or
