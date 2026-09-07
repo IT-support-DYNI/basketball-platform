@@ -43,6 +43,7 @@ export type Subject =
   | "Announcement"
   | "Video"
   | "Drill"
+  | "TrainingPlan"
   | "Evaluation"
   | "Feedback"
   | "Notification"
@@ -117,6 +118,7 @@ function applyRole(
 
       can(["read", "create", "update", "delete"], "Event", { teamId });
       can("read", "Event", { teamId: null }); // club-wide events
+      can(["read", "create", "update", "delete"], "TrainingPlan", { teamId });
       can("read", "Venue");
       can(["read", "record", "verify"], "Attendance", { teamId });
 
@@ -144,6 +146,7 @@ function applyRole(
       if (teamId == null) break;
       can("access", "Team", { id: teamId });
       can("read", "Team", { id: teamId });
+      can("read", "TrainingPlan", { teamId });
       can(["read", "create", "update"], "Event", { teamId });
       can("read", "Event", { teamId: null });
       can("read", "Venue");
@@ -191,6 +194,7 @@ function applyRole(
         can("read", ["Squad", "Membership"], { teamId: ownTeamId });
         can("read", "Event", { teamId: ownTeamId });
         can("read", "Announcement", { teamId: ownTeamId });
+        can("read", "TrainingPlan", { teamId: ownTeamId, status: "PUBLISHED" });
       }
       can("read", "Event", { teamId: null }); // club-wide events
       can("read", "Venue");

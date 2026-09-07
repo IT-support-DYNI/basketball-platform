@@ -150,6 +150,11 @@ const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/drills/{id}", summary: "Get a drill", tag: "Training", auth: "coach" },
   { method: "PATCH", path: "/drills/{id}", summary: "Edit a drill (or archive it)", tag: "Training", auth: "coach" },
   { method: "DELETE", path: "/drills/{id}", summary: "Delete a drill (author / admin only)", tag: "Training", auth: "coach" },
+  { method: "GET", path: "/training-plans", summary: "Session plans for your teams (?status=, ?templates=1)", tag: "Training", auth: "user", list: true },
+  { method: "POST", path: "/training-plans", summary: "Start a session plan (optionally from a template)", tag: "Training", auth: "coach" },
+  { method: "GET", path: "/training-plans/{id}", summary: "A session plan with its blocks", tag: "Training", auth: "user" },
+  { method: "PATCH", path: "/training-plans/{id}", summary: "Edit a plan / replace its blocks / publish / complete", tag: "Training", auth: "coach" },
+  { method: "DELETE", path: "/training-plans/{id}", summary: "Delete a session plan", tag: "Training", auth: "coach" },
 
   { method: "GET", path: "/videos", summary: "Videos visible to the caller", tag: "Video", auth: "user", list: true },
   { method: "POST", path: "/videos", summary: "Create a video record", tag: "Video", auth: "coach" },

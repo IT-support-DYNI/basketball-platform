@@ -38,6 +38,8 @@ test.describe("accessibility — no WCAG 2.1 A/AA violations", () => {
     await scan(page, "/coach/dashboard");
     await scan(page, "/coach/drills");
     await scan(page, "/coach/drills/new");
+    await scan(page, "/coach/training/plans");
+    await scan(page, "/coach/training/plans/new");
   });
 
   test("admin surfaces", async ({ page }) => {

@@ -30,13 +30,82 @@ shared/global drill every club sees), `name`, `category` (`DrillCategory`),
 - **Seed** — 7 drills across warm-up, ball-handling, shooting, defense,
   transition, scrimmage and cool-down.
 
-## Still to come
+## Session plans (W9 part 2)
 
-- Part 2 — `TrainingPlan` / `TrainingBlock`: ordered session sections
-  (warm-up → skill → tactical → conditioning → scrimmage → cool-down), each
-  referencing drills with durations and group notes; a duration roll-up.
-- Part 3 — attach a plan to a scheduled `Event`; a player-facing read view;
-  session templates + "duplicate session"; post-session notes + effectiveness
-  rating.
-- Part 4 — the `CourtDiagram` editor for drills (SVG half-court, players /
-  cones / movement arrows serialised to `courtDiagram` jsonb).
+Migration `20260903130000_training_plans`. `TrainingPlan` — `teamId` +
+`seasonId` (+ optional `squadId`), `title`, `objectives`, `date` (null for
+templates), `status` (`DRAFT` / `PUBLISHED` / `COMPLETED`), `isTemplate`,
+`coachingNotes`, `eventId` (`@unique` — the scheduled session it belongs to,
+wired in part 3), `effectivenessRating` + `postSessionNotes` (post-session),
+`templateOfId` (self-FK — "started from this template"), `createdByUserId`.
+`TrainingBlock` — `trainingPlanId`, `category` (`TrainingBlockCategory`:
+WARMUP / SKILL / TACTICAL / CONDITIONING / SCRIMMAGE / COOLDOWN / OTHER),
+`order`, `title`, `durationMinutes`, `notes`, `drillId` (optional library
+reference).
+
+- **authz** — subject `"TrainingPlan"`. `HEAD_COACH` / `ASSISTANT_COACH`:
+  full CRUD scoped to `{ teamId }`. `TEAM_MANAGER`: read. `PLAYER`: read
+  `{ teamId, status: "PUBLISHED" }` only. `CLUB_ADMIN`: manage all.
+- **API** — `GET /api/v1/training-plans` (`?status=&templates=1`; players get
+  only PUBLISHED), `POST` (optionally `fromTemplateId` — copies its blocks),
+  `GET|PATCH|DELETE /api/v1/training-plans/{id}`. **`PATCH` replaces the whole
+  block list** in order (delete-all + `createMany`), the same pattern consent
+  versions / evaluation category scores use. `lib/training-plans.ts` owns the
+  authz checks; `planDurationMinutes` (in `lib/training.ts`) sums block times.
+- **UI** — `/coach/training/plans` (grouped: upcoming/drafts, templates, past),
+  `/coach/training/plans/new` (`NewPlanForm` — title, objectives, date or
+  "save as template", optional start-from-template), `/coach/training/plans/{id}`
+  (`PlanBuilder` — inline header edit, block cards with category / title /
+  duration / notes / drill picker / reorder, running total, publish → complete
+  → post-session rating). Nav capability `coach.plans`.
+- **Seed** — a published U16 plan (6 blocks referencing the seeded drills) and
+  a reusable senior template.
+
+## Attach to a session + player view (W9 part 3)
+
+No migration — uses the existing `TrainingPlan.eventId @unique`.
+
+- **Link / unlink** — `createTrainingPlanSchema` + `updateTrainingPlanSchema`
+  take `eventId` (number to link, `null` to unlink). `lib/training-plans.ts`
+  `resolveEventLink` validates it: the event is on the plan's team, isn't a
+  deadline type, and isn't already taken by another plan (→ `409`). Linking
+  also fills the plan's `date` from the event when it's blank. Templates can't
+  be linked. `linkableSessionsFor(teamId, currentPlanId?)` lists the team's
+  recent + upcoming training / matches that are free (or already this plan's).
+- **Where it's set** — the `PlanBuilder` header has a "Linked session" select.
+  The calendar event dialog (`components/calendar/CalendarView.tsx`), for a
+  coach on a plannable team event, shows the linked plan (a link) or a
+  "Build a session plan →" link to `/coach/training/plans/new?eventId=…`, which
+  pre-fills the team + date and links on create.
+- **Player read view** — `components/training/PlanReadView.tsx` renders a plan
+  read-only (objectives, blocks with durations + drill names, running total).
+  The calendar dialog embeds it for a player when the event's plan is
+  `PUBLISHED` — it fetches `/api/v1/training-plans/{id}` (players are authorised
+  for their team's published plans only). The event list + detail API now carry
+  `trainingPlan { id, title, status }`.
+
+## Court-diagram editor (W9 part 4)
+
+No migration — fills the `Drill.courtDiagram` jsonb column.
+
+- **Shape** — `courtDiagramSchema` in `lib/contracts/training.ts`:
+  `{ markers: [{ id, kind, x, y, label? }], arrows: [{ id, kind, from, to }] }`.
+  `kind` is `player` / `opponent` / `cone` / `ball` / `coach` for markers and
+  `move` / `pass` / `dribble` / `screen` for arrows. **All coordinates are
+  normalised 0–1** within a half-court box (basket at the top). The drill
+  create/update schemas validate `courtDiagram` against this.
+- **Component** — `components/training/CourtDiagram.tsx` is both the editor and
+  the read view (editor when passed `onChange`). It draws the half-court
+  markings in SVG, then the arrows and markers. Editing: pick a tool, tap the
+  court to drop a marker (drag to move it), or tap twice to draw an arrow;
+  select + Delete/Backspace or the toolbar removes one; a selected player has a
+  jersey-label input.
+- **Accessibility** — the SVG carries `role="img"` and an `aria-label` from
+  `describeDiagram()` ("Court diagram: 1 player, 1 defender, 1 movement
+  arrow."), and the editor shows the same text hint. The freehand editing
+  itself is pointer-only — a known limitation noted here rather than solved.
+- **Wiring** — `DrillForm` has a "Court diagram" section; `DrillDetail` shows
+  "Court setup" read-only when the drill has one (`diagramHasContent`). Seed:
+  the "Closeout & mirror" drill ships with a diagram.
+
+## W9 complete — training plans + drill library.

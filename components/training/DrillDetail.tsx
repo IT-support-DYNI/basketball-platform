@@ -7,8 +7,14 @@ import Link from "next/link";
 import Card from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/toast";
-import { DRILL_CATEGORY_LABEL, DRILL_DIFFICULTY_LABEL } from "@/lib/training";
+import {
+  DRILL_CATEGORY_LABEL,
+  DRILL_DIFFICULTY_LABEL,
+  diagramHasContent,
+  type CourtDiagram,
+} from "@/lib/training";
 import DrillForm, { type DrillFormValues } from "./DrillForm";
+import CourtDiagramView from "./CourtDiagram";
 
 export type DrillView = {
   id: number;
@@ -24,6 +30,7 @@ export type DrillView = {
   maxPlayers: number | null;
   equipment: string[];
   tags: string[];
+  courtDiagram: CourtDiagram | null;
   shared: boolean;
   archived: boolean;
   createdByName: string | null;
@@ -81,6 +88,7 @@ export default function DrillDetail({ drill }: { drill: DrillView }) {
       maxPlayers: drill.maxPlayers?.toString() ?? "",
       equipment: drill.equipment,
       tags: drill.tags,
+      courtDiagram: drill.courtDiagram,
     };
     return (
       <Card as="section">
@@ -105,6 +113,15 @@ export default function DrillDetail({ drill }: { drill: DrillView }) {
           <div className="mt-4">
             <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink">How to run it</h2>
             <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-ink-dim">{drill.instructions}</p>
+          </div>
+        )}
+
+        {diagramHasContent(drill.courtDiagram) && (
+          <div className="mt-4">
+            <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink">Court setup</h2>
+            <div className="mt-2">
+              <CourtDiagramView value={drill.courtDiagram} />
+            </div>
           </div>
         )}
 

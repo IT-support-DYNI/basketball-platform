@@ -12,7 +12,11 @@ import {
   DRILL_DIFFICULTIES,
   DRILL_CATEGORY_LABEL,
   DRILL_DIFFICULTY_LABEL,
+  EMPTY_DIAGRAM,
+  diagramHasContent,
+  type CourtDiagram,
 } from "@/lib/training";
+import CourtDiagramEditor from "./CourtDiagram";
 
 export type DrillFormValues = {
   id?: number;
@@ -28,6 +32,7 @@ export type DrillFormValues = {
   maxPlayers: string;
   equipment: string[];
   tags: string[];
+  courtDiagram: CourtDiagram | null;
 };
 
 const EMPTY: DrillFormValues = {
@@ -43,6 +48,7 @@ const EMPTY: DrillFormValues = {
   maxPlayers: "",
   equipment: [],
   tags: [],
+  courtDiagram: null,
 };
 
 const lines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -82,6 +88,7 @@ export default function DrillForm({
         maxPlayers: v.maxPlayers ? Number(v.maxPlayers) : undefined,
         equipment: v.equipment,
         tags: v.tags,
+        courtDiagram: diagramHasContent(v.courtDiagram) ? v.courtDiagram : null,
       };
       const res = await fetch(editing ? `/api/v1/drills/${initial!.id}` : "/api/v1/drills", {
         method: editing ? "PATCH" : "POST",
@@ -173,6 +180,12 @@ export default function DrillForm({
         defaultValue={v.tags.join(", ")}
         onChange={(e) => set("tags", csv(e.target.value))}
       />
+
+      <div className="flex flex-col gap-1.5">
+        <span className="text-sm font-semibold text-ink">Court diagram</span>
+        <span className="text-xs text-ink-dim">Optional — place players, cones and a ball, and draw movement or pass arrows.</span>
+        <CourtDiagramEditor value={v.courtDiagram ?? EMPTY_DIAGRAM} onChange={(cd: CourtDiagram) => set("courtDiagram", cd)} />
+      </div>
 
       <div className="flex gap-2">
         <Button type="submit" loading={busy}>{editing ? "Save changes" : "Add drill"}</Button>

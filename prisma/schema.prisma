@@ -253,6 +253,7 @@ model Season {
   squads           Squad[]
   memberships      TeamMembership[]
   staffAssignments StaffAssignment[]
+  trainingPlans    TrainingPlan[]
 
   @@index([clubId, isActive])
 }
@@ -272,7 +273,8 @@ model Squad {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  memberships TeamMembership[]
+  memberships   TeamMembership[]
+  trainingPlans TrainingPlan[]
 
   @@unique([teamId, seasonId, name])
   @@index([seasonId])
@@ -469,6 +471,7 @@ model User {
   /// Populated when role = ADMIN and this admin has reviewed at least one registration.
   registrationsReviewed PlayerProfile[] @relation("RegistrationReviewer")
   drillsCreated  Drill[]               @relation("DrillCreatedBy")
+  trainingPlansCreated TrainingPlan[]  @relation("TrainingPlanCreatedBy")
 }
 
 // WEB PUSH
@@ -774,6 +777,7 @@ model Team {
   staffAssignments StaffAssignment[]
   registrationApplicants PlayerProfile[] @relation("RegistrationApplicant")
   conversations    Conversation[]
+  trainingPlans    TrainingPlan[]
 }
 
 // VENUES
@@ -853,6 +857,7 @@ model Event {
   availabilityResponses AvailabilityResponse[]
   qrTokens              QrCheckInToken[]
   conversations         Conversation[]
+  trainingPlan          TrainingPlan?
 
   @@index([teamId, startAt])
   @@index([startAt])
@@ -1154,5 +1159,80 @@ model Drill {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
+  blocks          TrainingBlock[]
+
   @@index([clubId, category])
+}
+
+enum TrainingPlanStatus {
+  DRAFT
+  PUBLISHED
+  COMPLETED
+}
+
+enum TrainingBlockCategory {
+  WARMUP
+  SKILL
+  TACTICAL
+  CONDITIONING
+  SCRIMMAGE
+  COOLDOWN
+  OTHER
+}
+
+/// A structured plan for one training session (brief §14). Ordered blocks, each
+/// optionally pulling a drill from the library. `isTemplate` plans have no date
+/// and are the "start from a template" source for `templateOf`.
+model TrainingPlan {
+  id                  Int                @id @default(autoincrement())
+  teamId              Int
+  team                Team               @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  seasonId            Int
+  season              Season             @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  squadId             Int?
+  squad               Squad?             @relation(fields: [squadId], references: [id], onDelete: SetNull)
+  title               String
+  objectives          String?
+  /// The session date this plan is for. Null for templates.
+  date                DateTime?
+  status              TrainingPlanStatus @default(DRAFT)
+  isTemplate          Boolean            @default(false)
+  coachingNotes       String?
+  /// The scheduled session this plan belongs to (W9 part 3). At most one plan
+  /// per event.
+  eventId             Int?               @unique
+  event               Event?             @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  /// Post-session reflection (status = COMPLETED).
+  effectivenessRating Int?
+  postSessionNotes    String?
+  /// The template this plan was created from ("duplicate session").
+  templateOfId        Int?
+  templateOf          TrainingPlan?      @relation("PlanTemplate", fields: [templateOfId], references: [id], onDelete: SetNull)
+  copies              TrainingPlan[]     @relation("PlanTemplate")
+  createdByUserId     Int?
+  createdBy           User?              @relation("TrainingPlanCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  blocks TrainingBlock[]
+
+  @@index([teamId, seasonId])
+  @@index([teamId, date])
+}
+
+/// One ordered section of a training plan.
+model TrainingBlock {
+  id              Int                   @id @default(autoincrement())
+  trainingPlanId  Int
+  trainingPlan    TrainingPlan          @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+  category        TrainingBlockCategory
+  order           Int
+  title           String?
+  durationMinutes Int?
+  /// Setup / coaching focus / player-group notes for this block.
+  notes           String?
+  drillId         Int?
+  drill           Drill?                @relation(fields: [drillId], references: [id], onDelete: SetNull)
+
+  @@index([trainingPlanId, order])
 }

@@ -34,6 +34,7 @@ export default async function DrillPage({ params }: { params: { id: string } }) 
           maxPlayers: drill.maxPlayers,
           equipment: drill.equipment,
           tags: drill.tags,
+          courtDiagram: (drill.courtDiagram as never) ?? null,
           shared: drill.clubId == null,
           archived: drill.archivedAt != null,
           createdByName: drill.createdBy?.name ?? null,

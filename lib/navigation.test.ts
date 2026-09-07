@@ -25,10 +25,14 @@ describe("navigation", () => {
     }
   });
 
-  it("the drill library is a coach tool, not for players or guardians", () => {
-    expect(navFor("COACH").map((i) => i.href)).toContain("/coach/drills");
+  it("the drill library + session plans are coach tools, not for players or guardians", () => {
+    const coach = navFor("COACH").map((i) => i.href);
+    expect(coach).toContain("/coach/drills");
+    expect(coach).toContain("/coach/training/plans");
     for (const role of ["PLAYER", "GUARDIAN"]) {
-      expect(navFor(role).map((i) => i.href)).not.toContain("/coach/drills");
+      const hrefs = navFor(role).map((i) => i.href);
+      expect(hrefs).not.toContain("/coach/drills");
+      expect(hrefs).not.toContain("/coach/training/plans");
     }
   });
 
