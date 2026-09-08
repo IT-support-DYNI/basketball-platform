@@ -75,6 +75,7 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params, re
   set("contactPhone", body.contactPhone);
   set("nationality", body.nationality);
   set("heightCm", body.heightCm);
+  set("weightKg", body.weightKg);
   set("preferredHand", body.preferredHand);
   set("bio", body.bio);
   set("address", body.address);

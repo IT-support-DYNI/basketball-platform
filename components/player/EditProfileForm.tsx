@@ -9,6 +9,7 @@ type Initial = {
   address: string | null;
   nationality: string | null;
   heightCm: number | null;
+  weightKg: number | null;
   preferredHand: string | null;
   bio: string | null;
   emergencyContactName: string | null;
@@ -31,6 +32,7 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
     address: initial.address ?? "",
     nationality: initial.nationality ?? "",
     heightCm: initial.heightCm?.toString() ?? "",
+    weightKg: initial.weightKg?.toString() ?? "",
     preferredHand: initial.preferredHand ?? "",
     bio: initial.bio ?? "",
     emergencyContactName: initial.emergencyContactName ?? "",
@@ -60,6 +62,7 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
         address: v.address || undefined,
         nationality: v.nationality || undefined,
         heightCm: v.heightCm ? Number(v.heightCm) : undefined,
+        weightKg: v.weightKg ? Number(v.weightKg) : undefined,
         preferredHand: v.preferredHand || undefined,
         bio: v.bio || undefined,
         emergencyContactName: v.emergencyContactName || undefined,
@@ -89,12 +92,30 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
 
   return (
     <form onSubmit={submit} className="space-y-5">
+      <fieldset className="space-y-2 rounded-control border border-flame/25 bg-flame/[0.04] p-4">
+        <legend className="px-1 font-mono text-[11px] uppercase tracking-wider text-flame-ink">Your bio</legend>
+        <p className="text-xs text-ink-faint">
+          Shown at the top of your profile — club members and coaches see this, and, if the club approves
+          your profile as public, so could anyone scouting for talent. Make it count.
+        </p>
+        <textarea
+          value={v.bio}
+          onChange={on("bio")}
+          rows={4}
+          maxLength={1000}
+          placeholder="Position, playing style, what you're working on, achievements — your call."
+          className={field}
+        />
+        <p className="text-right text-[11px] text-ink-faint">{v.bio.length}/1000</p>
+      </fieldset>
+
       <fieldset className="space-y-3">
         <legend className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">About you</legend>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-xs text-ink-dim">Date of birth<input type="date" value={v.dateOfBirth} onChange={on("dateOfBirth")} className={field} /></label>
-          <label className="text-xs text-ink-dim">Nationality<input value={v.nationality} onChange={on("nationality")} className={field} /></label>
+          <label className="text-xs text-ink-dim">Country<input value={v.nationality} onChange={on("nationality")} className={field} /></label>
           <label className="text-xs text-ink-dim">Height (cm)<input type="number" min={80} max={260} value={v.heightCm} onChange={on("heightCm")} className={field} /></label>
+          <label className="text-xs text-ink-dim">Weight (kg)<input type="number" min={20} max={200} value={v.weightKg} onChange={on("weightKg")} className={field} /></label>
           <label className="text-xs text-ink-dim">Preferred hand
             <select value={v.preferredHand} onChange={on("preferredHand")} className={field}>
               <option value="">—</option>
@@ -104,7 +125,6 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
             </select>
           </label>
         </div>
-        <label className="block text-xs text-ink-dim">Short bio<textarea value={v.bio} onChange={on("bio")} rows={2} className={field} /></label>
       </fieldset>
 
       <fieldset className="space-y-3">

@@ -27,8 +27,14 @@ export type ViewerKind =
 /** Fields not listed here are always returned (id, name, photoUrl basics, memberships…). */
 export const PLAYER_FIELD_VIEWERS: Record<string, ViewerKind[]> = {
   bio: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN", "PUBLIC"],
+  // Same tier as bio, on purpose: a real uploaded photo is exactly the kind of
+  // thing a guardian's publicProfileApproved opt-in is meant to gate before it
+  // can reach an outside recruiter — not something to make public by default
+  // just because the upload feature now exists.
+  photoUrl: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN", "PUBLIC"],
   nationality: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],
   heightCm: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],
+  weightKg: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],
   preferredHand: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],
 
   dateOfBirth: ["SELF", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],

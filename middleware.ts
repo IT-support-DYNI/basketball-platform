@@ -22,6 +22,17 @@ const ROLE_PREFIX: Record<string, string> = {
   GUARDIAN: "/guardian",
 };
 
+/** Pass the pathname through as a request header so Server Components that
+ *  have no other way to see it (NavBar, notably) can tell a public-site
+ *  route from an app route. Only matters for responses that actually render
+ *  a page — redirects and the JSON 401 don't need it, since a redirect is a
+ *  fresh request that re-enters this middleware anyway. */
+function nextWithPathname(req: NextRequest) {
+  const headers = new Headers(req.headers);
+  headers.set("x-pathname", req.nextUrl.pathname);
+  return NextResponse.next({ request: { headers } });
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
@@ -33,6 +44,8 @@ export async function middleware(req: NextRequest) {
     pathname === "/forgot-password" ||
     pathname === "/reset-password" ||
     pathname === "/verify-email" ||
+    pathname === "/club" ||
+    pathname.startsWith("/club/") ||
     pathname === "/api/v1" ||
     pathname === "/api/v1/openapi.json" ||
     pathname.startsWith("/api/auth") ||
@@ -46,7 +59,18 @@ export async function middleware(req: NextRequest) {
   const isApiRequest = pathname.startsWith("/api/");
 
   if (isPublic) {
-    return NextResponse.next();
+    // An already-signed-in user hitting /login shouldn't see the sign-in
+    // form at all — found as a real bug: NavBar (app/layout.tsx) renders
+    // off session presence alone, with no idea what route it's on, so a
+    // still-logged-in guardian landing here got the authenticated nav
+    // chrome rendered right on top of the login page. Redirecting away
+    // fixes the actual problem (they shouldn't be here) rather than
+    // teaching NavBar about route exceptions.
+    if (pathname === "/login" && token && token.isActive !== false) {
+      const role = token.role as string;
+      return NextResponse.redirect(new URL(ROLE_HOME[role] ?? "/", req.url));
+    }
+    return nextWithPathname(req);
   }
 
   if (!token || token.isActive === false) {
@@ -103,7 +127,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL(homePath, req.url));
   }
 
-  return NextResponse.next();
+  return nextWithPathname(req);
 }
 
 export const config = {

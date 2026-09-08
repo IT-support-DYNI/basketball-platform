@@ -104,6 +104,9 @@ export default function LoginPage() {
             <span className="mt-1 block text-xs text-ink-faint">
               An administrator reviews every registration before full access is granted.
             </span>
+            <Link href="/club" className="mt-3 block text-xs font-semibold text-ink-dim hover:text-flame-ink hover:underline">
+              Just looking? Visit the public club site →
+            </Link>
           </>
         )
       }

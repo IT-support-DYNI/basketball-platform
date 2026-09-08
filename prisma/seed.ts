@@ -222,6 +222,15 @@ async function main() {
     login?: boolean; // keep a stable password login for click-through
   };
 
+  const NATIONALITY_BY_EMAIL: Record<string, string> = {
+    "amara.k@example.com": "CI",
+    "tomas.r@example.com": "ES",
+    "kai.n@example.com": "JP",
+    "sam.o@example.com": "NG",
+    "elena.v@example.com": "UA",
+    "olu.a@example.com": "NG",
+  };
+
   const u16Players: PlayerSpec[] = [
     { email: "player1@example.com", name: "Priya Patel", team: u16.id, squad: u16Starters.id, pos: "PG", jersey: 7, bornYearsAgo: 15, medicalNotes: "Mild asthma — blue inhaler in kit bag.", welfareNotes: "Not to be dropped off alone after evening sessions.", login: true },
     { email: "player2@example.com", name: "Jordan Junior", team: u16.id, squad: u16Starters.id, pos: "C", jersey: 21, bornYearsAgo: 15, login: true },
@@ -253,8 +262,9 @@ async function main() {
         playerProfile: {
           create: {
             dateOfBirth: yearsAgo(spec.bornYearsAgo, 4, 12),
-            nationality: "GB",
+            nationality: NATIONALITY_BY_EMAIL[spec.email] ?? "GB",
             heightCm: 160 + ((spec.jersey * 7) % 35),
+            weightKg: 55 + ((spec.jersey * 5) % 40),
             preferredHand: spec.jersey % 4 === 0 ? "LEFT" : "RIGHT",
             registrationTeamId: spec.team,
             registrationPosition: spec.pos,
@@ -300,6 +310,37 @@ async function main() {
       });
     }
   }
+
+  /* ── Public club-site demo data ────────────────────────────────────────
+     A couple of profiles opted in (guardian + club approved, per the brief's
+     minor-safeguarding rule) so /club has real content to show rather than
+     an empty "nothing public yet" state. Everyone else stays private by
+     default — this is the exception, not the norm. */
+  await prisma.playerProfile.update({
+    where: { id: players["player1@example.com"].profileId }, // Priya Patel, U16 — a minor, guardian-approved
+    data: {
+      bio: "Point guard for the U16s. Been playing since I was nine — love the game for how much you have to think, not just run.",
+      publicProfileApproved: true,
+    },
+  });
+  await prisma.playerHighlight.create({
+    data: {
+      playerProfileId: players["player1@example.com"].profileId,
+      title: "U16 season highlights — spacing & closeouts",
+      url: "https://www.youtube.com/results?search_query=basketball+highlights",
+    },
+  });
+  await prisma.playerProfile.update({
+    where: { id: players["marcus.t@example.com"].profileId }, // Marcus Thompson, senior — an adult, self-approved
+    data: {
+      bio: "Senior point guard, team captain. Here to compete and to help the younger players coming up through the club.",
+      publicProfileApproved: true,
+    },
+  });
+  await prisma.coachProfile.update({
+    where: { userId: headCoach.id },
+    data: { publicProfileApproved: true },
+  });
 
   /* ── Guardians of the minors ───────────────────────────────────────── */
   const guardianSpecs: { email: string; name: string; children: string[]; label: string }[] = [

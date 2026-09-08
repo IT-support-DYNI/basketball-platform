@@ -8,7 +8,7 @@ import { recentAuditActivity } from "@/lib/audit";
 import StatTile from "@/components/StatTile";
 import StatusBadge from "@/components/StatusBadge";
 import ActionItems from "@/components/dashboard/ActionItems";
-import PageHeader from "@/components/ui/PageHeader";
+import DashboardHero from "@/components/dashboard/DashboardHero";
 import Card from "@/components/ui/Card";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -26,12 +26,22 @@ export default async function AdminDashboardPage() {
     recentAuditActivity(6),
   ]);
 
+  const facts: string[] = [
+    `${stats.totalUsers} members`,
+    `${stats.totalTeams} team${stats.totalTeams === 1 ? "" : "s"}`,
+    `${activeTeams.length} active team${activeTeams.length === 1 ? "" : "s"}`,
+  ];
+  if (stats.pendingRegistrations > 0) {
+    facts.push(`${stats.pendingRegistrations} pending registration${stats.pendingRegistrations === 1 ? "" : "s"}`);
+  }
+
   return (
     <main className="flex flex-col gap-8">
-      <PageHeader
+      <DashboardHero
         eyebrow="Administrator"
-        title="Club overview"
+        greeting="Club overview"
         lead={`Welcome back, ${session?.user?.name?.split(" ")[0] ?? ""}. Everything happening across the club.`}
+        facts={facts}
       />
 
       <ActionItems items={actionItems} />

@@ -7,7 +7,7 @@ import { actionItemsFor } from "@/lib/action-items";
 import { eventDayLabel } from "@/lib/events";
 import StatTile from "@/components/StatTile";
 import ActionItems from "@/components/dashboard/ActionItems";
-import PageHeader from "@/components/ui/PageHeader";
+import DashboardHero from "@/components/dashboard/DashboardHero";
 import Card from "@/components/ui/Card";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -24,12 +24,21 @@ export default async function CoachDashboardPage() {
     actionItems,
   ] = await Promise.all([getCoachDashboard(session!), actionItemsFor(session!)]);
 
+  const facts: string[] = [`${numberOfPlayers} player${numberOfPlayers === 1 ? "" : "s"} on your roster`];
+  if (attendanceSummary.percentage != null) facts.push(`Team attendance ${attendanceSummary.percentage}%`);
+  if (nextSession) facts.push(`Next session ${nextSession.title}`);
+  if (playersNeedingReview.length > 0) {
+    facts.push(`${playersNeedingReview.length} player${playersNeedingReview.length === 1 ? "" : "s"} need a review`);
+  }
+
   return (
     <main className="flex flex-col gap-8">
-      <PageHeader
+      <DashboardHero
         eyebrow="Coach"
-        title={`Welcome back, ${session?.user?.name?.split(" ")[0] ?? "coach"}`}
+        greeting="Welcome back,"
+        name={session?.user?.name?.split(" ")[0] ?? "coach"}
         lead="What's happening across your team."
+        facts={facts}
       />
 
       <ActionItems items={actionItems} />

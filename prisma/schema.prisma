@@ -498,6 +498,10 @@ model CoachProfile {
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   phone   String?
   bio     String?
+  photoUrl String?
+  /// Same opt-in-then-admin-confirmed gate as PlayerProfile.publicProfileApproved
+  /// — nothing renders on the public club site until this is true.
+  publicProfileApproved Boolean @default(false)
 
   attendanceRecorded   AttendanceRecord[]       @relation("AttendanceRecordedBy")
   attendanceVerified   AttendanceRecord[]       @relation("AttendanceVerifiedBy")
@@ -519,6 +523,7 @@ model PlayerProfile {
   /// CLUB_MEMBER+
   nationality     String?
   heightCm        Int?
+  weightKg        Int?
   preferredHand   PreferredHand?
   bio             String?
 
@@ -574,8 +579,24 @@ model PlayerProfile {
   guardians         GuardianRelationship[] @relation("Player")
   memberships       TeamMembership[]
   consentRecords    ConsentRecord[]
+  highlights        PlayerHighlight[]
 
   @@index([registrationStatus])
+}
+
+/// Player-managed highlight reel — links out to video the player already has
+/// hosted elsewhere (YouTube, Vimeo, Hudl…), not a self-hosting pipeline.
+/// Same visibility rule as `bio`/`photoUrl`: club-visible always, public only
+/// once `publicProfileApproved` — see lib/player-profile-view.ts.
+model PlayerHighlight {
+  id              Int           @id @default(autoincrement())
+  playerProfileId Int
+  player          PlayerProfile @relation(fields: [playerProfileId], references: [id], onDelete: Cascade)
+  title           String
+  url             String
+  createdAt       DateTime      @default(now())
+
+  @@index([playerProfileId])
 }
 
 // GUARDIANS

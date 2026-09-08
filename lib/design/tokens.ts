@@ -26,24 +26,26 @@ export const brand = {
 } as const;
 
 export const dark = {
-  ground: "#0b0b0f",
-  surface: "#141419",
-  surface2: "#1c1c23",
-  surface3: "#26262f",
-  ink: "#f4f1ec",
-  inkDim: "#9b9ba6",
-  inkFaint: "#6b6b77",
-  line: "rgba(255,255,255,0.09)",
-  lineStrong: "rgba(255,255,255,0.16)",
-  flame: "#f04800",
-  flameInk: "#ff7a3d",
-  ember: "#f5851f",
-  gold: "#f5c451",
+  // 7 Sept 2026 repaint — see app/globals.css for the same values as the
+  // canonical CSS custom properties this mirrors.
+  ground: "#0b0d12",
+  surface: "#151821",
+  surface2: "#1c202b",
+  surface3: "#262b38",
+  ink: "#f8fafc",
+  inkDim: "#94a3b8",
+  inkFaint: "#646e82",
+  line: "#292e3a",
+  lineStrong: "#394054",
+  flame: "#ff6b35",
+  flameInk: "#ff7a45",
+  ember: "#ff8a4c",
+  gold: "#fbbf24",
   onFlame: "#ffffff",
-  success: "#35c15e",
-  warning: "#e0a417",
+  success: "#4ade80",
+  warning: "#fbbf24",
   danger: "#f0503c",
-  info: "#5b9bf0",
+  info: "#5b8cff",
 } as const;
 
 export const light = {
@@ -71,28 +73,28 @@ export const light = {
  *  above so "injured red" never reads as "error red". Keys match the DB enums. */
 export const statusColor = {
   // player status
-  ACTIVE: "#35c15e",
-  PENDING: "#e0a417",
+  ACTIVE: "#4ade80",
+  PENDING: "#fbbf24",
   INJURED: "#f0503c",
   SUSPENDED: "#8b8177",
-  INACTIVE: "#6b6b77",
-  TRIALIST: "#5b9bf0",
-  FORMER: "#6b6b77",
+  INACTIVE: "#646e82",
+  TRIALIST: "#5b8cff",
+  FORMER: "#646e82",
   // event / session status
-  SCHEDULED: "#5b9bf0",
-  CONFIRMED: "#35c15e",
-  COMPLETED: "#35c15e",
+  SCHEDULED: "#5b8cff",
+  CONFIRMED: "#4ade80",
+  COMPLETED: "#4ade80",
   CANCELLED: "#f0503c",
-  POSTPONED: "#e0a417",
+  POSTPONED: "#fbbf24",
   // attendance
-  PRESENT: "#35c15e",
+  PRESENT: "#4ade80",
   ABSENT: "#f0503c",
-  LATE: "#e0a417",
-  EXCUSED: "#9b9ba6",
+  LATE: "#fbbf24",
+  EXCUSED: "#94a3b8",
   // registration
-  APPROVED: "#35c15e",
+  APPROVED: "#4ade80",
   REJECTED: "#f0503c",
-  CHANGES_REQUESTED: "#5b9bf0",
+  CHANGES_REQUESTED: "#5b8cff",
 } as const;
 
 export const space = [0, 4, 8, 12, 16, 24, 32, 48, 64, 80] as const;
