@@ -41,7 +41,7 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
             )}
             <div className="min-w-0">
               <p className="font-mono text-xs uppercase tracking-wider text-on-flame/80">
-                {[player.team, player.position, player.jerseyNumber != null ? `#${player.jerseyNumber}` : null].filter(Boolean).join(" · ") || "DYNI Blazers"}
+                {[player.team, player.positionLabel, player.jerseyNumber != null ? `#${player.jerseyNumber}` : null].filter(Boolean).join(" · ") || "DYNI Blazers"}
               </p>
               <h1 className="mt-1 font-display text-3xl font-extrabold uppercase leading-[0.95] tracking-tight text-on-flame sm:text-5xl">
                 {player.name}

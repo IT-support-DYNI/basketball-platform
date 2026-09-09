@@ -186,8 +186,49 @@ job than the dashboards §4/§5 are for.
   watermark motif from §5, and the global card-hover rule from §5 (any
   `rounded-card border border-line` on this site gets the same hover-lift
   for free).
-- **Not done yet**: a mobile nav menu for the public header (the Teams/
-  Players/Coaches links are desktop-only for now, though every section is
-  still reachable by scrolling on mobile), and photo upload for coaches
-  (players already have one — `components/player/PhotoUpload.tsx` — coaches
-  don't yet, so coach cards are initials-only until that's built).
+- **Not done yet**: photo upload for coaches (players already have one —
+  `components/player/PhotoUpload.tsx` — coaches don't yet, so coach cards are
+  initials-only until that's built).
+
+## §7 — Full public site build-out from manager mockups (9 Sept 2026)
+
+The manager built two Claude-design mockups (`Blazers Club Site.dc.html`,
+`Blazers App Dashboards.dc.html`) and asked for them adopted site-wide. This
+pass covers the public site side; the dashboard mockup's "needs your
+attention" alert-strip pattern (per-role real counts of unread messages,
+unacknowledged announcements, unanswered RSVPs, pending registrations) is
+real new data wiring, not styling, and hasn't been done yet — the existing
+dashboards (§5) already match the mockup's hero/KPI-tile/marquee treatment.
+
+- **New pages**: `/club/teams`, `/club/roster` (client-side filter chips by
+  age group and position — `components/public/RosterGrid.tsx`), `/club/coaches`,
+  `/club/about`. `PersonCard` extracted to `components/public/PersonCard.tsx`
+  so home/roster/coaches share one implementation (and one place to not
+  reintroduce the `display: inline` ghost-box bug from §6).
+- **`PublicHeader` gained a mobile menu and a shrink-on-scroll treatment**
+  (toggles `Brandmark`'s `sm`/`md` size) — the mobile-nav gap flagged in §6
+  is closed.
+- **Real data only — three things the mockups showed that this build
+  deliberately left out**, because nothing in the schema backs them and
+  showing them would be publishing an unverifiable or fabricated claim to
+  an audience with no account:
+  - No "DBS checked" coach badge. `getPublicCoaches`/`getPublicCoach` do
+    show a real role line ("Head coach · Blazers U16") sourced from
+    `StaffAssignment`, just not an unverifiable compliance claim.
+  - No team "Trains: Tue/Thu" / "Spaces: OPEN/TRIAL/FULL" schedule table —
+    `Team` has no capacity or training-day fields. `/club/teams` shows real
+    member counts instead.
+  - No News page with invented stories/dates. There's no news/CMS model in
+    this app; `/club/news` is an honest empty state rather than the
+    mockup's six fabricated posts with fake dates.
+- `lib/public-site.ts` gained `POSITION_LABELS` (PG → "Point guard", etc —
+  the DB's compact codes aren't visitor-friendly on their own) and per-coach
+  `roleLine`.
+- Found in the process, unrelated to this design pass but blocking: schema
+  drift — `CoachProfile.photoUrl`/`publicProfileApproved`, `PlayerProfile.weightKg`,
+  and the whole `PlayerHighlight` model were present in applied migrations
+  and in code that queried them, but missing from `schema.prisma` itself
+  (most likely an editor/git state that reverted the file without reverting
+  the generated migrations). `npx tsc --noEmit` was failing project-wide
+  before this was fixed by restoring the missing model fields to match the
+  already-applied migrations.

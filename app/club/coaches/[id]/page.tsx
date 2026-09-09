@@ -30,7 +30,7 @@ export default async function PublicCoachPage({ params }: { params: { id: string
             </div>
           )}
           <div className="min-w-0">
-            <p className="font-mono text-xs uppercase tracking-wider text-on-flame/80">Coach</p>
+            <p className="font-mono text-xs uppercase tracking-wider text-on-flame/80">{coach.roleLine ?? "Coach"}</p>
             <h1 className="mt-1 font-display text-3xl font-extrabold uppercase leading-[0.95] tracking-tight text-on-flame sm:text-5xl">
               {coach.name}
             </h1>
