@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { getPublicCoach } from "@/lib/public-site";
 
@@ -18,32 +19,65 @@ export default async function PublicCoachPage({ params }: { params: { id: string
   const initials = coach.name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 
   return (
-    <article className="mx-auto max-w-2xl px-5 py-14 sm:px-8">
-      <div className="animate-hero-rise overflow-hidden rounded-card shadow-pop">
-        <div className="flex items-center gap-5 bg-gradient-to-br from-flame via-flame to-ember px-6 py-8 sm:px-10">
-          {coach.photoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={coach.photoUrl} alt="" className="h-28 w-28 flex-none rounded-full border-4 border-on-flame/30 object-cover shadow-pop sm:h-36 sm:w-36" />
-          ) : (
-            <div className="flex h-28 w-28 flex-none items-center justify-center rounded-full border-4 border-on-flame/30 bg-black/15 font-condensed text-4xl font-bold text-on-flame shadow-pop sm:h-36 sm:w-36">
-              {initials}
+    <main>
+      <section style={{ paddingTop: 28 }}>
+        <div className="wrap">
+          <Link className="back-link" href="/club/coaches">
+            ← Back to coaching staff
+          </Link>
+        </div>
+      </section>
+
+      <section style={{ paddingTop: 20 }}>
+        <div className="wrap">
+          <div className="profile-hero">
+            <div className="profile-hero-in">
+              <div className="profile-photo">
+                {coach.photoUrl ? (
+                  <div className="photo has-img">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={coach.photoUrl} alt="" />
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      display: "grid",
+                      placeItems: "center",
+                      background: "var(--photo-ground)",
+                      color: "var(--photo-text)",
+                      fontFamily: "var(--font-display)",
+                      fontStyle: "italic",
+                      fontWeight: 800,
+                      fontSize: "2rem",
+                    }}
+                  >
+                    {initials}
+                  </div>
+                )}
+              </div>
+              <div>
+                <p className="eyebrow">{coach.roleLine ?? "Coach"}</p>
+                <h1>{coach.name}</h1>
+              </div>
             </div>
-          )}
-          <div className="min-w-0">
-            <p className="font-mono text-xs uppercase tracking-wider text-on-flame/80">{coach.roleLine ?? "Coach"}</p>
-            <h1 className="mt-1 font-display text-3xl font-extrabold uppercase leading-[0.95] tracking-tight text-on-flame sm:text-5xl">
-              {coach.name}
-            </h1>
           </div>
         </div>
-      </div>
+      </section>
 
-      {coach.bio && (
-        <section className="mt-6 rounded-card border border-line bg-surface p-6 transition duration-200 hover:-translate-y-0.5 hover:shadow-card">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">About</p>
-          <p className="mt-2 text-ink-dim">{coach.bio}</p>
+      {coach.bio ? (
+        <section style={{ padding: "20px 0 var(--section-y)" }}>
+          <div className="wrap">
+            <div className="card">
+              <p className="card-label">About</p>
+              <p>{coach.bio}</p>
+            </div>
+          </div>
         </section>
+      ) : (
+        <div style={{ paddingBottom: "var(--section-y)" }} />
       )}
-    </article>
+    </main>
   );
 }

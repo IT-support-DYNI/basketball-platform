@@ -9,12 +9,19 @@
 
 .dyni-landing, .dyni-landing * { box-sizing: border-box; }
 .dyni-landing { background: var(--bg); color: var(--text-2); font-family: var(--font-body); font-size: var(--type-body); line-height: var(--body-leading); -webkit-font-smoothing: antialiased; }
-.dyni-landing a { color: var(--link); text-decoration: none; }
-.dyni-landing a:hover { color: var(--link-hover); }
-.dyni-landing img { display: block; max-width: 100%; }
-.dyni-landing h1, .dyni-landing h2, .dyni-landing h3, .dyni-landing h4 { margin: 0; font-family: var(--font-display); font-style: italic; font-weight: var(--display-weight); color: var(--text-1); letter-spacing: var(--display-tracking); line-height: var(--display-leading); text-transform: uppercase; }
-.dyni-landing p { margin: 0; }
-.dyni-landing button { font: inherit; color: inherit; }
+/* :where() on the element part keeps these resets at the SAME specificity
+   as a single component class (e.g. .btn-primary), not higher — the .dyni-
+   landing prefix needed for scoping was accidentally also making these win
+   over .btn-primary/.btn-secondary/.signin/.toggle/.chip's own color rules
+   (.dyni-landing a → 0,1,1 beats .btn-primary → 0,1,0 outright, regardless
+   of source order), which is why "Join the club" rendered in the same
+   accent orange as its own background — effectively invisible. */
+.dyni-landing :where(a) { color: var(--link); text-decoration: none; }
+.dyni-landing :where(a):hover { color: var(--link-hover); }
+.dyni-landing :where(img) { display: block; max-width: 100%; }
+.dyni-landing :where(h1, h2, h3, h4) { margin: 0; font-family: var(--font-display); font-style: italic; font-weight: var(--display-weight); color: var(--text-1); letter-spacing: var(--display-tracking); line-height: var(--display-leading); text-transform: uppercase; }
+.dyni-landing :where(p) { margin: 0; }
+.dyni-landing :where(button) { font: inherit; color: inherit; }
 .dyni-landing :where(a,button,input,select,[tabindex]):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--radius-xs); }
 .dyni-landing section { position: relative; }
 
@@ -78,8 +85,20 @@ html[data-theme=dark] .toggle .sun{display:none}
 @media (prefers-color-scheme:dark){html:not([data-theme=light]) .toggle .moon{display:block}html:not([data-theme=light]) .toggle .sun{display:none}}
 .signin{font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.16em;color:var(--text-2)}
 .signin:hover{color:var(--text-1)}
-@media (max-width:900px){.nav-links{display:none}.nav-act{margin-left:auto}}
-@media (max-width:560px){.signin{display:none}}
+/* ---- mobile nav: below 900px .nav-links AND .nav-act both give way to a
+   hamburger + dropdown panel — otherwise brand + toggle + sign-in + join
+   don't fit a phone width and something gets clipped. ---- */
+.nav-burger{display:none;width:38px;height:38px;flex:none;align-items:center;justify-content:center;border-radius:var(--radius-pill);border:1px solid var(--border);background:transparent;color:var(--text-1);cursor:pointer;margin-left:auto}
+.nav-burger svg{width:17px;height:17px}
+.nav-mobile-panel{border-top:var(--border-hairline);padding:16px var(--gutter) 20px;display:flex;flex-direction:column;gap:14px}
+.nav-mobile-panel nav{display:flex;flex-direction:column;gap:2px}
+.nav-mobile-panel nav a{font-family:var(--font-mono);font-size:var(--type-label);text-transform:uppercase;letter-spacing:.16em;color:var(--text-2);padding:10px 4px;border-radius:var(--radius-sm)}
+.nav-mobile-panel nav a:hover{color:var(--text-1);background:var(--surface)}
+.nav-mobile-panel nav a[aria-current]{color:var(--text-1)}
+.nav-mobile-act{display:flex;align-items:center;gap:10px;padding-top:10px;border-top:var(--border-hairline)}
+.nav-mobile-act .btn{flex:1;justify-content:center}
+@media (max-width:900px){.nav-links{display:none}.nav-act{display:none}.nav-burger{display:flex}}
+@media (min-width:901px){.nav-mobile-panel{display:none}}
 
 /* ---- hero ---- */
 .hero{position:relative;overflow:hidden;background:var(--ground-dark);display:flex;flex-direction:column}
@@ -260,3 +279,47 @@ html[data-theme=dark] .toggle .sun{display:none}
 .rv{opacity:0;transform:translateY(26px);transition:opacity var(--dur-reveal) var(--ease-out),transform var(--dur-reveal) var(--ease-out);transition-delay:var(--d,0ms)}
 .rv.in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.hero h1 .w>span{transform:none}.hero-watermark{animation:none}.dot-live{animation:none}.tile:hover .photo{transform:none}}
+
+/* ---- sub-page header (Roster, Coaches, About, …) ----
+   Not part of the original export — every other page needed a consistent
+   "banner + eyebrow + big italic heading" treatment that isn't the home
+   page's hero carousel. Built from the same tokens/classes as everything
+   above rather than inventing a new visual language. */
+.page-head{padding:var(--section-y) 0 calc(var(--section-y) * .7);border-bottom:var(--border-hairline)}
+.page-head .eyebrow{letter-spacing:var(--label-tracking-wide)}
+.page-head h1{margin-top:12px;font-size:var(--type-hero);max-width:16ch}
+.page-head .lead{margin-top:18px;max-width:56ch}
+.page-head-dark{background:var(--ground-dark)}
+.page-head-dark .eyebrow{color:var(--accent-light)}
+.page-head-dark h1{color:var(--photo-text)}
+.page-head-dark .lead{color:rgba(246,233,214,.82)}
+
+/* ---- filter chips (roster) ---- */
+.chip-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:28px}
+.chip-row .chip-label{font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.16em;color:var(--text-3);margin-right:4px}
+.chip{border-radius:var(--radius-pill);padding:7px 15px;font-family:var(--font-mono);font-size:var(--type-label-sm);font-weight:600;text-transform:uppercase;letter-spacing:.14em;border:1px solid var(--border);background:var(--surface);color:var(--text-2);cursor:pointer;transition:border-color var(--dur-fast),color var(--dur-fast),background var(--dur-fast)}
+.chip:hover{border-color:var(--accent);color:var(--text-1)}
+.chip.active{border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent-light));color:var(--on-accent)}
+.chip-sep{width:1px;height:22px;background:var(--border);margin:0 2px}
+
+/* ---- generic bordered card (profile bio/highlights, about's venue/contact,
+   empty states) — the same flat-shadowless-1px-border language as .safe-card
+   and .coach, just not tied to either's specific layout. ---- */
+.card{border:var(--border-hairline);border-radius:var(--radius-lg);background:var(--surface);padding:26px}
+.card + .card{margin-top:16px}
+.card .card-label{font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.18em;color:var(--text-3)}
+.card p{margin-top:12px;font-size:var(--type-small);color:var(--text-2);line-height:1.7}
+.empty-state{text-align:center;padding:calc(var(--section-y) * .6) var(--gutter)}
+.empty-state h2{font-size:var(--type-display-1)}
+.empty-state p{margin:14px auto 0;max-width:44ch;color:var(--text-2)}
+
+/* ---- profile hero (individual player/coach page) ---- */
+.profile-hero{position:relative;overflow:hidden;background:var(--ground-dark);border-radius:var(--radius-lg);padding:clamp(28px,5vw,52px) clamp(22px,4vw,44px);box-shadow:var(--shadow-photo)}
+.profile-hero-jersey{position:absolute;right:-4px;top:-10%;font-family:var(--font-display);font-style:italic;font-weight:900;font-size:clamp(9rem,20vw,16rem);line-height:1;color:rgba(246,233,214,.08);pointer-events:none;user-select:none}
+.profile-hero-in{position:relative;display:flex;align-items:center;gap:clamp(18px,3vw,32px);flex-wrap:wrap}
+.profile-photo{width:clamp(96px,14vw,140px);height:clamp(96px,14vw,140px);border-radius:50%;flex:none;overflow:hidden;border:3px solid rgba(246,233,214,.25)}
+.profile-photo .photo{width:100%;height:100%}
+.profile-hero h1{font-size:clamp(2.25rem,5vw,3.5rem);color:var(--photo-text);max-width:16ch}
+.profile-hero .eyebrow{color:var(--accent-light)}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.16em;color:var(--text-2)}
+.back-link:hover{color:var(--text-1)}

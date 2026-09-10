@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import PublicHeader from "@/components/public/PublicHeader";
-import PublicFooter from "@/components/public/PublicFooter";
+
+import "@/styles/dyni-landing/tokens.css";
+import "@/styles/dyni-landing/landing.css";
+
+import ScrollProgressBar from "@/components/public/landing/ScrollProgressBar";
+import LandingNav from "@/components/public/landing/LandingNav";
+import LandingFooter from "@/components/public/landing/LandingFooter";
 
 // The root layout (app/layout.tsx) already defines the "%s · DYNI Blazers"
 // template — redeclaring it here made a page with no title of its own read
@@ -17,25 +21,18 @@ export const metadata: Metadata = {
  *  root layout above this) suppresses itself on /club/* via the pathname
  *  header middleware.ts stamps onto every request — see components/NavBar.tsx.
  *
- *  The home page (`/club` exactly) is the one exception within /club/* itself:
- *  it carries its own full nav + footer, styled to the newer "DYNI Blazers
- *  Landing" design (styles/dyni-landing/) — a different visual language
- *  (warm/editorial, italic display type) from PublicHeader/PublicFooter's
- *  Tailwind styling. Stacking both here would read as two different sites,
- *  so the home page opts out of this shared chrome and supplies its own;
- *  every other /club/* page (teams, roster, coaches, about, news, individual
- *  profiles) keeps it. */
+ *  Every /club/* page shares the same "DYNI Blazers Landing" design
+ *  (styles/dyni-landing/) — nav, footer and scroll-progress bar live here so
+ *  every page gets them for free instead of redeclaring them; a page that
+ *  used the old Tailwind-styled PublicHeader/PublicFooter here would look
+ *  like two different sites stitched together. */
 export default function ClubLayout({ children }: { children: React.ReactNode }) {
-  const pathname = headers().get("x-pathname") ?? "";
-  if (pathname === "/club") {
-    return <>{children}</>;
-  }
-
   return (
-    <div className="flex min-h-screen flex-col">
-      <PublicHeader />
-      <main className="flex-1">{children}</main>
-      <PublicFooter />
+    <div className="dyni-landing">
+      <ScrollProgressBar />
+      <LandingNav />
+      {children}
+      <LandingFooter />
     </div>
   );
 }

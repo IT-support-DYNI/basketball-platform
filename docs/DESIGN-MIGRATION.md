@@ -232,3 +232,75 @@ dashboards (§5) already match the mockup's hero/KPI-tile/marquee treatment.
   the generated migrations). `npx tsc --noEmit` was failing project-wide
   before this was fixed by restoring the missing model fields to match the
   already-applied migrations.
+
+## §8 — Public site replaced with the "DYNI Blazers Landing" Claude Design
+   import (10 Sept 2026) — §6/§7 superseded
+
+The manager built a proper design-system project in Claude Design
+(`DYNI Blazers Design System`, imported via the `DesignSync` MCP tool after
+running `/design-login`) and asked for its `DYNI Blazers Landing.html` page
+adopted. This is a different, more considered visual language than §6/§7's
+flame/ember dark theme — warm/editorial (`#F6DEC1` light ground, `#FE440B`
+accent), italic Big Shoulders Display headings, IBM Plex Mono labels — and
+it replaces §6/§7's public site entirely rather than sitting alongside it.
+
+- **Where it lives**: `styles/dyni-landing/` (tokens + `landing.css`, ported
+  from the export and scoped under a `.dyni-landing` wrapper class so its
+  generic-named custom properties — `--bg`, `--accent`, `--text-1` — and
+  element-level rules — `a`, `h1`–`h4`, `section` — can't leak onto the rest
+  of the app; verified against every existing className first). Two renamed
+  keyframes (`spin`→`dyni-spin`, `pulse`→`dyni-pulse`) avoid colliding with
+  Tailwind's own `animate-spin`/`animate-pulse` globals.
+- **Theme toggle reuses the app's existing mechanism** (`dyni-theme`
+  localStorage key, `data-theme` on `<html>` — `components/theme/
+  ThemeScript.tsx`) rather than inventing a parallel one; `ThemeToggleButton`
+  just supplies this page's own `.toggle` markup over the same underlying
+  state.
+- **`app/club/layout.tsx` now renders the shared chrome for every /club/*
+  page** — `LandingNav` (shrink-on-scroll, active-link highlighting via
+  `usePathname`, and — added after verifying mobile broke without it — a
+  hamburger + dropdown panel below 900px, since `.nav-links`/`.nav-act`
+  together don't fit a phone width) and `LandingFooter`. The old
+  Tailwind-styled `PublicHeader`/`PublicFooter`/`PersonCard`/`RosterGrid`
+  (§6/§7) are deleted — every /club/* page uses one design now, not two
+  stitched together.
+- **Every /club/* page rebuilt in the new system**: `/club/roster` and
+  `/club/coaches` show the *full* approved list (not just the home page's
+  preview) — `/club/roster` keeps the age-group/position filter chips,
+  restyled as `.chip`. `/club/players/[id]` and `/club/coaches/[id]` got a
+  new `.profile-hero` treatment (dark band, jersey-ghost watermark, circular
+  photo) instead of the old flame-gradient hero. `/club/moments` is new (the
+  "All moments" full gallery); `/club/teams`, `/club/about`, `/club/news`
+  restyled in place. New shared CSS added for things the export didn't have
+  a sub-page version of: `.page-head`, `.chip`, `.card`, `.empty-state`,
+  `.profile-hero`.
+- **Content decisions carried over from §7, re-applied to the new markup**:
+  no fabricated "DBS checked" badge, no invented team schedule/capacity
+  table, no fabricated news stories. Two more of the export's own invented
+  content got the same treatment this pass: a testimonial quote attributed
+  to a named "parent" and a specific fabricated biography for a named coach
+  in one hero slide — both dropped, not reworded, since a named individual's
+  quote or life story isn't something to publish without it being real. The
+  safeguarding section's "named lead" card also had a specific fabricated
+  name attached to "the designated safeguarding lead, contactable directly"
+  — replaced with a generic pointer to ask the club, since getting a
+  safeguarding contact wrong is a safety issue, not just an accuracy one.
+- **The trial-registration form** (`RegisterInterestForm`) doesn't fake a
+  submission the way the export's did (`preventDefault()` + a local "we'll
+  be in touch" message, no backend call at all) — collecting a guardian's
+  email and child's name and pretending it was received would be a real
+  trust problem on a safeguarding-conscious platform. It validates the same
+  two fields, then sends the visitor into the real `/register` flow.
+- **The hero carousel doesn't pause on hover** — the export's did
+  (`mouseenter`/`mouseleave` cancel/resume of the autoplay `requestAnimationFrame`
+  loop), but manager feedback after using it was that hovering anywhere over
+  the hero (most of the viewport, reading a slide) made it look stuck.
+  Removed outright rather than narrowed to a smaller hover target.
+- **Real data wired in, not the export's six invented names**:
+  `getClubStats()` gained a real `sessionsThisWeek` (scheduled `TRAINING`
+  events in the next 7 days); `getPublicPlayers`/`getPublicPlayer` gained
+  `publicStatus` — real `TeamMembership.status`, collapsed to `"Active"` /
+  `"Trialist"` / `null` only, so INJURED/SUSPENDED/PENDING (real states, not
+  ones to publish to a stranger) never reach a public card.
+- **Not done yet**: the dashboard mockup's "needs your attention" pattern
+  (§7's note still applies — real new data wiring, not styling).
