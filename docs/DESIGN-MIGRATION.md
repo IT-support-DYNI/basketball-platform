@@ -304,3 +304,65 @@ it replaces §6/§7's public site entirely rather than sitting alongside it.
   ones to publish to a stranger) never reach a public card.
 - **Not done yet**: the dashboard mockup's "needs your attention" pattern
   (§7's note still applies — real new data wiring, not styling).
+
+## §9 — "Futuristic / high-end" visual pass over §8 (10 Sept 2026)
+
+Manager feedback after using §8's warm/editorial version: liked the
+structure and interactions, wanted the look pushed toward "futuristic,
+high-end" — different type, cooler/darker palette, sharper data
+presentation. This is a **skin change on top of §8's structure**, not a
+rebuild: every class name, component, and page from §8 stays exactly as it
+was: only `styles/dyni-landing/tokens/*.css` and a handful of targeted rules
+in `landing.css` changed.
+
+- **§8 preserved on request** ("keep this version in case I want to
+  revert"): committed as its own checkpoint (`git log` — "Checkpoint: warm/
+  editorial DYNI Blazers Landing design, full public site") before this pass
+  started, *and* copied byte-for-byte to `styles/dyni-landing-v1-warm-
+  archived/` (inert — nothing imports it) as a second, non-git way to see or
+  restore it. To actually revert: `git revert` back to that commit, or swap
+  the imports in `app/club/layout.tsx` to the archived folder.
+- **Dark is now the default** (flipped from §8's light-default), matching
+  the rest of the app's own already-stated convention ("Dark is the
+  default" — app/globals.css) — the public site was the odd one out before.
+  Palette is cooler/near-black (`#06070A`) rather than warm beige.
+  **Accent stays the platform's own flame orange** (`#FF6B35`, the same
+  value `app/globals.css` uses for `--flame`) rather than switching to a
+  colder brand colour just because "futuristic" often reads that way —
+  brand consistency with the dashboards mattered more here. A secondary
+  `--accent-cyan` carries the "tech/data" register instead, used sparingly
+  (just the live-status dot in the register section) rather than as a
+  second primary colour.
+- **Type**: Space Grotesk (upright, geometric) replaces the italic,
+  condensed "broadcast" face (Big Shoulders Display) for headings — no more
+  slant, no more forced uppercase on `h1`–`h4` (eyebrows/labels keep
+  uppercase via their own `.eyebrow`/`.mono` classes, unaffected). JetBrains
+  Mono replaces IBM Plex Mono for the same label/stat job. Fraunces (the
+  pull-quote face) is gone along with the quote section itself.
+- **Shape/elevation**: hover states across cards (`.team`, `.coach`, `.card`,
+  `.safe-card`) now add an accent-tinted **glow** (`--shadow-glow-soft`,
+  `--shadow-glow`) alongside their existing lift, instead of a plain dark
+  drop-shadow — `.card`/`.safe-card` had no hover state at all before this
+  pass. `.btn-primary` switched from a 2-colour diagonal gradient to a flat
+  accent fill (reads more controlled/premium than a gradient). A faint
+  (3.5% opacity) technical grid background was added across the whole page
+  — cheap, and probably the single highest-leverage "futuristic" cue here.
+- **Two real bugs found and fixed while verifying this pass, not present
+  before it**:
+  - The `.dyni-landing :where(a)`/`:where(button)` specificity fix from the
+    "hard to see what's written on these orange buttons" report earlier
+    still held, but is worth re-noting here since this pass touched the
+    same rules again.
+  - **Word-reveal spacing regression**: the hero headline's word-by-word
+    reveal (`.w` spans) had no explicit space character between words in
+    the JSX (`.map()` over an array with no separator) — invisible under
+    the old all-caps, larger, more-likely-to-wrap type, but exposed the
+    moment headings went upright/mixed-case and words started fitting on
+    the same line ("Everyone developshere."). Fixed with a `Fragment` +
+    literal space between word spans. A follow-up attempt at the same fix
+    (wrapping each word in its own `<span>`) broke `.hero h1 .w:last-child`
+    instead — that selector means "last among true DOM siblings", so
+    giving each word its own wrapper made every `.w` the "last child" of
+    its own wrapper, colouring the *entire* headline in the accent instead
+    of just the final word. `Fragment` (no DOM element of its own) was the
+    actual fix, verified via computed `color` per word after.

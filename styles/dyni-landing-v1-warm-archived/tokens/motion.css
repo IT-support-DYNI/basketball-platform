@@ -1,0 +1,24 @@
+/* DYNI Blazers — motion. Every animation in the system is gated behind
+   prefers-reduced-motion and degrades to instant/static, never shortened.
+   Scoped to `.dyni-landing`, same reasoning as tokens/colors.css. */
+.dyni-landing {
+  --dur-fast: 140ms;
+  --dur-base: 260ms;
+  --dur-slow: 620ms;
+  --dur-reveal: 700ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-inout: cubic-bezier(0.4, 0, 0.2, 1);
+  --tilt-max: 7deg;
+  --marquee-dur: 32s;
+  --pulse-dur: 1.8s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dyni-landing {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+    --dur-reveal: 0ms;
+    --tilt-max: 0deg;
+  }
+}
