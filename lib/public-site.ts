@@ -44,7 +44,9 @@ async function resolvePhotoUrl(stored: string | null | undefined): Promise<strin
 }
 
 export async function getClubStats() {
-  const [teams, players, coaches, seasons] = await Promise.all([
+  const now = new Date();
+  const inSevenDays = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const [teams, players, coaches, seasons, sessionsThisWeek] = await Promise.all([
     prisma.team.count({ where: { status: "ACTIVE" } }),
     prisma.playerProfile.findMany({
       select: { id: true },
@@ -52,8 +54,11 @@ export async function getClubStats() {
     }),
     prisma.coachProfile.count(),
     prisma.season.count({ where: { isActive: true } }),
+    prisma.event.count({
+      where: { type: "TRAINING", status: "SCHEDULED", startAt: { gte: now, lt: inSevenDays } },
+    }),
   ]);
-  return { teams, players: players.length, coaches, seasons: seasons || 1 };
+  return { teams, players: players.length, coaches, seasons: seasons || 1, sessionsThisWeek };
 }
 
 export type PublicTeam = {
@@ -95,6 +100,11 @@ export type PublicPlayerCard = {
   ageGroup: string | null;
   jerseyNumber: number | null;
   bio: string | null;
+  /** "Active" or "Trialist" only — INJURED/SUSPENDED/PENDING are real
+   *  membership states but not ones to publish to a stranger, so those
+   *  collapse to null (no pill shown) rather than leaking club-internal
+   *  status onto a public card. */
+  publicStatus: "Active" | "Trialist" | null;
 };
 
 /** Roster cards for the public "meet the team" grid — approved players only. */
@@ -116,12 +126,15 @@ export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> 
   return Promise.all(
     players.map(async (p) => {
       const membership = p.memberships[0];
+      const publicStatus: PublicPlayerCard["publicStatus"] =
+        membership?.status === "ACTIVE" ? "Active" : membership?.status === "TRIALIST" ? "Trialist" : null;
       return {
         id: p.id,
         name: p.user.name,
         photoUrl: await resolvePhotoUrl(p.photoUrl),
         position: membership?.position ?? null,
         positionLabel: membership?.position ? POSITION_LABELS[membership.position] ?? membership.position : null,
+        publicStatus,
         team: membership?.team.name ?? null,
         ageGroup: membership?.team.ageGroup ?? null,
         jerseyNumber: membership?.jerseyNumber ?? null,
@@ -160,12 +173,15 @@ export async function getPublicPlayer(playerId: number): Promise<PublicPlayerPro
   const visible = serializePlayerProfile(player, PUBLIC_SCOPE);
 
   const membership = player.memberships[0];
+  const publicStatus: PublicPlayerCard["publicStatus"] =
+    membership?.status === "ACTIVE" ? "Active" : membership?.status === "TRIALIST" ? "Trialist" : null;
   return {
     id: player.id,
     name: player.user.name,
     photoUrl: await resolvePhotoUrl((visible as { photoUrl?: string | null }).photoUrl),
     position: membership?.position ?? null,
     positionLabel: membership?.position ? POSITION_LABELS[membership.position] ?? membership.position : null,
+    publicStatus,
     team: membership?.team.name ?? null,
     ageGroup: membership?.team.ageGroup ?? null,
     bio: (visible as { bio?: string | null }).bio ?? null,

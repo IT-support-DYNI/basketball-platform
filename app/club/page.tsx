@@ -1,256 +1,418 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-import { getClubStats, getPublicTeams, getPublicPlayers, getPublicCoaches } from "@/lib/public-site";
-import CountUp from "@/components/player/CountUp";
-import ScrollReveal from "@/components/player/ScrollReveal";
-import PersonCard from "@/components/public/PersonCard";
+import "@/styles/dyni-landing/tokens.css";
+import "@/styles/dyni-landing/landing.css";
 
-function GhostBall({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 200 200" aria-hidden="true" className={className}>
-      <circle cx="100" cy="100" r="92" fill="none" stroke="currentColor" strokeWidth="6" />
-      <path
-        d="M100 8v184M8 100h184M30 30c30 30 30 110 0 140M170 30c-30 30-30 110 0 140"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="6"
-      />
-    </svg>
-  );
-}
+import { getClubStats, getPublicPlayers, getPublicCoaches } from "@/lib/public-site";
+import ScrollProgressBar from "@/components/public/landing/ScrollProgressBar";
+import LandingNav from "@/components/public/landing/LandingNav";
+import HeroCarousel, { type HeroSlide } from "@/components/public/landing/HeroCarousel";
+import Ticker from "@/components/public/landing/Ticker";
+import StatCount from "@/components/public/landing/StatCount";
+import TiltCard from "@/components/public/landing/TiltCard";
+import RegisterInterestForm from "@/components/public/landing/RegisterInterestForm";
+import RevealBlock from "@/components/public/landing/RevealBlock";
 
-const RIBBON_ITEMS = [
-  "Junior to senior, one club",
+// Bypasses the root layout's "%s · DYNI Blazers" template for a one-off
+// exact title, rather than doubling up ("… · DYNI Blazers · DYNI Blazers").
+export const metadata: Metadata = {
+  title: { absolute: "DYNI Blazers — A club, not an academy" },
+  description: "A community basketball club run by Diverse Youth Northern Ireland. Junior to senior, one club.",
+};
+
+const HERO_SLIDES: HeroSlide[] = [
+  {
+    label: "Hero 01 — Culture",
+    eyebrow: "A club, not an academy",
+    words: ["Everyone", "develops", "here."],
+    lead: "Juniors through seniors on the same floor, to the same standards. No trial-and-cut, no season on the bench — if you turn up, you get coached.",
+    tabTitle: "The culture",
+    ctas: [
+      { label: "Start registration", href: "/register", primary: true },
+      { label: "What we're about", href: "#about" },
+    ],
+  },
+  {
+    label: "Hero 02 — Teams",
+    eyebrow: "Junior to senior · one club",
+    words: ["Every", "squad,", "one", "floor."],
+    lead: "From our youngest juniors to the senior squad, everyone trains out of the same hall, with the same coaching staff and the same expectations.",
+    tabTitle: "Every squad",
+    ctas: [
+      { label: "Meet the players", href: "#roster" },
+      { label: "Full roster", href: "/club/roster" },
+    ],
+  },
+  {
+    label: "Hero 03 — Trials",
+    eyebrow: "Open trials",
+    words: ["Come", "down", "and", "play."],
+    lead: "Bring trainers and a water bottle — we'll sort the rest. Cost is never the reason someone can't play; see our cost breakdown below.",
+    tabTitle: "Open trials",
+    ctas: [
+      { label: "Register for trials", href: "/register", primary: true },
+      { label: "What it costs", href: "#cost" },
+    ],
+  },
+  {
+    label: "Hero 04 — Coaches",
+    eyebrow: "Our coaches",
+    words: ["Real", "coaching,", "every", "session."],
+    lead: "Every coach on our roster is here every week, not just for match day — meet the people who'll actually be running your sessions.",
+    tabTitle: "Our coaches",
+    ctas: [
+      { label: "Meet the coaches", href: "#coaches" },
+      { label: "Safeguarding", href: "#safeguarding" },
+    ],
+  },
+];
+
+const TICKER_FACTS = [
+  "A club, not an academy",
+  "Everyone develops",
   "Qualified coaches, every session",
-  "Guardian-approved player profiles",
-  "Development tracked, not guessed",
+  "Nobody sits on the bench for a season",
+  "Cost is never the reason",
+  "Junior to senior, one club",
 ];
 
 const CULTURE_POINTS = [
-  "Guardian-approved profiles — nothing about a junior goes public by default.",
-  "Session plans and attendance shared with families, not kept in a coach's notebook.",
-  "Every player gets a development plan and feedback they can act on.",
+  {
+    n: "01",
+    title: "Everyone develops",
+    body: "Every player gets a development plan and feedback they can actually act on — not a score in a coach's notebook.",
+  },
+  {
+    n: "02",
+    title: "No pressure",
+    body: "We play to win, but nobody's future is decided young. Miss a week for exams or work and your place is still here.",
+  },
+  {
+    n: "03",
+    title: "Nobody sits on the bench for a season",
+    body: "If you're in a squad, you play. Rotation is planned in the session, not decided by who shouts loudest.",
+  },
 ];
 
-export default async function ClubHomePage() {
-  const [stats, teams, players, coaches] = await Promise.all([
-    getClubStats(),
-    getPublicTeams(),
-    getPublicPlayers(9),
-    getPublicCoaches(6),
-  ]);
+const MOMENTS = [
+  { caption: "Match day", big: true },
+  { caption: "Training session" },
+  { caption: "Juniors on the floor" },
+  { caption: "Free-throw drill" },
+  { caption: "Open trials" },
+  { caption: "Senior squad" },
+  { caption: "Club moment", wide: true },
+];
+
+const SAFE_CARDS = [
+  { title: "Vetted staff", body: "AccessNI checks and safeguarding training for every coach and volunteer on the floor." },
+  { title: "Guardian consent", body: "Photos, profiles and video are opt-in per player, and reversible at any time." },
+  {
+    title: "A named lead, on request",
+    body: "The club has a designated safeguarding lead — ask at registration or via the club's contact details for who to reach and how.",
+  },
+  { title: "Open sessions", body: "Parents and guardians are welcome to stay and watch any session, any age group." },
+];
+
+const COST_ROWS = [
+  { label: "Trials & taster sessions", value: "Free" },
+  { label: "Juniors, per term", value: "£40" },
+  { label: "Academy, per term", value: "£55" },
+  { label: "Senior squads, per term", value: "£70" },
+  { label: "Club kit", value: "Loaned" },
+  { label: "Hardship fund", value: "Ask us" },
+];
+
+const FOOTER_LINKS = [
+  { href: "#top", label: "Home" },
+  { href: "#roster", label: "Players" },
+  { href: "#coaches", label: "Coaches" },
+  { href: "#moments", label: "Moments" },
+  { href: "#news", label: "News" },
+  { href: "#about", label: "About" },
+  { href: "#safeguarding", label: "Safeguarding" },
+  { href: "#cost", label: "Costs" },
+];
+
+export default async function ClubLandingPage() {
+  const [stats, players, coaches] = await Promise.all([getClubStats(), getPublicPlayers(6), getPublicCoaches(3)]);
+
+  const statTiles = [
+    { value: stats.teams, label: "Teams" },
+    { value: stats.players, label: "Players" },
+    { value: stats.coaches, label: "Coaches" },
+    { value: stats.sessionsThisWeek, label: "Sessions this week" },
+  ];
 
   return (
-    <>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-flame via-flame to-ember px-5 py-20 sm:px-8 sm:py-28">
-        <GhostBall className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 animate-[spin_90s_linear_infinite] text-on-flame/10 sm:h-[28rem] sm:w-[28rem] motion-reduce:animate-none" />
-        <div className="relative mx-auto max-w-4xl">
-          <p className="animate-hero-rise font-mono text-xs font-bold uppercase tracking-[0.3em] text-on-flame/80">
-            Junior to senior · one club
-          </p>
-          <h1 className="mt-3 font-display text-5xl font-extrabold uppercase leading-[0.9] tracking-tight text-on-flame sm:text-7xl">
-            <span className="block animate-hero-rise" style={{ animationDelay: "60ms" }}>
-              Every
-            </span>
-            <span className="block animate-hero-rise" style={{ animationDelay: "150ms" }}>
-              rep
-            </span>
-            <span
-              className="block animate-hero-rise bg-gradient-to-br from-on-flame to-gold bg-clip-text text-transparent"
-              style={{ animationDelay: "240ms" }}
-            >
-              counts.
-            </span>
-          </h1>
-          <p className="mt-5 max-w-xl animate-hero-rise text-lg text-on-flame/85" style={{ animationDelay: "340ms" }}>
-            A community club where every player gets coached properly — juniors through seniors, on the same floor,
-            with the same standards. Come and see what we&apos;re about.
-          </p>
-          <div className="mt-8 flex animate-hero-rise flex-wrap gap-3" style={{ animationDelay: "420ms" }}>
-            <Link
-              href="/register"
-              className="rounded-full bg-ground px-6 py-3 text-sm font-bold uppercase tracking-wide text-ink shadow-pop transition hover:-translate-y-0.5"
-            >
-              Start registration
-            </Link>
-            <Link
-              href="/club/roster"
-              className="rounded-full border-2 border-on-flame/40 px-6 py-3 text-sm font-bold uppercase tracking-wide text-on-flame transition hover:border-on-flame"
-            >
-              Meet the players
-            </Link>
-          </div>
-        </div>
+    <div className="dyni-landing">
+      <ScrollProgressBar />
 
-        {/* Live stat strip */}
-        <div className="relative mt-16 grid grid-cols-2 gap-6 border-t border-on-flame/20 pt-8 sm:grid-cols-4">
-          {[
-            { label: "Teams", value: stats.teams },
-            { label: "Active players", value: stats.players },
-            { label: "Coaches", value: stats.coaches },
-            { label: "Seasons running", value: stats.seasons },
-          ].map((s) => (
-            <div key={s.label}>
-              <p className="font-condensed text-4xl font-bold tabular-nums text-on-flame sm:text-5xl">
-                <CountUp value={s.value} />
-              </p>
-              <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-on-flame/70">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <LandingNav />
 
-      {/* Value ribbon */}
-      <div className="overflow-hidden bg-gradient-to-r from-flame to-ember py-3">
-        <div className="animate-marquee flex w-max items-center gap-0">
-          {[false, true].map((dup) => (
-            <div key={String(dup)} className={dup ? "marquee-dup flex items-center" : "flex items-center"}>
-              {RIBBON_ITEMS.map((item) => (
-                <span key={item} className="flex items-center whitespace-nowrap">
-                  <span className="px-6 font-condensed text-lg font-bold uppercase tracking-wide text-on-flame">{item}</span>
-                  <span aria-hidden="true" className="text-on-flame/50">
-                    ◆
-                  </span>
-                </span>
+      <main id="top">
+        <HeroCarousel slides={HERO_SLIDES} />
+
+        <Ticker facts={TICKER_FACTS} />
+
+        <section className="stats" aria-label="Club by the numbers">
+          <div className="wrap">
+            <div className="stat-grid">
+              {statTiles.map((s, i) => (
+                <RevealBlock key={s.label} delayMs={i * 90} className="stat">
+                  <div className="photo"></div>
+                  <StatCount value={s.value} />
+                  <p className="stat-l">{s.label}</p>
+                </RevealBlock>
               ))}
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Teams */}
-      <section id="teams" className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
-        <ScrollReveal>
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-wider text-flame-ink">Our teams</p>
-              <h2 className="mt-1 font-display text-3xl font-extrabold uppercase tracking-tight text-ink sm:text-4xl">
-                Junior to senior, one club
-              </h2>
-            </div>
-            <Link href="/club/teams" className="flex-none rounded-full border border-line-strong px-5 py-2.5 text-sm font-semibold text-ink hover:border-flame/40">
-              All teams
-            </Link>
           </div>
-        </ScrollReveal>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {teams.slice(0, 6).map((t, i) => (
-            <ScrollReveal key={t.id} delayMs={i * 60}>
-              <div className="rounded-card border border-line bg-surface p-5">
-                <p className="font-display text-xl font-bold text-ink">{t.name}</p>
-                {t.ageGroup && <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">{t.ageGroup}</p>}
-                {t.description && <p className="mt-2 text-sm text-ink-dim">{t.description}</p>}
-              </div>
-            </ScrollReveal>
-          ))}
-          {teams.length === 0 && <p className="text-sm text-ink-dim">Teams will appear here once the club sets them up.</p>}
-        </div>
-      </section>
+        </section>
 
-      {/* Players */}
-      <section id="players" className="bg-surface px-5 py-16 sm:px-8">
-        <div className="mx-auto max-w-6xl">
-          <ScrollReveal>
-            <div className="flex flex-wrap items-end justify-between gap-4">
+        <section className="culture" id="about">
+          <div className="wrap culture-in">
+            <RevealBlock className="photo"></RevealBlock>
+            <RevealBlock delayMs={80}>
+              <p className="eyebrow">Our culture</p>
+              <h2>A club, not an academy</h2>
+              <p className="lead" style={{ marginTop: 14 }}>
+                We&apos;re run by Diverse Youth Northern Ireland, and we&apos;re a community club first. That decides
+                everything else: who gets in, who gets minutes, and what a session looks like.
+              </p>
+              <ul className="culture-list">
+                {CULTURE_POINTS.map((c) => (
+                  <li key={c.n}>
+                    <em>{c.n}</em>
+                    <div>
+                      <h3>{c.title}</h3>
+                      <p>{c.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </RevealBlock>
+          </div>
+        </section>
+
+        <section className="teams" id="roster">
+          <div className="wrap">
+            <RevealBlock className="head">
               <div>
-                <p className="font-mono text-xs uppercase tracking-wider text-flame-ink">Meet the players</p>
-                <h2 className="mt-1 font-display text-3xl font-extrabold uppercase tracking-tight text-ink sm:text-4xl">
-                  The team, on and off the court
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm text-ink-dim">
-                  Shown here only with the player&apos;s (and, for juniors, their guardian&apos;s) explicit permission.
-                </p>
+                <p className="eyebrow">Meet the players</p>
+                <h2>The squad, on and off the court</h2>
+                <p className="lead">Junior players appear here only once a guardian and the club have both approved it.</p>
               </div>
-              <Link href="/club/roster" className="flex-none rounded-full border border-line-strong px-5 py-2.5 text-sm font-semibold text-ink hover:border-flame/40">
+              <Link className="btn btn-secondary btn-sm" href="/club/roster">
                 Full roster
               </Link>
-            </div>
-          </ScrollReveal>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {players.map((p, i) => (
-              <ScrollReveal key={p.id} delayMs={(i % 3) * 60}>
-                <PersonCard
-                  href={`/club/players/${p.id}`}
-                  name={p.name}
-                  photoUrl={p.photoUrl}
-                  line={[p.positionLabel, p.team].filter(Boolean).join(" · ") || null}
-                  bio={p.bio}
-                  jerseyNumber={p.jerseyNumber}
-                />
-              </ScrollReveal>
-            ))}
-            {players.length === 0 && (
-              <p className="text-sm text-ink-dim">No player profiles are public yet — check back soon.</p>
+            </RevealBlock>
+            {players.length === 0 ? (
+              <p className="lead">No player profiles are public yet — check back soon.</p>
+            ) : (
+              <div className="team-grid">
+                {players.map((p, i) => (
+                  <TiltCard key={p.id} className="team" href={`/club/players/${p.id}`} delayMs={i * 70}>
+                    <div className={`photo${p.photoUrl ? " has-img" : ""}`}>
+                      {p.photoUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={p.photoUrl} alt="" />
+                      )}
+                    </div>
+                    {p.jerseyNumber != null && (
+                      <span className="team-jersey" aria-hidden="true">
+                        {p.jerseyNumber}
+                      </span>
+                    )}
+                    <div className="team-top">
+                      <span className={`team-code${p.publicStatus === "Trialist" ? " trial" : ""}`}>
+                        {p.jerseyNumber != null ? `#${p.jerseyNumber}` : "—"}
+                      </span>
+                      {p.publicStatus && (
+                        <span className={`pill ${p.publicStatus === "Trialist" ? "pill-trial" : "pill-open"}`}>
+                          {p.publicStatus}
+                        </span>
+                      )}
+                    </div>
+                    <div className="team-body">
+                      <h3>{p.name}</h3>
+                      <div className="team-meta">
+                        {p.positionLabel && <span>{p.positionLabel}</span>}
+                        {p.team && <span>{p.team}</span>}
+                      </div>
+                    </div>
+                  </TiltCard>
+                ))}
+              </div>
             )}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Coaches */}
-      <section id="coaches" className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
-        <ScrollReveal>
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-wider text-flame-ink">Coaching staff</p>
-              <h2 className="mt-1 font-display text-3xl font-extrabold uppercase tracking-tight text-ink sm:text-4xl">
-                Real coaching, every session
-              </h2>
-            </div>
-            <Link href="/club/coaches" className="flex-none rounded-full border border-line-strong px-5 py-2.5 text-sm font-semibold text-ink hover:border-flame/40">
-              All staff
-            </Link>
+        <section className="coaches" id="coaches">
+          <div className="wrap">
+            <RevealBlock className="head">
+              <div>
+                <p className="eyebrow">Coaching staff</p>
+                <h2>Qualified coaches, every session</h2>
+              </div>
+              <Link className="btn btn-secondary btn-sm" href="/club/coaches">
+                All staff
+              </Link>
+            </RevealBlock>
+            {coaches.length === 0 ? (
+              <p className="lead">No coach profiles are public yet — check back soon.</p>
+            ) : (
+              <div className="coach-grid">
+                {coaches.map((c, i) => (
+                  <TiltCard key={c.id} className="coach" href={`/club/coaches/${c.id}`} delayMs={i * 90}>
+                    <div className={`photo${c.photoUrl ? " has-img" : ""}`}>
+                      {c.photoUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={c.photoUrl} alt="" />
+                      )}
+                    </div>
+                    <h3>{c.name}</h3>
+                    {c.roleLine && <p className="role">{c.roleLine}</p>}
+                    {c.bio && <p className="bio">{c.bio}</p>}
+                  </TiltCard>
+                ))}
+              </div>
+            )}
           </div>
-        </ScrollReveal>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {coaches.map((c, i) => (
-            <ScrollReveal key={c.id} delayMs={(i % 3) * 60}>
-              <PersonCard href={`/club/coaches/${c.id}`} name={c.name} photoUrl={c.photoUrl} line={c.roleLine} bio={c.bio} />
-            </ScrollReveal>
-          ))}
-          {coaches.length === 0 && <p className="text-sm text-ink-dim">No coach profiles are public yet — check back soon.</p>}
-        </div>
-      </section>
+        </section>
 
-      {/* Culture */}
-      <section className="bg-surface px-5 py-16 sm:px-8">
-        <div className="mx-auto max-w-6xl">
-          <ScrollReveal>
-            <p className="font-mono text-xs uppercase tracking-wider text-flame-ink">Our culture</p>
-            <h2 className="mt-1 max-w-xl font-display text-3xl font-extrabold uppercase tracking-tight text-ink sm:text-4xl">
-              Nobody sits on the bench for a season
-            </h2>
-            <div className="mt-6 flex max-w-xl flex-col gap-3">
-              {CULTURE_POINTS.map((point) => (
-                <div key={point} className="flex items-start gap-3">
-                  <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-flame" aria-hidden="true" />
-                  <p className="text-sm leading-relaxed text-ink">{point}</p>
-                </div>
+        <section className="gallery" id="moments">
+          <div className="wrap">
+            <RevealBlock className="head">
+              <div>
+                <p className="eyebrow">Blazers moments</p>
+                <h2>The team, on and off the court</h2>
+              </div>
+            </RevealBlock>
+            <div className="gal-grid">
+              {MOMENTS.map((m, i) => (
+                <RevealBlock
+                  key={m.caption}
+                  as="figure"
+                  delayMs={i * 60}
+                  className={`tile${m.big ? " big" : ""}${m.wide ? " wide" : ""}`}
+                >
+                  <div className="photo"></div>
+                  <figcaption>{m.caption}</figcaption>
+                </RevealBlock>
               ))}
             </div>
-          </ScrollReveal>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* CTA */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-flame to-ember px-5 py-16 text-center sm:px-8">
-        <GhostBall className="pointer-events-none absolute -bottom-24 -left-20 h-80 w-80 text-on-flame/10" />
-        <div className="relative">
-          <h2 className="font-display text-3xl font-extrabold uppercase tracking-tight text-on-flame sm:text-4xl">
-            Ready to play?
-          </h2>
-          <p className="mx-auto mt-2 max-w-md text-on-flame/85">
-            Registration takes a few minutes, and every application is reviewed by the club before anyone gets full
-            access.
-          </p>
-          <Link
-            href="/register"
-            className="mt-6 inline-block rounded-full bg-ground px-7 py-3 text-sm font-bold uppercase tracking-wide text-ink shadow-pop transition hover:-translate-y-0.5"
-          >
-            Start registration
-          </Link>
+        <section className="news" id="news">
+          <div className="wrap">
+            <RevealBlock className="head">
+              <div>
+                <p className="eyebrow">Club news</p>
+                <h2>Nothing posted yet</h2>
+              </div>
+            </RevealBlock>
+            <RevealBlock className="news-mod">
+              <div className="news-panel">
+                <p className="eyebrow">Club news</p>
+                <p style={{ fontSize: "var(--type-small)", color: "rgba(246,233,214,.75)" }}>
+                  The club hasn&apos;t shared any news or stories here yet. Check back soon.
+                </p>
+              </div>
+            </RevealBlock>
+          </div>
+        </section>
+
+        <section className="safe" id="safeguarding">
+          <div className="wrap safe-in">
+            <RevealBlock>
+              <p className="eyebrow">Safeguarding</p>
+              <h2>Nothing about a young player is public by default</h2>
+              <p>
+                Every coach is vetted and every junior profile is guardian-approved before it appears anywhere. If
+                you want something taken down, one message to the club is enough.
+              </p>
+            </RevealBlock>
+            <RevealBlock delayMs={80} className="safe-grid">
+              {SAFE_CARDS.map((c) => (
+                <div className="safe-card" key={c.title}>
+                  <strong>{c.title}</strong>
+                  <p>{c.body}</p>
+                </div>
+              ))}
+            </RevealBlock>
+          </div>
+        </section>
+
+        <section className="cost" id="cost">
+          <div className="wrap cost-in">
+            <RevealBlock>
+              <p className="eyebrow">Cost transparency</p>
+              <h2>
+                Cost is never <em>the reason</em>
+              </h2>
+              <p className="lead" style={{ marginTop: 14 }}>
+                Here&apos;s the whole picture, up front. If any of it is a problem, tell us — the hardship fund
+                exists for exactly that and no one needs to explain themselves twice.
+              </p>
+              <p className="cost-note">Illustrative figures for the current term. Confirm with the club before registering.</p>
+            </RevealBlock>
+            <RevealBlock delayMs={80} className="cost-rows">
+              {COST_ROWS.map((r) => (
+                <div className="cost-row" key={r.label}>
+                  <strong>{r.label}</strong>
+                  <span>{r.value}</span>
+                </div>
+              ))}
+            </RevealBlock>
+          </div>
+        </section>
+
+        <section className="reg" id="register">
+          <div className="wrap reg-in">
+            <RevealBlock>
+              <p className="live">
+                <span className="dot-live" aria-hidden="true"></span>Open trials every term
+              </p>
+              <h2 style={{ marginTop: 16 }}>Come down, bring trainers, see if you like us</h2>
+              <p className="note">
+                Leave a name and a guardian email and we&apos;ll take you straight to registration for the right age
+                group. Every application is reviewed by the club before full access is granted.
+              </p>
+            </RevealBlock>
+            <RegisterInterestForm />
+          </div>
+        </section>
+      </main>
+
+      <footer className="foot">
+        <div className="wrap">
+          <div className="foot-in">
+            <div>
+              <a className="brand" href="#top">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/dyni-blazers-crest.png" alt="DYNI Blazers" />
+                <span className="wordmark">
+                  DYNI <span>Blazers</span>
+                </span>
+              </a>
+              <p>A basketball club run by Diverse Youth Northern Ireland. Junior to senior, one club.</p>
+            </div>
+            <nav aria-label="Footer">
+              {FOOTER_LINKS.map((l) => (
+                <a key={l.label} href={l.href}>
+                  {l.label}
+                </a>
+              ))}
+            </nav>
+          </div>
+          <div className="foot-base">
+            <span>© 2026 Diverse Youth Northern Ireland</span>
+            <span>Belfast, Northern Ireland</span>
+          </div>
         </div>
-      </section>
-    </>
+      </footer>
+    </div>
   );
 }

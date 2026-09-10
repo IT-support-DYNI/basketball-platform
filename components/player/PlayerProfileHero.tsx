@@ -19,11 +19,14 @@ function countryName(code: string | null): string | null {
   }
 }
 
-function Fact({ label, value }: { label: string; value: string | number | null }) {
+/** One cell in the divided stat strip below the hero — the vertical rules
+ *  between cells (via the parent's `divide-x`) are the point, echoing the
+ *  boxed NBA.com stat-line look rather than a loose wrapped list. */
+function StatCell({ label, value, tone = "text-ink" }: { label: string; value: React.ReactNode; tone?: string }) {
   return (
-    <div className="min-w-[5.5rem] rounded-lg px-2 py-1 transition duration-150 hover:-translate-y-0.5 hover:bg-white/[0.06]">
-      <p className="font-mono text-[10px] uppercase tracking-wider text-on-flame/70">{label}</p>
-      <p className="mt-0.5 font-condensed text-lg font-bold tabular text-on-flame">{value ?? "—"}</p>
+    <div className="min-w-[5.5rem] flex-1 px-5 py-4 transition duration-150 hover:bg-white/[0.03]">
+      <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">{label}</p>
+      <p className={`mt-1 truncate font-condensed text-xl font-bold tabular sm:text-2xl ${tone}`}>{value ?? "—"}</p>
     </div>
   );
 }
@@ -68,7 +71,7 @@ export default function PlayerProfileHero({
   return (
     <div className="animate-hero-rise overflow-hidden rounded-card shadow-pop">
       {/* Hero band */}
-      <div className="relative bg-gradient-to-br from-flame via-flame to-ember px-6 pb-16 pt-6 sm:px-8 sm:pt-8">
+      <div className="relative overflow-hidden bg-gradient-to-br from-flame via-flame to-ember">
         {/* ghost jersey number watermark */}
         {player.jerseyNumber != null && (
           <span
@@ -79,8 +82,37 @@ export default function PlayerProfileHero({
           </span>
         )}
 
-        <div className="relative flex items-start justify-between gap-4">
-          <div className="min-w-0">
+        {/* club crest strip — its own row so it never collides with the
+         *  photo beneath it (the reference's crest overlaps its player's
+         *  photo because that's a transparent cutout PNG; ours are plain
+         *  uploaded rectangles, so a shared row is the honest equivalent) */}
+        <div className="relative flex items-center gap-2 px-5 pt-4 sm:px-8 sm:pt-5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/dyni-crest-256.png" alt="" aria-hidden="true" className="h-7 w-7 sm:h-8 sm:w-8" />
+          <span className="font-mono text-[11px] uppercase tracking-wider text-on-flame/70">DYNI Blazers</span>
+        </div>
+
+        <div className="relative mt-3 flex h-40 items-stretch gap-5 pr-6 sm:h-48 sm:pr-8">
+          {/* photo — a cropped rectangle flush to the bottom of the band,
+           *  not a floating circle, to match the cutout-to-the-edge look */}
+          <div className="animate-avatar-pop relative w-28 flex-none sm:w-40">
+            {/* overflow-hidden lives on this inner wrapper, not the outer
+             *  relative one — otherwise it clips PhotoUpload's edit badge,
+             *  which deliberately hangs off the corner via negative insets */}
+            <div className="h-full w-full overflow-hidden">
+              {player.photoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={player.photoUrl} alt="" className="h-full w-full object-cover object-top transition duration-200 hover:scale-105" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-black/15 font-condensed text-4xl font-bold text-on-flame">
+                  {initials}
+                </div>
+              )}
+            </div>
+            {editable && <PhotoUpload playerId={player.id} />}
+          </div>
+
+          <div className="flex min-w-0 flex-1 flex-col justify-center">
             <p className="font-mono text-xs uppercase tracking-wider text-on-flame/80">
               {[player.team, player.position ? POSITION_LABEL[player.position] : null, player.jerseyNumber != null ? `#${player.jerseyNumber}` : null]
                 .filter(Boolean)
@@ -90,61 +122,42 @@ export default function PlayerProfileHero({
               {player.name}
             </h1>
             {player.status && player.status !== "ACTIVE" && (
-              <span className="mt-2 inline-block rounded-full bg-black/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-on-flame">
+              <span className="mt-2 inline-block w-fit rounded-full bg-black/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-on-flame">
                 {player.status.replace(/_/g, " ")}
               </span>
             )}
           </div>
-
-          <div className="animate-avatar-pop relative shrink-0 transition duration-200 hover:scale-105">
-            {player.photoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={player.photoUrl}
-                alt=""
-                className="h-24 w-24 rounded-full border-4 border-on-flame/30 object-cover shadow-pop transition duration-200 hover:border-on-flame/60 sm:h-32 sm:w-32"
-              />
-            ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-on-flame/30 bg-black/15 font-condensed text-3xl font-bold text-on-flame shadow-pop transition duration-200 hover:border-on-flame/60 sm:h-32 sm:w-32 sm:text-4xl">
-                {initials}
-              </div>
-            )}
-            {editable && <PhotoUpload playerId={player.id} />}
-          </div>
         </div>
       </div>
 
-      {/* Stat strip — overlaps the hero band bottom edge, NBA.com-style */}
-      <div className="-mt-10 flex flex-wrap items-center gap-x-8 gap-y-4 rounded-t-2xl bg-[rgb(20_20_25)] px-6 py-5 sm:px-8">
-        {player.canSeeStats && (player.attendancePct != null || player.weeklyForm != null) && (
-          <div className="flex gap-8 border-r border-on-flame/15 pr-8">
-            {player.attendancePct != null && (
-              <div className="rounded-lg px-1.5 py-1 transition duration-150 hover:-translate-y-0.5 hover:bg-white/[0.04]">
-                <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">Attendance</p>
-                <p className={`mt-0.5 font-condensed text-3xl font-bold tabular ${attendanceColor(player.attendancePct)}`}>
-                  <CountUp value={player.attendancePct} suffix="%" />
-                </p>
-              </div>
-            )}
-            {player.weeklyForm != null && (
-              <div className="rounded-lg px-1.5 py-1 transition duration-150 hover:-translate-y-0.5 hover:bg-white/[0.04]">
-                <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">Form</p>
-                <p className={`mt-0.5 font-condensed text-3xl font-bold tabular ${formColor(player.weeklyForm)}`}>
-                  <CountUp value={player.weeklyForm} decimals={1} />
-                  <span className="text-base text-ink-faint">/10</span>
-                </p>
-              </div>
-            )}
-          </div>
+      {/* Stat strip — a divided grid (vertical rules between cells), flush
+       *  below the hero with no overlap into the colour band. */}
+      <div className="grid grid-cols-2 divide-x divide-y divide-line border-t border-line bg-[rgb(20_20_25)] sm:grid-cols-4 sm:divide-y-0 lg:grid-cols-7">
+        {player.canSeeStats && player.attendancePct != null && (
+          <StatCell label="Attendance" value={<CountUp value={player.attendancePct} suffix="%" />} tone={attendanceColor(player.attendancePct)} />
         )}
-
-        <div className="flex flex-wrap gap-x-8 gap-y-3">
-          <Fact label="Height" value={player.heightCm ? `${(player.heightCm / 100).toFixed(2)}m` : null} />
-          <Fact label="Weight" value={player.weightKg ? `${player.weightKg}kg` : null} />
-          <Fact label="Country" value={countryName(player.nationality)} />
-          <Fact label="Age" value={player.age != null ? `${player.age} yrs` : null} />
-          {player.preferredHand && <Fact label="Hand" value={player.preferredHand === "AMBIDEXTROUS" ? "Both" : player.preferredHand[0] + player.preferredHand.slice(1).toLowerCase()} />}
-        </div>
+        {player.canSeeStats && player.weeklyForm != null && (
+          <StatCell
+            label="Form"
+            value={
+              <>
+                <CountUp value={player.weeklyForm} decimals={1} />
+                <span className="text-base text-ink-faint">/10</span>
+              </>
+            }
+            tone={formColor(player.weeklyForm)}
+          />
+        )}
+        <StatCell label="Height" value={player.heightCm ? `${(player.heightCm / 100).toFixed(2)}m` : null} />
+        <StatCell label="Weight" value={player.weightKg ? `${player.weightKg}kg` : null} />
+        <StatCell label="Country" value={countryName(player.nationality)} />
+        <StatCell label="Age" value={player.age != null ? `${player.age} yrs` : null} />
+        {player.preferredHand && (
+          <StatCell
+            label="Hand"
+            value={player.preferredHand === "AMBIDEXTROUS" ? "Both" : player.preferredHand[0] + player.preferredHand.slice(1).toLowerCase()}
+          />
+        )}
       </div>
     </div>
   );
