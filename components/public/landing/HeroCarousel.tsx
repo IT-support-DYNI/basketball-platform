@@ -125,7 +125,7 @@ export default function HeroCarousel({
   }, []);
 
   return (
-    <section className="hero on-photo" id="hero" aria-label="Featured" ref={heroRef}>
+    <section className="hero" id="hero" aria-label="Featured" ref={heroRef}>
       <div className="hero-glow" ref={glowRef}></div>
       <GhostBall />
 

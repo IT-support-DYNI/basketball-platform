@@ -48,9 +48,6 @@
 .btn-secondary:hover{color:var(--text-1);border-color:var(--accent);box-shadow:var(--shadow-glow-soft)}
 .btn-secondary:active{transform:scale(.97)}
 .btn-sm{padding:9px 16px;font-size:var(--type-label-sm)}
-.on-photo .btn-secondary{color:var(--photo-text)}
-.on-photo .btn-secondary:hover{color:var(--photo-text)}
-
 /* ---- pills ---- */
 .pill{display:inline-flex;align-items:center;gap:6px;border-radius:var(--radius-pill);padding:4px 10px;font-family:var(--font-mono);font-size:var(--type-label-sm);font-weight:600;text-transform:uppercase;letter-spacing:.14em}
 .pill-open{color:var(--positive);background:var(--positive-bg);border:1px solid color-mix(in srgb,var(--positive) 40%,transparent)}
@@ -100,42 +97,48 @@ html[data-theme=dark] .toggle .sun{display:none}
 @media (max-width:900px){.nav-links{display:none}.nav-act{display:none}.nav-burger{display:flex}}
 @media (min-width:901px){.nav-mobile-panel{display:none}}
 
-/* ---- hero ---- */
-.hero{position:relative;overflow:hidden;background:var(--ground-dark);display:flex;flex-direction:column}
-.hero-glow{position:absolute;width:620px;height:620px;left:0;top:0;pointer-events:none;border-radius:50%;background:radial-gradient(circle,rgba(254,68,11,.34),rgba(254,68,11,0) 62%);opacity:0;transition:opacity var(--dur-slow);z-index:3;transform:translate(-50%,-50%)}
-.hero-watermark{position:absolute;right:-9%;top:50%;width:min(60vw,720px);aspect-ratio:1;transform:translateY(-50%);opacity:.05;z-index:2;pointer-events:none;animation:dyni-spin 120s linear infinite;color:var(--photo-text)}
+/* ---- hero ----
+   Light, boxed, wireframe-matched: paper background, a framed dashed-border
+   photo placeholder instead of a full-bleed dark photo, dashed stat tiles,
+   and a light tab strip. (Previously a full-bleed dark/on-photo treatment —
+   see git history if that look is ever wanted back.) */
+.hero{position:relative;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+.hero-glow{position:absolute;width:620px;height:620px;left:0;top:0;pointer-events:none;border-radius:50%;background:radial-gradient(circle,rgba(254,68,11,.18),rgba(254,68,11,0) 62%);opacity:0;transition:opacity var(--dur-slow);z-index:3;transform:translate(-50%,-50%)}
+.hero-watermark{position:absolute;right:-9%;top:50%;width:min(60vw,720px);aspect-ratio:1;transform:translateY(-50%);opacity:.07;z-index:2;pointer-events:none;animation:dyni-spin 120s linear infinite;color:var(--text-3)}
 @keyframes dyni-spin{to{transform:translateY(-50%) rotate(360deg)}}
 .slides{position:relative;flex:1;display:grid;min-height:min(78vh,680px)}
-.slide{grid-area:1/1;opacity:0;visibility:hidden;transition:opacity var(--dur-slow) var(--ease-inout);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}
+.slide{grid-area:1/1;opacity:0;visibility:hidden;transition:opacity var(--dur-slow) var(--ease-inout);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:center}
 .slide.on{opacity:1;visibility:visible;z-index:1}
-.slide-copy{position:relative;z-index:4;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:clamp(32px,5vw,72px) clamp(24px,4.5vw,64px);background:var(--ground-dark)}
-.slide-photo{position:relative}
-.slide-photo .photo{position:absolute;inset:0}
-.slide-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--ground-dark),rgba(13,10,6,.25) 42%,rgba(13,10,6,.45));pointer-events:none}
-.hero h1{font-size:clamp(2.75rem,5.4vw,4.75rem);color:var(--photo-text);max-width:15ch}
+.slide-copy{position:relative;z-index:4;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:clamp(32px,5vw,72px) clamp(24px,4.5vw,64px)}
+.slide-photo{position:relative;align-self:stretch;margin:clamp(24px,4vw,56px) clamp(24px,4.5vw,64px) clamp(24px,4vw,56px) 0;border-radius:var(--radius-lg);overflow:hidden}
+.slide-photo .photo{position:absolute;inset:0;background:var(--surface-alt);background-image:repeating-linear-gradient(135deg,var(--surface) 0 1px,transparent 1px 11px);border:1px dashed var(--border)}
+.slide-photo .photo::after{color:var(--text-3)}
+.hero h1{font-size:clamp(2.75rem,5.4vw,4.75rem);color:var(--text-1);max-width:15ch}
 .hero h1 .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 .1em .05em;margin:0 -.1em}
 .hero h1 .w>span{display:inline-block;transform:translateY(105%);transition:transform var(--dur-slow) var(--ease-out)}
 .slide.on h1 .w>span{transform:translateY(0)}
 .hero h1 .w:last-child>span{color:var(--accent)}
-.hero .eyebrow{color:var(--accent-light);letter-spacing:var(--label-tracking-wide)}
-.hero .lead{color:rgba(246,233,214,.82);max-width:44ch}
+.hero .eyebrow{letter-spacing:var(--label-tracking-wide)}
+.hero .lead{color:var(--text-2);max-width:44ch}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px}
-.tabs{position:relative;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(246,233,214,.16);background:color-mix(in srgb,var(--ground-dark) 82%,transparent);backdrop-filter:blur(8px)}
-.tab{position:relative;text-align:left;background:transparent;border:0;border-right:1px solid rgba(246,233,214,.12);padding:16px 18px 18px;cursor:pointer;color:rgba(246,233,214,.55);transition:color var(--dur-base),background var(--dur-base)}
+.hero .btn-primary{background:transparent;color:var(--accent);border-color:var(--accent);box-shadow:none}
+.hero .btn-primary:hover{background:transparent;color:var(--accent);box-shadow:none}
+.tabs{position:relative;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:var(--border-hairline);background:var(--surface-alt)}
+.tab{position:relative;text-align:left;background:transparent;border:0;border-right:1px dashed var(--border);padding:16px 18px 18px;cursor:pointer;color:var(--text-3);transition:color var(--dur-base),background var(--dur-base)}
 .tab:last-child{border-right:0}
-.tab:hover{color:var(--photo-text);background:rgba(246,233,214,.05)}
-.tab[aria-selected=true]{color:var(--photo-text)}
+.tab:hover{color:var(--text-1);background:var(--surface)}
+.tab[aria-selected=true]{color:var(--text-1)}
 .tab-n{font-family:var(--font-mono);font-size:var(--type-label-sm);letter-spacing:.2em;color:var(--accent)}
 .tab-t{display:block;margin-top:5px;font-family:var(--font-display);font-style:normal;font-weight:var(--display-weight);text-transform:none;font-size:1.1875rem;line-height:1.1;letter-spacing:0}
-.tab-bar{position:absolute;inset:auto 0 0 0;height:2px;background:rgba(246,233,214,.14)}
+.tab-bar{position:absolute;inset:auto 0 0 0;height:2px;background:var(--border)}
 .tab-bar i{display:block;height:100%;width:0;background:var(--accent);transform-origin:left}
-@media (max-width:860px){.slide{grid-template-columns:1fr;grid-template-rows:1fr}.slide-photo{display:none}.hero-watermark{right:-26%}.tabs{grid-template-columns:repeat(2,1fr)}.tab{border-bottom:1px solid rgba(246,233,214,.12)}}
+@media (max-width:860px){.slide{grid-template-columns:1fr;grid-template-rows:1fr}.slide-photo{display:none}.hero-watermark{right:-26%}.tabs{grid-template-columns:repeat(2,1fr)}.tab{border-bottom:1px dashed var(--border)}}
 
 /* ---- hero inline stats (shared across every slide) ---- */
-.hero-stats{position:relative;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(246,233,214,.14)}
-.hero-stat{background:var(--ground-dark);padding:14px 18px;display:flex;flex-direction:column;gap:2px}
-.hero-stat .stat-n{font-size:1.75rem;line-height:1}
-.hero-stat-l{font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.16em;color:rgba(246,233,214,.6)}
+.hero-stats{position:relative;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 clamp(24px,4.5vw,64px) clamp(24px,4vw,40px)}
+.hero-stat{background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:16px 18px;display:flex;flex-direction:column;gap:2px}
+.hero-stat .stat-n{font-size:1.75rem;line-height:1;color:var(--text-1)}
+.hero-stat-l{font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.16em;color:var(--text-3)}
 @media (max-width:860px){.hero-stats{grid-template-columns:repeat(2,1fr)}}
 
 /* ---- ticker ---- */
