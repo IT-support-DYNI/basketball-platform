@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type HeroSlide = {
   label: string;
@@ -127,18 +127,9 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               <p className="eyebrow">{slide.eyebrow}</p>
               <h1>
                 {slide.words.map((word, wi) => (
-                  // Fragment (not a span) so the .w spans + space text nodes
-                  // stay direct children of <h1> — CSS's `.w:last-child`
-                  // only means "last among true siblings", so wrapping each
-                  // word in its own element would make every `.w` its own
-                  // wrapper's only (hence "last") child, colouring the
-                  // whole headline instead of just the final word.
-                  <Fragment key={wi}>
-                    <span className="w">
-                      <span>{word}</span>
-                    </span>
-                    {wi < slide.words.length - 1 ? " " : ""}
-                  </Fragment>
+                  <span className="w" key={wi}>
+                    <span>{word}</span>
+                  </span>
                 ))}
               </h1>
               <p className="lead">{slide.lead}</p>
