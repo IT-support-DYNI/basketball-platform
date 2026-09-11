@@ -39,6 +39,10 @@ export default function LandingFooter() {
         </div>
         <div className="foot-base">
           <span>© 2026 Diverse Youth Northern Ireland</span>
+          <nav className="foot-legal" aria-label="Legal">
+            <Link href="/club/terms">Terms &amp; Conditions</Link>
+            <Link href="/club/privacy">Privacy Policy</Link>
+          </nav>
           <span>Belfast, Northern Ireland</span>
         </div>
       </div>

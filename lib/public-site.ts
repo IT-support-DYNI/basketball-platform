@@ -43,6 +43,34 @@ async function resolvePhotoUrl(stored: string | null | undefined): Promise<strin
   }
 }
 
+export type PublicFixture = {
+  id: number;
+  title: string;
+  teamName: string | null;
+  startAt: Date;
+  venueName: string | null;
+};
+
+/** The next publicly-visible match — Event.visibility must be PUBLIC, same
+ *  gate as everything else on this page (a TEAM/CLUB-visibility fixture stays
+ *  internal). Returns null when there's nothing upcoming to show, which the
+ *  page treats as "omit the section" rather than a loading state. */
+export async function getNextFixture(): Promise<PublicFixture | null> {
+  const match = await prisma.event.findFirst({
+    where: { type: "MATCH", status: "SCHEDULED", visibility: "PUBLIC", startAt: { gte: new Date() } },
+    include: { team: { select: { name: true } }, venue: { select: { name: true } } },
+    orderBy: { startAt: "asc" },
+  });
+  if (!match) return null;
+  return {
+    id: match.id,
+    title: match.title,
+    teamName: match.team?.name ?? null,
+    startAt: match.startAt,
+    venueName: match.venue?.name ?? match.locationText ?? null,
+  };
+}
+
 export async function getClubStats() {
   const now = new Date();
   const inSevenDays = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);

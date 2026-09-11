@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Fragment, useEffect, useRef, useState } from "react";
+import StatCount from "./StatCount";
 
 export type HeroSlide = {
   label: string;
@@ -36,7 +37,15 @@ function GhostBall() {
  *  via refs rather than React state — an animation frame loop driving state
  *  updates every tick would be needless re-render churn for a value nothing
  *  else reads. */
-export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
+export default function HeroCarousel({
+  slides,
+  stats,
+}: {
+  slides: HeroSlide[];
+  /** Same numbers as the old separate stats strip, shown inline in the hero
+   *  instead — one row shared across every slide rather than per-slide. */
+  stats?: { value: number; label: string }[];
+}) {
   const [active, setActive] = useState(0);
   const heroRef = useRef<HTMLElement | null>(null);
   const glowRef = useRef<HTMLDivElement | null>(null);
@@ -150,6 +159,17 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           </article>
         ))}
       </div>
+
+      {stats && stats.length > 0 && (
+        <div className="hero-stats">
+          {stats.map((s) => (
+            <div className="hero-stat" key={s.label}>
+              <StatCount value={s.value} />
+              <p className="hero-stat-l">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="tabs" role="tablist" aria-label="Featured stories">
         {slides.map((slide, i) => (
