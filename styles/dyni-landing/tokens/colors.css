@@ -1,9 +1,11 @@
 /* DYNI Blazers — colour system.
-   Warm, editorial, photo-led. Light is the default; dark is a matching warm
-   near-black palette with the same role structure (never an inverted grey).
-   Fixed tokens (--accent, --on-accent, --status-trial-*, --photo-*) are
-   identical in both themes: anything sitting on a photograph keeps a fixed
-   warm-dark scrim/ink because photos always need it.
+   Muted, spec-sheet, wireframe-led (matching the wireframe canvas the club
+   signed off on — cream paper, warm grey ink, single orange-red accent).
+   Light is the default; dark is a matching warm near-black palette with the
+   same role structure (never an inverted grey). Fixed tokens (--accent,
+   --on-accent, --status-trial-*, --photo-*) are identical in both themes:
+   anything sitting on a photograph keeps a fixed warm-dark scrim/ink
+   because photos always need it.
 
    Scoped to `.dyni-landing` (not :root) so these generic-named custom
    properties (--bg, --accent, --text-1…) never leak onto the rest of the
@@ -18,16 +20,16 @@
   color-scheme: light;
 
   /* Base surfaces */
-  --bg: #F6DEC1;
-  --bg-deep: #EAC896;
-  --surface: #FBF0DD;
-  --surface-alt: #EFDBB8;
-  --border: #E2C79C;
+  --bg: #F6F4EF;
+  --bg-deep: #ECE8DF;
+  --surface: #FFFFFF;
+  --surface-alt: #ECE8DF;
+  --border: #A39D92;
 
   /* Ink */
-  --text-1: #161211;
-  --text-2: #4E443B;
-  --text-3: #8C7C68;
+  --text-1: #2A2723;
+  --text-2: #514C44;
+  --text-3: #8B857A;
 
   /* Semantic */
   --positive: #027A48;
@@ -47,8 +49,8 @@
   --status-trial: #D97706;
   --status-trial-bg: rgba(217, 119, 6, 0.2);
   --photo-ink: #161211;
-  --ground-dark: #0D0A06;
-  --photo-text: #F6E9D6;
+  --ground-dark: #211E1A;
+  --photo-text: #F1EDE4;
   --photo-ground: #2A2118;
   --photo-ink-2: rgba(22, 18, 17, 0.72);
   --photo-scrim: rgba(13, 10, 6, 0.55);
@@ -67,14 +69,14 @@
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) .dyni-landing {
     color-scheme: dark;
-    --bg: #17120B;
-    --bg-deep: #0D0A06;
-    --surface: #241C13;
-    --surface-alt: #362A1B;
-    --border: #4A3A25;
-    --text-1: #F6E9D6;
-    --text-2: #C7B49B;
-    --text-3: #8F7C64;
+    --bg: #1C1915;
+    --bg-deep: #131110;
+    --surface: #262220;
+    --surface-alt: #362F2A;
+    --border: #4A443C;
+    --text-1: #F1EDE4;
+    --text-2: #C9C3B6;
+    --text-3: #8F897C;
     --positive: #34D399;
     --positive-bg: #12271D;
     --negative: #F87171;
@@ -88,14 +90,14 @@
 
 html[data-theme="dark"] .dyni-landing {
   color-scheme: dark;
-  --bg: #17120B;
-  --bg-deep: #0D0A06;
-  --surface: #241C13;
-  --surface-alt: #362A1B;
-  --border: #4A3A25;
-  --text-1: #F6E9D6;
-  --text-2: #C7B49B;
-  --text-3: #8F7C64;
+  --bg: #1C1915;
+  --bg-deep: #131110;
+  --surface: #262220;
+  --surface-alt: #362F2A;
+  --border: #4A443C;
+  --text-1: #F1EDE4;
+  --text-2: #C9C3B6;
+  --text-3: #8F897C;
   --positive: #34D399;
   --positive-bg: #12271D;
   --negative: #F87171;
@@ -108,14 +110,14 @@ html[data-theme="dark"] .dyni-landing {
 
 html[data-theme="light"] .dyni-landing {
   color-scheme: light;
-  --bg: #F6DEC1;
-  --bg-deep: #EAC896;
-  --surface: #FBF0DD;
-  --surface-alt: #EFDBB8;
-  --border: #E2C79C;
-  --text-1: #161211;
-  --text-2: #4E443B;
-  --text-3: #8C7C68;
+  --bg: #F6F4EF;
+  --bg-deep: #ECE8DF;
+  --surface: #FFFFFF;
+  --surface-alt: #ECE8DF;
+  --border: #A39D92;
+  --text-1: #2A2723;
+  --text-2: #514C44;
+  --text-3: #8B857A;
   --positive: #027A48;
   --positive-bg: #ECFDF3;
   --negative: #B42318;

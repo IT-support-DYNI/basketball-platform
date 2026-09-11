@@ -1,18 +1,18 @@
 /* DYNI Blazers — radii, borders, elevation.
-   Flat cards are shadowless with a 1px border. Shadow is for emphasis only:
-   an accent-tinted glow on CTAs and active states, a plain dark lift on
-   photo panels. Scoped to `.dyni-landing`, same reasoning as tokens/colors.css. */
+   Wireframe-led: flat, shadowless, dashed-line boxes rather than soft-shadow
+   cards — the same "spec sheet" language the wireframes were drawn in.
+   Scoped to `.dyni-landing`, same reasoning as tokens/colors.css. */
 .dyni-landing {
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
   --radius-pill: 999px;
 
-  --border-hairline: 1px solid var(--border);
+  --border-hairline: 1px dashed var(--border);
 
-  --shadow-glow: 0 10px 30px -8px rgba(254, 68, 11, 0.45);
-  --shadow-glow-soft: 0 6px 20px -8px rgba(254, 68, 11, 0.35);
-  --shadow-photo: 0 24px 48px -24px rgba(13, 10, 6, 0.55);
-  --shadow-lift: 0 14px 30px -18px rgba(13, 10, 6, 0.4);
+  --shadow-glow: none;
+  --shadow-glow-soft: none;
+  --shadow-photo: none;
+  --shadow-lift: none;
 }
