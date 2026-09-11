@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Inter, Barlow_Condensed, IBM_Plex_Mono } from "next/font/google";
+import { Architects_Daughter, Big_Shoulders_Display, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -9,16 +9,19 @@ import NavBar from "@/components/NavBar";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import ThemeScript from "@/components/theme/ThemeScript";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const archivo = Archivo({
+// Same face swap as the public /club site (app/club/layout.tsx), applied
+// app-wide so the internal admin/coach/player/guardian screens match it
+// instead of keeping the old "performance analytics" system: handwritten
+// display face, condensed bold for stat-card/profile contexts, and mono
+// for body copy + labels. Variable NAMES are kept as-is (--font-inter,
+// --font-archivo, --font-barlow) even though they no longer hold Inter/
+// Archivo/Barlow — renaming them would mean touching every consumer in
+// tailwind.config.ts's fontFamily map and beyond for no functional gain.
+const inter = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-inter", display: "swap" });
+const archivo = Architects_Daughter({ subsets: ["latin"], weight: "400", variable: "--font-archivo", display: "swap" });
+const barlow = Big_Shoulders_Display({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-  variable: "--font-archivo",
-  display: "swap",
-});
-const barlow = Barlow_Condensed({
-  subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: ["700", "800"],
   variable: "--font-barlow",
   display: "swap",
 });
@@ -43,8 +46,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0b0b0f" },
-    { media: "(prefers-color-scheme: light)", color: "#f7f4ef" },
+    { media: "(prefers-color-scheme: dark)", color: "#1c1915" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f4ef" },
   ],
 };
 

@@ -5,8 +5,11 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 type Variant = "primary" | "secondary" | "ghost" | "destructive";
 type Size = "sm" | "md" | "lg";
 
+// font-mono uppercase, not font-display — same convention as /club's .btn
+// (buttons stay legible mono-uppercase; the handwritten display face is for
+// headings, not controls).
 const BASE =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control font-display font-bold uppercase tracking-wide transition disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control font-mono font-semibold uppercase tracking-wide transition disabled:cursor-not-allowed disabled:opacity-50";
 
 const VARIANTS: Record<Variant, string> = {
   primary: "bg-flame text-on-flame hover:brightness-110 active:brightness-95",
