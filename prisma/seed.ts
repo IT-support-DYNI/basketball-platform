@@ -337,6 +337,51 @@ async function main() {
       publicProfileApproved: true,
     },
   });
+  // A few more opted-in profiles so the public roster/profile pages have more
+  // than two cards to demo — same rule as above: minors need the guardian
+  // relationship below, adults self-approve.
+  await prisma.playerProfile.update({
+    where: { id: players["amara.k@example.com"].profileId }, // Amara Kone, U16 — a minor, guardian-approved
+    data: {
+      bio: "Shooting guard for the U16s. Working on catch-and-shoot — coach says it's the fastest way to help this squad space the floor.",
+      publicProfileApproved: true,
+    },
+  });
+  await prisma.playerProfile.update({
+    where: { id: players["sam.o@example.com"].profileId }, // Sam Okafor, U16 dev squad — a minor, guardian-approved
+    data: {
+      bio: "U16 development squad. Newer to organised basketball but puts in the extra reps after every session.",
+      publicProfileApproved: true,
+    },
+  });
+  await prisma.playerProfile.update({
+    where: { id: players["noah.f@example.com"].profileId }, // Noah Fischer, U16 trialist — a minor, guardian-approved
+    data: {
+      bio: "Trialling with the U16s at centre. Still learning the calls, but rebounds like he's been doing it for years.",
+      publicProfileApproved: true,
+    },
+  });
+  await prisma.playerProfile.update({
+    where: { id: players["elena.v@example.com"].profileId }, // Elena Volkov, senior — an adult, self-approved
+    data: {
+      bio: "Senior shooting guard. Plays every minute like it's the last one of the game.",
+      publicProfileApproved: true,
+    },
+  });
+  await prisma.playerProfile.update({
+    where: { id: players["olu.a@example.com"].profileId }, // Olu Ademola, senior — an adult, self-approved
+    data: {
+      bio: "Senior power forward. The one boxing out so someone else gets the highlight.",
+      publicProfileApproved: true,
+    },
+  });
+  await prisma.playerProfile.update({
+    where: { id: players["ben.c@example.com"].profileId }, // Ben Carter, senior — an adult, self-approved
+    data: {
+      bio: "Senior centre. Shows up whenever his shifts allow it, and the squad's better for it when he does.",
+      publicProfileApproved: true,
+    },
+  });
   await prisma.coachProfile.update({
     where: { userId: headCoach.id },
     data: { publicProfileApproved: true },
@@ -349,6 +394,7 @@ async function main() {
     { email: "m.rivera@example.com", name: "Maria Rivera", children: ["tomas.r@example.com"], label: "Parent" },
     { email: "h.nakamura@example.com", name: "Haruki Nakamura", children: ["kai.n@example.com"], label: "Parent" },
     { email: "c.brennan@example.com", name: "Ciara Brennan", children: ["leah.b@example.com", "sam.o@example.com"], label: "Guardian" },
+    { email: "p.fischer@example.com", name: "Petra Fischer", children: ["noah.f@example.com"], label: "Parent" },
   ];
   for (const g of guardianSpecs) {
     const gUser = await mkUser(g.email, g.name, "GUARDIAN");

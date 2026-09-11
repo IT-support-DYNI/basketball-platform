@@ -28,53 +28,67 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
         </div>
       </section>
 
-      <section style={{ paddingTop: 20 }}>
-        <div className="wrap">
-          <div className="profile-hero">
-            {player.jerseyNumber != null && <span className="profile-hero-jersey">{player.jerseyNumber}</span>}
-            <div className="profile-hero-in">
-              <div className="profile-photo">
-                {player.photoUrl ? (
-                  <div className="photo has-img">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={player.photoUrl} alt="" />
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      display: "grid",
-                      placeItems: "center",
-                      background: "var(--photo-ground)",
-                      color: "var(--photo-text)",
-                      fontFamily: "var(--font-display)",
-                      fontStyle: "italic",
-                      fontWeight: 800,
-                      fontSize: "2rem",
-                    }}
-                  >
-                    {initials}
-                  </div>
-                )}
+      <div className="profile-banner">
+        {player.jerseyNumber != null && <span className="profile-banner-jersey">{player.jerseyNumber}</span>}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="profile-banner-crest" src="/brand/dyni-blazers-crest.png" alt="" />
+        <div className="profile-banner-body">
+          <div className="profile-banner-photo">
+            {player.photoUrl ? (
+              <div className="photo has-img">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={player.photoUrl} alt="" />
               </div>
-              <div>
-                <p className="eyebrow">
-                  {[player.team, player.positionLabel, player.jerseyNumber != null ? `#${player.jerseyNumber}` : null]
-                    .filter(Boolean)
-                    .join(" · ") || "DYNI Blazers"}
-                </p>
-                <h1>{player.name}</h1>
-                {player.publicStatus && (
-                  <span className={`pill ${player.publicStatus === "Trialist" ? "pill-trial" : "pill-open"}`} style={{ marginTop: 10 }}>
-                    {player.publicStatus}
-                  </span>
-                )}
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "grid",
+                  placeItems: "center",
+                  background: "var(--photo-ground)",
+                  color: "var(--photo-text)",
+                  fontFamily: "var(--font-condensed)",
+                  fontWeight: 800,
+                  fontSize: "2.5rem",
+                }}
+              >
+                {initials}
               </div>
-            </div>
+            )}
+          </div>
+          <div className="profile-banner-info">
+            <p className="profile-banner-meta">
+              {[player.team ?? "DYNI Blazers", player.jerseyNumber != null ? `#${player.jerseyNumber}` : null, player.positionLabel]
+                .filter(Boolean)
+                .join(" | ")}
+            </p>
+            <h1 className="profile-banner-name">{player.name}</h1>
+            {player.publicStatus && (
+              <span className={`pill ${player.publicStatus === "Trialist" ? "pill-trial" : "pill-open"}`}>{player.publicStatus}</span>
+            )}
           </div>
         </div>
-      </section>
+      </div>
+
+      <div className="profile-stat-bar">
+        <div className="profile-stat">
+          <span className="l">Position</span>
+          <span className="v">{player.positionLabel ?? "—"}</span>
+        </div>
+        <div className="profile-stat">
+          <span className="l">Team</span>
+          <span className="v">{player.team ?? "—"}</span>
+        </div>
+        <div className="profile-stat">
+          <span className="l">Age group</span>
+          <span className="v">{player.ageGroup ?? "—"}</span>
+        </div>
+        <div className="profile-stat">
+          <span className="l">Status</span>
+          <span className="v">{player.publicStatus ?? "—"}</span>
+        </div>
+      </div>
 
       {player.bio && (
         <section style={{ paddingTop: 20 }}>

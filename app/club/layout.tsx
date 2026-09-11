@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Architects_Daughter, Fraunces, IBM_Plex_Mono } from "next/font/google";
+import { Architects_Daughter, Big_Shoulders_Display, Fraunces, IBM_Plex_Mono } from "next/font/google";
 
 import "@/styles/dyni-landing/tokens.css";
 import "@/styles/dyni-landing/landing.css";
@@ -18,6 +18,11 @@ const fraunces = Fraunces({
   variable: "--nf-quote",
 });
 const ibmPlexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--nf-mono" });
+// A second display face, condensed/bold/uppercase — used only on player and
+// coach profile "stat card" banners (an NBA.com-style player-page layout),
+// which deliberately reads as a sports stat sheet rather than the site's
+// handwritten-headline marketing voice used everywhere else.
+const bigShouldersDisplay = Big_Shoulders_Display({ subsets: ["latin"], weight: ["700", "800"], variable: "--nf-condensed" });
 
 import ScrollProgressBar from "@/components/public/landing/ScrollProgressBar";
 import LandingNav from "@/components/public/landing/LandingNav";
@@ -44,7 +49,9 @@ export const metadata: Metadata = {
  *  like two different sites stitched together. */
 export default function ClubLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`dyni-landing ${architectsDaughter.variable} ${fraunces.variable} ${ibmPlexMono.variable}`}>
+    <div
+      className={`dyni-landing ${architectsDaughter.variable} ${fraunces.variable} ${ibmPlexMono.variable} ${bigShouldersDisplay.variable}`}
+    >
       <ScrollProgressBar />
       <LandingNav />
       {children}

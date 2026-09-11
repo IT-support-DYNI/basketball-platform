@@ -20,6 +20,9 @@
   --font-quote: var(--nf-quote), Georgia, serif;
   --font-body: var(--nf-mono), ui-monospace, monospace;
   --font-mono: var(--nf-mono), ui-monospace, monospace;
+  /* Bold condensed uppercase — player/coach profile banners only, see
+     app/club/layout.tsx for why this is a second display face. */
+  --font-condensed: var(--nf-condensed), "Arial Narrow", sans-serif;
 
   /* Display scale — handwritten, single weight, loose enough that
      ascenders/descenders don't collide */

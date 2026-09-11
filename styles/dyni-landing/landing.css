@@ -372,13 +372,31 @@ html[data-theme=dark] .toggle .sun{display:none}
 .empty-state h2{font-size:var(--type-display-1)}
 .empty-state p{margin:14px auto 0;max-width:44ch;color:var(--text-2)}
 
-/* ---- profile hero (individual player/coach page) ---- */
-.profile-hero{position:relative;overflow:hidden;background:var(--ground-dark);border-radius:var(--radius-lg);padding:clamp(28px,5vw,52px) clamp(22px,4vw,44px);box-shadow:var(--shadow-photo)}
-.profile-hero-jersey{position:absolute;right:-4px;top:-10%;font-family:var(--font-display);font-style:normal;font-weight:var(--display-weight);font-size:clamp(9rem,20vw,16rem);line-height:1;color:rgba(246,233,214,.08);pointer-events:none;user-select:none}
-.profile-hero-in{position:relative;display:flex;align-items:center;gap:clamp(18px,3vw,32px);flex-wrap:wrap}
-.profile-photo{width:clamp(96px,14vw,140px);height:clamp(96px,14vw,140px);border-radius:50%;flex:none;overflow:hidden;border:3px solid rgba(246,233,214,.25)}
-.profile-photo .photo{width:100%;height:100%;border:none}
-.profile-hero h1{font-size:clamp(2.25rem,5vw,3.5rem);color:var(--photo-text);max-width:16ch}
-.profile-hero .eyebrow{color:var(--accent-light)}
+/* ---- profile banner (player/coach profile page — NBA.com-style stat card)
+   Full-bleed like .hero/.fixture (no .wrap), not the site's usual rounded
+   inset card — deliberately reads as a sports stat sheet: club crest,
+   jersey-number watermark, a tall photo panel, condensed bold uppercase
+   name, and a stat-bar strip of real public fields underneath. ---- */
+.profile-banner{position:relative;overflow:hidden;background:var(--ground-dark);padding:clamp(20px,3vw,32px) clamp(24px,4.5vw,64px) 0}
+.profile-banner-jersey{position:absolute;right:-4px;top:-14%;font-family:var(--font-display);font-weight:var(--display-weight);font-size:clamp(9rem,20vw,16rem);line-height:1;color:rgba(246,233,214,.08);pointer-events:none;user-select:none}
+.profile-banner-crest{position:relative;z-index:2;width:56px;height:auto;display:block}
+.profile-banner-body{position:relative;z-index:2;display:flex;align-items:flex-end;gap:clamp(20px,3vw,36px);margin-top:18px}
+.profile-banner-photo{width:clamp(130px,16vw,200px);height:clamp(160px,20vw,250px);flex:none;border-radius:var(--radius-lg) var(--radius-lg) 0 0;overflow:hidden}
+.profile-banner-photo .photo{width:100%;height:100%;border:none}
+.profile-banner-info{padding-bottom:26px}
+.profile-banner-meta{font-family:var(--font-mono);font-size:var(--type-label);text-transform:uppercase;letter-spacing:.14em;color:rgba(246,233,214,.7)}
+.profile-banner-name{font-family:var(--font-condensed);font-weight:800;text-transform:uppercase;line-height:.92;font-size:clamp(2rem,5vw,3.5rem);color:var(--photo-text);margin-top:6px;max-width:14ch}
+.profile-banner-info .pill{margin-top:14px}
+
+.profile-stat-bar{background:var(--bg-deep);display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.profile-stat{padding:16px clamp(20px,3vw,32px);border-right:var(--border-hairline)}
+.profile-stat:last-child{border-right:0}
+.profile-stat .l{display:block;font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.16em;color:var(--text-3)}
+.profile-stat .v{display:block;margin-top:4px;font-family:var(--font-condensed);font-weight:700;font-size:1.25rem;color:var(--text-1)}
+@media (max-width:700px){
+  .profile-banner-body{flex-direction:column;align-items:flex-start}
+  .profile-banner-photo{width:130px;height:130px;border-radius:var(--radius-lg)}
+}
+
 .back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.16em;color:var(--text-2)}
 .back-link:hover{color:var(--text-1)}
