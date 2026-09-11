@@ -1,19 +1,20 @@
 /* DYNI Blazers — type system.
-   Four faces, four jobs. Display is Big Shoulders Display in ITALIC at 700–900:
+   Three faces now. Display is Big Shoulders Display in ITALIC at 700–900:
    bold, condensed, raked forward — the closest legally-usable Google Fonts
    match to the club's broadcast-style headline face. Fraunces italic is a
    secondary display face used in exactly ONE place per page (the pull-quote).
-   Inter carries body copy. IBM Plex Mono carries every label, eyebrow, stat
-   and timestamp, always uppercase and tracked out.
+   IBM Plex Mono carries everything else — body copy as well as every label,
+   eyebrow, stat and timestamp — for the closer-to-the-wireframe "spec sheet"
+   read (labels stay uppercase/tracked-out, body copy doesn't).
 
    Scoped to `.dyni-landing`, same reasoning as tokens/colors.css. */
 
-@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
 
 .dyni-landing {
   --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
   --font-quote: "Fraunces", Georgia, serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-body: "IBM Plex Mono", ui-monospace, monospace;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
   /* Display scale — italic, tight */
