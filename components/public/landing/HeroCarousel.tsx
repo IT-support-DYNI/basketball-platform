@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 export type HeroSlide = {
   label: string;
@@ -127,9 +127,12 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               <p className="eyebrow">{slide.eyebrow}</p>
               <h1>
                 {slide.words.map((word, wi) => (
-                  <span className="w" key={wi}>
-                    <span>{word}</span>
-                  </span>
+                  <Fragment key={wi}>
+                    <span className="w">
+                      <span>{word}</span>
+                    </span>
+                    {wi < slide.words.length - 1 && " "}
+                  </Fragment>
                 ))}
               </h1>
               <p className="lead">{slide.lead}</p>
