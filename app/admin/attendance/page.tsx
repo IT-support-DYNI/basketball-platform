@@ -11,7 +11,7 @@ export default async function AdminAttendancePage() {
   return (
     <main className="flex flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-ink">Attendance</h1>
+        <h1 className="font-display text-3xl text-ink">Attendance</h1>
         <p className="mt-1 text-ink-dim">Per-player rates by team over a date range (view-only — coaches mark attendance).</p>
       </div>
 

@@ -21,32 +21,39 @@ function countryName(code: string | null): string | null {
 
 /** One cell in the divided stat strip below the hero — the vertical rules
  *  between cells (via the parent's `divide-x`) are the point, echoing the
- *  boxed NBA.com stat-line look rather than a loose wrapped list. */
-function StatCell({ label, value, tone = "text-ink" }: { label: string; value: React.ReactNode; tone?: string }) {
+ *  boxed NBA.com stat-line look rather than a loose wrapped list.
+ *
+ *  This strip is a fixed-dark band regardless of the app's light/dark
+ *  toggle (same idea as /club's --ground-dark/--photo-text — a permanently
+ *  dark surface needs permanently light ink, not theme-relative `text-ink`,
+ *  which would go dark-on-dark once light became the app's default theme). */
+function StatCell({ label, value, tone = "text-[#F1EDE4]" }: { label: string; value: React.ReactNode; tone?: string }) {
   return (
     <div className="min-w-[5.5rem] flex-1 px-5 py-4 transition duration-150 hover:bg-white/[0.03]">
-      <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">{label}</p>
+      <p className="font-mono text-[10px] uppercase tracking-wider text-[#8F897C]">{label}</p>
       <p className={`mt-1 truncate font-condensed text-xl font-bold tabular sm:text-2xl ${tone}`}>{value ?? "—"}</p>
     </div>
   );
 }
 
 /** Colour is semantic here, not decorative — it tells a coach at a glance
- *  whether a number needs attention, same idea as StatTile's accent system. */
+ *  whether a number needs attention, same idea as StatTile's accent system.
+ *  Fixed hex, not the theme-relative text-success/warning/danger tokens —
+ *  this strip is a permanently-dark band (see StatCell), and the light-mode
+ *  values of those tokens are tuned for dark-on-cream, not light-on-near-
+ *  black, so they'd lose contrast here once light became the app default. */
 function attendanceColor(pct: number): string {
-  if (pct >= 85) return "text-success";
-  if (pct >= 60) return "text-warning";
-  return "text-danger";
+  if (pct >= 85) return "text-[#34D399]";
+  if (pct >= 60) return "text-[#FBBF24]";
+  return "text-[#F87171]";
 }
 function formColor(score: number): string {
   // Gold for a standout score — the brief's "gold for standout statistics"
-  // idea, using the token that already exists for exactly this (--gold,
-  // "flame-tip highlight, live indicator" in app/globals.css) rather than
-  // introducing a new colour.
-  if (score >= 9) return "text-gold";
-  if (score >= 7.5) return "text-success";
-  if (score >= 5) return "text-warning";
-  return "text-danger";
+  // idea, using the same fixed-dark-band reasoning as attendanceColor above.
+  if (score >= 9) return "text-[#FBBF24]";
+  if (score >= 7.5) return "text-[#34D399]";
+  if (score >= 5) return "text-[#FBBF24]";
+  return "text-[#F87171]";
 }
 
 /** The NBA.com-style profile hero: team-colour band, cutout-style avatar,
@@ -118,7 +125,7 @@ export default function PlayerProfileHero({
                 .filter(Boolean)
                 .join(" · ") || "DYNI Blazers"}
             </p>
-            <h1 className="mt-1 font-display text-3xl font-extrabold uppercase leading-[0.95] tracking-tight text-on-flame sm:text-5xl">
+            <h1 className="mt-1 font-condensed text-3xl font-extrabold uppercase leading-[0.95] tracking-tight text-on-flame sm:text-5xl">
               {player.name}
             </h1>
             {player.status && player.status !== "ACTIVE" && (
@@ -132,7 +139,7 @@ export default function PlayerProfileHero({
 
       {/* Stat strip — a divided grid (vertical rules between cells), flush
        *  below the hero with no overlap into the colour band. */}
-      <div className="grid grid-cols-2 divide-x divide-y divide-line border-t border-line bg-[rgb(20_20_25)] sm:grid-cols-4 sm:divide-y-0 lg:grid-cols-7">
+      <div className="grid grid-cols-2 divide-x divide-y divide-[#4A443C] border-t border-[#4A443C] bg-[#1C1915] sm:grid-cols-4 sm:divide-y-0 lg:grid-cols-7">
         {player.canSeeStats && player.attendancePct != null && (
           <StatCell label="Attendance" value={<CountUp value={player.attendancePct} suffix="%" />} tone={attendanceColor(player.attendancePct)} />
         )}
@@ -142,7 +149,7 @@ export default function PlayerProfileHero({
             value={
               <>
                 <CountUp value={player.weeklyForm} decimals={1} />
-                <span className="text-base text-ink-faint">/10</span>
+                <span className="text-base text-[#8F897C]">/10</span>
               </>
             }
             tone={formColor(player.weeklyForm)}

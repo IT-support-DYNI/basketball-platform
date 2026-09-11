@@ -3,6 +3,8 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import Alert from "@/components/ui/Alert";
+
 export default function CreateStaffUserForm() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -42,22 +44,16 @@ export default function CreateStaffUserForm() {
 
   if (result) {
     return (
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-        <p className="font-semibold text-emerald-900">Account created for {result.email}</p>
-        <p className="mt-1 text-sm text-emerald-800">
-          Temporary password (relay this to them — it won't be shown again):
-        </p>
-        <code className="mt-2 block rounded-lg bg-surface px-3 py-2 font-mono text-sm text-slate-800">
+      <Alert tone="success" className="p-5">
+        <p className="font-semibold">Account created for {result.email}</p>
+        <p className="mt-1 text-sm">Temporary password (relay this to them — it won't be shown again):</p>
+        <code className="mt-2 block rounded-control border border-line bg-surface px-3 py-2 font-mono text-sm text-ink">
           {result.tempPassword}
         </code>
-        <button
-          type="button"
-          onClick={() => setResult(null)}
-          className="mt-3 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
-        >
+        <button type="button" onClick={() => setResult(null)} className="mt-3 text-sm font-semibold hover:underline">
           Add another
         </button>
-      </div>
+      </Alert>
     );
   }
 
@@ -66,7 +62,7 @@ export default function CreateStaffUserForm() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-court-500/30 transition hover:shadow-md"
+        className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white shadow-court-500/30 transition hover:border-flame"
       >
         + Add Coach or Admin
       </button>
@@ -74,7 +70,7 @@ export default function CreateStaffUserForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-surface p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-card border border-line bg-surface p-5 space-y-4">
       <div className="flex gap-3">
         <label className="flex items-center gap-2 text-sm font-medium">
           <input type="radio" checked={role === "COACH"} onChange={() => setRole("COACH")} /> Coach
@@ -90,7 +86,7 @@ export default function CreateStaffUserForm() {
         value={name}
         onChange={(e) => setName(e.target.value)}
         required
-        className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20"
+        className="w-full rounded-control border border-line px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20"
       />
       <input
         type="email"
@@ -98,16 +94,16 @@ export default function CreateStaffUserForm() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
-        className="w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20"
+        className="w-full rounded-control border border-line px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20"
       />
 
-      {error && <p className="text-sm text-rose-700">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="flex gap-2">
         <button
           type="submit"
           disabled={loading}
-          className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm disabled:opacity-50"
+          className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
         >
           {loading ? "Creating..." : "Create account"}
         </button>

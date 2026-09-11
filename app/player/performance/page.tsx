@@ -25,7 +25,7 @@ export default async function PlayerPerformancePage() {
 
   return (
     <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Performance</h1>
+      <h1 className="font-display text-3xl text-ink">Performance</h1>
       <p className="mt-1 text-slate-600">Your evaluation history and development over time.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -34,7 +34,7 @@ export default async function PlayerPerformancePage() {
       </div>
 
       {monthlyTrend.length > 1 && (
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-surface p-5">
+        <section className="mt-6 rounded-card border border-line bg-surface p-5">
           <h2 className="font-bold text-slate-900">Monthly trend</h2>
           <div className="mt-4 flex items-end gap-3" style={{ height: 100 }}>
             {monthlyTrend.map((m) => (
@@ -49,7 +49,7 @@ export default async function PlayerPerformancePage() {
 
       <section className="mt-6 space-y-4">
         {evaluations.map((e) => (
-          <div key={e.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
+          <div key={e.id} className="rounded-card border border-line bg-surface p-5">
             <div className="flex items-center justify-between">
               <p className="font-bold text-slate-900">
                 {e.periodType} · {new Date(e.periodStart).toLocaleDateString()} – {new Date(e.periodEnd).toLocaleDateString()}
@@ -67,13 +67,13 @@ export default async function PlayerPerformancePage() {
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {e.strengths && (
                   <div>
-                    <p className="text-xs font-semibold text-emerald-700">Strengths</p>
+                    <p className="text-xs font-semibold text-success">Strengths</p>
                     <p className="text-sm text-slate-600">{e.strengths}</p>
                   </div>
                 )}
                 {e.developmentAreas && (
                   <div>
-                    <p className="text-xs font-semibold text-amber-700">Development areas</p>
+                    <p className="text-xs font-semibold text-warning">Development areas</p>
                     <p className="text-sm text-slate-600">{e.developmentAreas}</p>
                   </div>
                 )}

@@ -73,7 +73,7 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">{event.title}</h1>
+            <h1 className="font-display text-3xl text-ink">{event.title}</h1>
             <StatusBadge status={event.status} />
           </div>
           <p className="mt-1 text-slate-600">
@@ -106,7 +106,7 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
       </div>
 
       {event.teamId != null && (
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-surface p-5">
+        <section className="mt-8 rounded-card border border-line bg-surface p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="font-bold text-slate-900">RSVPs</h2>
             <p className="text-sm text-slate-500">
@@ -117,7 +117,7 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
           </div>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
             {(["ATTENDING", "UNSURE", "NOT_ATTENDING"] as const).map((k) => (
-              <div key={k} className="rounded-xl border border-slate-200 p-3">
+              <div key={k} className="rounded-control border border-line p-3">
                 <p className="font-mono text-[11px] uppercase tracking-wider text-slate-400">{RSVP_LABEL[k]}</p>
                 <ul className="mt-1.5 space-y-0.5 text-sm text-slate-700">
                   {rsvpGroups[k].map((r, i) => (
@@ -134,7 +134,7 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
         </section>
       )}
 
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-surface p-5">
+      <section className="mt-8 rounded-card border border-line bg-surface p-5">
         <h2 className="font-bold text-slate-900">Attendance</h2>
         <div className="mt-3">
           {event.teamId == null ? (
@@ -146,7 +146,7 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
       </section>
 
       {event.teamId != null && register.length > 0 && (
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-surface p-5">
+        <section className="mt-8 rounded-card border border-line bg-surface p-5">
           <h2 className="font-bold text-slate-900">Register &amp; corrections</h2>
           <p className="mt-1 text-sm text-slate-500">
             Check-in times and method. Every correction records a reason.

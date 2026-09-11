@@ -111,13 +111,13 @@ export default function PushNotificationToggle() {
         disabled={loading}
         className={`rounded-full px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${
           status === "subscribed"
-            ? "border border-slate-200 text-slate-600 hover:bg-slate-100"
-            : "bg-gradient-to-r from-court-500 to-court-700 text-white shadow-sm shadow-court-500/30 hover:shadow-md"
+            ? "border border-line text-slate-600 hover:bg-slate-100"
+            : "bg-gradient-to-r from-court-500 to-court-700 text-white shadow-court-500/30 hover:border-flame"
         }`}
       >
         {loading ? "Working..." : status === "subscribed" ? "Push notifications on — turn off" : "Enable push notifications"}
       </button>
-      {error && <span className="text-xs text-rose-600">{error}</span>}
+      {error && <span className="text-xs text-danger">{error}</span>}
     </div>
   );
 }

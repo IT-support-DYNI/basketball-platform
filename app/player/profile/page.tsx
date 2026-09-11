@@ -31,7 +31,7 @@ export default async function PlayerProfilePage() {
   if (!player) {
     return (
       <main>
-        <h1 className="text-3xl font-extrabold tracking-tight text-ink">Profile</h1>
+        <h1 className="font-display text-3xl text-ink">Profile</h1>
         <p className="mt-3 text-sm text-ink-dim">Player profile not found.</p>
       </main>
     );

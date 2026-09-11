@@ -100,7 +100,7 @@ export default function CreateSessionForm({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-court-500/30 transition hover:shadow-md"
+        className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white shadow-court-500/30 transition hover:border-flame"
       >
         + Create Event
       </button>
@@ -108,10 +108,10 @@ export default function CreateSessionForm({
   }
 
   const field =
-    "rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20";
+    "rounded-control border border-line px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-slate-200 bg-surface p-5">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-card border border-line bg-surface p-5">
       <div className="grid gap-3 sm:grid-cols-2">
         <select value={teamId} onChange={(e) => setTeamId(e.target.value)} className={field}>
           {teams.map((t) => (
@@ -164,7 +164,7 @@ export default function CreateSessionForm({
         Repeats
       </label>
       {repeats && (
-        <div className="grid gap-3 rounded-xl border border-slate-200 p-3 sm:grid-cols-3">
+        <div className="grid gap-3 rounded-control border border-line p-3 sm:grid-cols-3">
           <select value={frequency} onChange={(e) => setFrequency(e.target.value)} className={field}>
             <option value="DAILY">Daily</option>
             <option value="WEEKLY">Weekly</option>
@@ -181,10 +181,10 @@ export default function CreateSessionForm({
         </div>
       )}
 
-      {error && <p className="text-sm text-rose-700">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="flex gap-2">
-        <button type="submit" disabled={loading} className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm disabled:opacity-50">
+        <button type="submit" disabled={loading} className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50">
           {loading ? "Creating..." : "Create"}
         </button>
         <button type="button" onClick={() => setOpen(false)} className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100">

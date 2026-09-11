@@ -20,7 +20,7 @@ export default async function CoachVideosPage() {
 
   return (
     <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Training Video Library</h1>
+      <h1 className="font-display text-3xl text-ink">Training Video Library</h1>
       <p className="mt-1 text-slate-600">Upload videos and assign them to a whole team or individual players.</p>
 
       <div className="mt-6">
@@ -29,7 +29,7 @@ export default async function CoachVideosPage() {
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {videos.map((v) => (
-          <div key={v.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
+          <div key={v.id} className="rounded-card border border-line bg-surface p-5">
             <div className="flex items-start justify-between gap-2">
               <p className="font-bold text-slate-900">{v.title}</p>
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">{v.category.replace(/_/g, " ")}</span>

@@ -24,12 +24,12 @@ export default async function AdminPerformancePage() {
 
   return (
     <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Performance</h1>
+      <h1 className="font-display text-3xl text-ink">Performance</h1>
       <p className="mt-1 text-slate-600">Latest overall score per player, by team (view-only — coaches record evaluations).</p>
 
       <div className="mt-6 space-y-6">
         {teams.map((team) => (
-          <section key={team.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
+          <section key={team.id} className="rounded-card border border-line bg-surface p-5">
             <Link href={`/admin/teams/${team.id}`} className="font-bold text-slate-900 hover:text-court-700">{team.name}</Link>
             <ul className="mt-3 divide-y divide-slate-100">
               {team.memberships.map((m) => (

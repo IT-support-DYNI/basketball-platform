@@ -22,7 +22,7 @@ export default async function PlayerAttendancePage() {
 
   return (
     <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Attendance</h1>
+      <h1 className="font-display text-3xl text-ink">Attendance</h1>
       <p className="mt-1 text-slate-600">Your attendance history and overall percentage.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-4">
@@ -32,7 +32,7 @@ export default async function PlayerAttendancePage() {
         <StatTile label="Absent" value={stats.absent} icon="🔴" accent="rose" />
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-surface">
+      <div className="mt-6 overflow-x-auto rounded-card border border-line bg-surface">
         <table className="w-full min-w-[38rem] text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
             <tr>

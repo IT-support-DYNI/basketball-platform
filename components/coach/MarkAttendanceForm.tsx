@@ -53,13 +53,13 @@ export default function MarkAttendanceForm({ eventId, players }: { eventId: numb
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                     statuses[p.id] === s
                       ? s === "PRESENT"
-                        ? "bg-emerald-600 text-white"
+                        ? "bg-success text-white"
                         : s === "ABSENT"
-                        ? "bg-rose-600 text-white"
+                        ? "bg-danger text-white"
                         : s === "LATE"
-                        ? "bg-amber-500 text-white"
-                        : "bg-slate-500 text-white"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        ? "bg-warning text-white"
+                        : "bg-ink-faint text-white"
+                      : "bg-surface-2 text-ink-dim hover:bg-surface-3"
                   }`}
                 >
                   {s}
@@ -77,11 +77,11 @@ export default function MarkAttendanceForm({ eventId, players }: { eventId: numb
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm disabled:opacity-50"
+            className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save attendance"}
           </button>
-          {saved && <span className="text-sm text-emerald-700">Saved ✓</span>}
+          {saved && <span className="text-sm text-success">Saved ✓</span>}
         </div>
       )}
     </div>

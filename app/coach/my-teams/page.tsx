@@ -16,7 +16,7 @@ export default async function CoachMyTeamsPage() {
 
   return (
     <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">My Teams</h1>
+      <h1 className="font-display text-3xl text-ink">My Teams</h1>
       <p className="mt-1 text-slate-600">Teams assigned to you by an admin.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -24,7 +24,7 @@ export default async function CoachMyTeamsPage() {
           <Link
             key={team.id}
             href={`/coach/my-teams/${team.id}`}
-            className="rounded-2xl border border-slate-200 bg-surface p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="rounded-card border border-line bg-surface p-5 transition hover:-translate-y-0.5 hover:border-flame"
           >
             <div className="flex items-start justify-between gap-3">
               <div>

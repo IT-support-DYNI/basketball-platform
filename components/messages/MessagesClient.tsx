@@ -271,7 +271,7 @@ export default function MessagesClient({
                       {!mine && <span className="px-1 text-[11px] font-semibold text-ink-faint">{m.author}</span>}
                       <div
                         className={cn(
-                          "group max-w-[80%] rounded-2xl px-3 py-2 text-sm",
+                          "group max-w-[80%] rounded-card px-3 py-2 text-sm",
                           m.deleted
                             ? "border border-dashed border-line text-ink-faint"
                             : mine
@@ -309,7 +309,7 @@ export default function MessagesClient({
               </div>
 
               <div className="border-t border-line p-3">
-                {composerError && <p className="mb-1.5 text-xs text-red-500">{composerError}</p>}
+                {composerError && <p className="mb-1.5 text-xs text-danger">{composerError}</p>}
                 <div className="flex items-end gap-2">
                   <textarea
                     value={draft}
@@ -322,12 +322,12 @@ export default function MessagesClient({
                     }}
                     rows={1}
                     placeholder="Write a message…"
-                    className="max-h-32 min-h-[2.5rem] flex-1 resize-none rounded-xl border border-line bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-flame/50"
+                    className="max-h-32 min-h-[2.5rem] flex-1 resize-none rounded-control border border-line bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-flame/50"
                   />
                   <button
                     onClick={send}
                     disabled={sending || !draft.trim()}
-                    className="rounded-xl bg-flame px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+                    className="rounded-control bg-flame px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
                   >
                     Send
                   </button>
@@ -423,11 +423,11 @@ function NewConversationDialog({
             onChange={(e) => setName(e.target.value)}
             placeholder="Group name"
             maxLength={80}
-            className="mt-3 w-full rounded-xl border border-line bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-flame/50"
+            className="mt-3 w-full rounded-control border border-line bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-flame/50"
           />
         )}
 
-        <div className="mt-3 max-h-64 divide-y divide-line overflow-y-auto rounded-xl border border-line">
+        <div className="mt-3 max-h-64 divide-y divide-line overflow-y-auto rounded-control border border-line">
           {contacts.length === 0 ? (
             <p className="p-4 text-center text-sm text-ink-faint">No one to message yet.</p>
           ) : (
@@ -446,16 +446,16 @@ function NewConversationDialog({
           )}
         </div>
 
-        {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+        {error && <p className="mt-2 text-xs text-danger">{error}</p>}
 
         <div className="mt-4 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl border border-line px-4 py-2 text-sm font-semibold text-ink-dim">
+          <button onClick={onClose} className="rounded-control border border-line px-4 py-2 text-sm font-semibold text-ink-dim">
             Cancel
           </button>
           <button
             onClick={create}
             disabled={selected.size === 0 || busy}
-            className="rounded-xl bg-flame px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            className="rounded-control bg-flame px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
           >
             {selected.size === 1 ? "Start DM" : "Create group"}
           </button>

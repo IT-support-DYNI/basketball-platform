@@ -19,7 +19,7 @@ export default function DeleteAnnouncementButton({ id }: { id: number }) {
   }
 
   return (
-    <button type="button" onClick={handleClick} disabled={loading} className="text-xs font-semibold text-rose-600 hover:text-rose-800 disabled:opacity-50">
+    <button type="button" onClick={handleClick} disabled={loading} className="text-xs font-semibold text-danger hover:underline disabled:opacity-50">
       Remove
     </button>
   );

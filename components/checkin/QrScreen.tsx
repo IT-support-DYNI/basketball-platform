@@ -58,7 +58,7 @@ export default function QrScreen({ eventId, eventTitle }: { eventId: number; eve
         <p className="font-display text-lg font-bold uppercase tracking-tight text-ink">{eventTitle}</p>
         <p className="mt-1 text-sm text-ink-dim">Scan to check in</p>
         <div
-          className="mt-5 aspect-square w-full max-w-sm rounded-xl bg-white p-3 [&_svg]:h-full [&_svg]:w-full"
+          className="mt-5 aspect-square w-full max-w-sm rounded-control bg-white p-3 [&_svg]:h-full [&_svg]:w-full"
           // our own generated SVG string — safe
           dangerouslySetInnerHTML={{ __html: qr ? qrSvg(qr.checkinUrl) : "" }}
         />

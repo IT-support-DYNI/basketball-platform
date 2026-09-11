@@ -22,7 +22,7 @@ export default async function CheckInScreenPage({ params }: { params: { id: stri
     <main className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-ink">Check-in screen</h1>
+          <h1 className="font-display text-3xl text-ink">Check-in screen</h1>
           <p className="mt-1 text-ink-dim">
             {event.title} · {eventDayLabel(event.startAt)} · {eventTimeRange(event.startAt, event.endAt)}
             {event.venue?.name ? ` · ${event.venue.name}` : ""}

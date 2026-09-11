@@ -27,7 +27,7 @@ export default function ToggleActiveButton({ userId, isActive }: { userId: numbe
       onClick={toggle}
       disabled={loading}
       className={`rounded-full px-3 py-1 text-xs font-semibold transition disabled:opacity-50 ${
-        isActive ? "bg-rose-50 text-rose-700 hover:bg-rose-100" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+        isActive ? "bg-danger/10 text-danger hover:bg-danger/20" : "bg-success/10 text-success hover:bg-success/20"
       }`}
     >
       {isActive ? "Deactivate" : "Reactivate"}
