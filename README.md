@@ -2,6 +2,8 @@
 
 Team management and player development platform for basketball coaches and players. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the system design, database schema, and API structure this scaffold implements.
 
+**Want to change something on the site — a photo, some text, a font, a size or color?** See [docs/EDITING-THE-SITE.md](./docs/EDITING-THE-SITE.md) for a plain-English map of exactly which file to open.
+
 ## Stack
 
 Next.js (App Router) + TypeScript + Tailwind CSS · Prisma + PostgreSQL · NextAuth (Auth.js) · S3-compatible object storage (Backblaze B2 or Cloudflare R2) for video/photo storage. See ARCHITECTURE.md §1 for rationale.
