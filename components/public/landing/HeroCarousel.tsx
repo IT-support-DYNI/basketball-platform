@@ -22,7 +22,7 @@ function GhostBall() {
       <circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" strokeWidth="4"></circle>
       <path
         d="M100 6v188M6 100h188M32 32c30 30 30 106 0 136M168 32c-30 30-30 106 0 136"
-        fill="none"
+        fill="yellow"
         stroke="currentColor"
         strokeWidth="4"
       ></path>
