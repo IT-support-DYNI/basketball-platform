@@ -2,9 +2,9 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import RecordEvaluationForm from "@/components/coach/RecordEvaluationForm";
+import RecordEvaluationForm from "@/app/coach/performance/_components/RecordEvaluationForm";
 import { rosterPlayerFilter } from "@/lib/roster";
-import WriteFeedbackForm from "@/components/coach/WriteFeedbackForm";
+import WriteFeedbackForm from "@/app/coach/performance/_components/WriteFeedbackForm";
 
 export default async function CoachPerformancePage() {
   const session = await getServerSession(authOptions);

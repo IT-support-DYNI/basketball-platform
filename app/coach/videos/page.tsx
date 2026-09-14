@@ -2,8 +2,8 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import UploadVideoForm from "@/components/coach/UploadVideoForm";
-import AssignVideoForm from "@/components/coach/AssignVideoForm";
+import UploadVideoForm from "@/app/coach/videos/_components/UploadVideoForm";
+import AssignVideoForm from "@/app/coach/videos/_components/AssignVideoForm";
 
 export default async function CoachVideosPage() {
   const session = await getServerSession(authOptions);

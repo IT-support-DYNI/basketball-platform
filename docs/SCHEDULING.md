@@ -57,7 +57,7 @@ one** in the series (per-occurrence datetimes are never bulk-rewritten).
 
 ## Calendar UI (W5 part 2)
 
-`components/calendar/CalendarView.tsx` — a client component with **month / week /
+`components/shared/calendar/CalendarView.tsx` — a client component with **month / week /
 agenda** views, prev/next/today navigation, a type-coloured event chip, and a
 details dialog (with a per-event `.ics` download + a "Manage" link for staff). It
 fetches `/api/v1/events?from=&to=` on range change. Wired into the three
@@ -91,7 +91,7 @@ from `AttendanceRecord`: an RSVP is an intention, attendance is what happened
   `rsvpDeadline` passed — repeating your existing answer is still allowed) and
   `capacityState` (a new "attending" is rejected 409 once `capacity` "attending"
   responses exist).
-- UI: `components/calendar/RsvpControl.tsx` in the calendar event dialog
+- UI: `components/shared/calendar/RsvpControl.tsx` in the calendar event dialog
   (players + staff, future team events only); a full breakdown on the coach
   event page; the create form gained **Capacity** and **RSVP by** fields.
 
@@ -124,7 +124,7 @@ Migration `20260829200000_checkin_and_audit`. `AttendanceRecord` gains
   `reason` and writes a before/after row; `GET …/audit` returns the history.
 - **Report** — `GET /api/v1/reports/attendance?teamId=&from=&to=&format=csv`
   (coach/admin): per-player present/late/absent/excused + % over a window, with
-  CSV export. Surfaced by `components/reports/AttendanceReport.tsx` on the
+  CSV export. Surfaced by `components/shared/attendance/AttendanceReport.tsx` on the
   `/coach/attendance` and `/admin/attendance` pages.
 
 Pages: `/checkin/{eventId}` (player landing — auto check-in from the QR link, PIN

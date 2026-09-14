@@ -6,8 +6,8 @@ import { getCoachDashboard } from "@/lib/dashboard";
 import { actionItemsFor } from "@/lib/action-items";
 import { eventDayLabel } from "@/lib/events";
 import StatTile from "@/components/StatTile";
-import ActionItems from "@/components/dashboard/ActionItems";
-import DashboardHero from "@/components/dashboard/DashboardHero";
+import ActionItems from "@/components/shared/dashboard/ActionItems";
+import DashboardHero from "@/components/shared/dashboard/DashboardHero";
 import Card from "@/components/ui/Card";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {

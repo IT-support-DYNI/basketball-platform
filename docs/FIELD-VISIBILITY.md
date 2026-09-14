@@ -46,7 +46,7 @@ When a per-club `FieldVisibilityPolicy` table lands it replaces
   medical → +medical notes; admin/self → everything.
 - `PATCH /api/v1/players/{id}` — `canEditPlayerField` per field; a coach editing
   `medicalNotes` gets 403.
-- Player self-service form: `components/player/EditProfileForm.tsx`.
+- Player self-service form: `app/player/profile/_components/EditProfileForm.tsx`.
 
 The team roster (`GET /api/v1/teams/{id}/players`) still uses the coarser
 `canViewPlayerContactDetails` (admin + the team's coaches) — fine for that list;
@@ -63,10 +63,10 @@ Migration `20260901130000_consent`. `ConsentDocument` → ordered
   `resolveConsentSubject` (player → self; guardian → a linked child).
 - Admin: `GET|POST /api/v1/consent-documents`, `PATCH …/{id}` (rename / retire /
   toggle required), `POST …/{id}/versions`. UI at `/admin/consent`
-  (`components/admin/ConsentManager.tsx`), nav cap `admin.consent`.
+  (`app/admin/consent/_components/ConsentManager.tsx`), nav cap `admin.consent`.
 - Player/guardian: `GET /api/v1/consent`, `POST /api/v1/consent/accept`
   (rejects stale/superseded version ids with 400). UI at `/consent`
-  (`components/consent/ConsentForm.tsx`).
+  (`app/consent/_components/ConsentForm.tsx`).
 - **Gate**: `app/player/layout.tsx` redirects an APPROVED player with any
   outstanding *required* document to `/consent`. Publishing a new version
   re-gates everyone.

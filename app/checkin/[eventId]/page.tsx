@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { authorize } from "@/lib/authz/guard";
 import { eventDayLabel, eventTimeRange, EVENT_TYPE_LABEL } from "@/lib/events";
-import CheckInPanel from "@/components/checkin/CheckInPanel";
+import CheckInPanel from "@/app/checkin/[eventId]/_components/CheckInPanel";
 
 export default async function CheckInPage({
   params,

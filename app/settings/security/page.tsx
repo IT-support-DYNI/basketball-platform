@@ -1,5 +1,5 @@
 import PageHeader from "@/components/ui/PageHeader";
-import SecuritySettings from "@/components/settings/SecuritySettings";
+import SecuritySettings from "@/app/settings/security/_components/SecuritySettings";
 
 export const metadata = { title: "Security" };
 

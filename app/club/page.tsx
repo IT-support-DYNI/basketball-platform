@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { getClubStats, getNextFixture } from "@/lib/public-site";
-import HeroCarousel, { type HeroSlide } from "@/components/public/landing/HeroCarousel";
-import Ticker from "@/components/public/landing/Ticker";
-import RegisterInterestForm from "@/components/public/landing/RegisterInterestForm";
-import RevealBlock from "@/components/public/landing/RevealBlock";
-import StoryTabs from "@/components/public/landing/StoryTabs";
+import HeroCarousel, { type HeroSlide } from "@/app/club/_components/HeroCarousel";
+import Ticker from "@/app/club/_components/Ticker";
+import RegisterInterestForm from "@/app/club/_components/RegisterInterestForm";
+import RevealBlock from "@/app/club/_components/RevealBlock";
+import StoryTabs from "@/app/club/_components/StoryTabs";
 
 // Bypasses the root layout's "%s · DYNI Blazers" template for a one-off
 // exact title, rather than doubling up ("… · DYNI Blazers · DYNI Blazers").

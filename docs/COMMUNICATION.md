@@ -22,7 +22,7 @@ and `pinnedUntil`; `AnnouncementAck` is one row per (announcement, user).
   author, the team's coach, or an admin only. Returns the expected audience with
   each person's ack state.
 - `POST /api/v1/announcements` takes `requiresAck` + `pinnedUntil`; the compose
-  form is in `components/announcements/AnnouncementsBoard.tsx` (a coach may pin
+  form is in `app/announcements/_components/AnnouncementsBoard.tsx` (a coach may pin
   and require ack; only an admin may post club-wide).
 
 Acknowledgement is **tracked, not gated** — unlike consent, an unacked
@@ -45,7 +45,7 @@ Migration `20260901210000_notification_prefs`. `Notification` gains `category`
   users opted into push for that category (`lib/notifications.ts#optedIn`).
 - **Feed** — `GET /api/v1/notifications?category=&unread=1` → `{ items,
   unreadCount }`. `GET|PATCH /api/v1/notifications/preferences`. UI at the shared
-  `/notifications` (`components/notifications/NotificationsFeed.tsx` — day
+  `/notifications` (`app/notifications/_components/NotificationsFeed.tsx` — day
   groups, category chips, mark-all, an inline settings table). Every role gets
   the nav bell now; `/player/notifications` redirects here.
 - **Digest** — `lib/digest.ts#runNotificationDigest` runs from the daily cron:
@@ -90,7 +90,7 @@ with safe defaults.
   `NotificationType`), de-duped on `conversation:{id}`, then pushes to those
   opted into that category.
 - **Surface** — `/messages`, shared by every role (nav capability `messages`).
-  `components/messages/MessagesClient.tsx`: two-pane on `md+`, list→thread on
+  `app/messages/_components/MessagesClient.tsx`: two-pane on `md+`, list→thread on
   mobile with a back control; a "New" dialog picks one contact for a DM or
   several for a group.
 
@@ -102,7 +102,7 @@ and all DMs are covered.
 
 **Action band.** `lib/action-items.ts#actionItemsFor(session)` is the one
 resolver behind the "Needs your attention" band on all three dashboards
-(`components/dashboard/ActionItems.tsx` — renders nothing when the list is
+(`components/shared/dashboard/ActionItems.tsx` — renders nothing when the list is
 empty). It surfaces:
 
 | item | who | source |
@@ -120,7 +120,7 @@ the read side. `lib/audit.ts`: `auditActionLabel` (friendly phrasing, humanised
 fallback for unknown actions), `recentAuditActivity(n)`, `listAuditLog({ page,
 pageSize, action?, entityType?, actorUserId? })`. `GET /api/v1/audit` (admin,
 `force-dynamic`) is paginated + filterable. `/admin/audit`
-(`components/admin/AuditLogViewer.tsx`) has the filter dropdowns, a table and
+(`app/admin/audit/_components/AuditLogViewer.tsx`) has the filter dropdowns, a table and
 prev/next paging; nav capability `admin.audit`. The admin dashboard gets a
 "Recent activity" card linking to it. Logged actions today: registration
 decisions (`REGISTRATION_*`), `ROSTER_EXPORTED`, `EMAIL_VERIFIED`,

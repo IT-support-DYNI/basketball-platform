@@ -5,8 +5,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AppContainer from "@/components/app/AppContainer";
 import PageHeader from "@/components/ui/PageHeader";
-import PushNotificationToggle from "@/components/player/PushNotificationToggle";
-import NotificationsFeed from "@/components/notifications/NotificationsFeed";
+import PushNotificationToggle from "@/app/notifications/_components/PushNotificationToggle";
+import NotificationsFeed from "@/app/notifications/_components/NotificationsFeed";
 
 /** Shared notifications feed — every signed-in role. */
 export default async function NotificationsPage() {

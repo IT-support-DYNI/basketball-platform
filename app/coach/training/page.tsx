@@ -4,8 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateCalendarToken } from "@/lib/calendar-feed";
 import { baseUrl } from "@/lib/base-url";
-import CalendarView from "@/components/calendar/CalendarView";
-import CreateSessionForm from "@/components/coach/CreateSessionForm";
+import CalendarView from "@/components/shared/calendar/CalendarView";
+import CreateSessionForm from "@/app/coach/training/_components/CreateSessionForm";
 
 export default async function CoachSchedulePage() {
   const session = await getServerSession(authOptions);

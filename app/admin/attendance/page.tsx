@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import AttendanceReport from "@/components/reports/AttendanceReport";
+import AttendanceReport from "@/components/shared/attendance/AttendanceReport";
 
 export default async function AdminAttendancePage() {
   const teams = await prisma.team.findMany({

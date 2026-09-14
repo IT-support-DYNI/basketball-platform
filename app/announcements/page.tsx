@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AppContainer from "@/components/app/AppContainer";
 import PageHeader from "@/components/ui/PageHeader";
-import AnnouncementsBoard from "@/components/announcements/AnnouncementsBoard";
+import AnnouncementsBoard from "@/app/announcements/_components/AnnouncementsBoard";
 
 /** The shared announcements surface — every signed-in role reads from here. */
 export default async function AnnouncementsPage() {
