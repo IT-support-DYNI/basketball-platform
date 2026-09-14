@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { getClubStats, getPublicPlayers, getPublicCoaches } from "@/lib/public-site";
-import HeroCarousel, { type HeroSlide } from "@/components/public/landing/HeroCarousel";
-import Ticker from "@/components/public/landing/Ticker";
-import StatCount from "@/components/public/landing/StatCount";
-import TiltCard from "@/components/public/landing/TiltCard";
-import RegisterInterestForm from "@/components/public/landing/RegisterInterestForm";
-import RevealBlock from "@/components/public/landing/RevealBlock";
+import { getClubStats, getNextFixture } from "@/lib/public-site";
+import HeroCarousel, { type HeroSlide } from "@/app/club/_components/HeroCarousel";
+import Ticker from "@/app/club/_components/Ticker";
+import RegisterInterestForm from "@/app/club/_components/RegisterInterestForm";
+import RevealBlock from "@/app/club/_components/RevealBlock";
+import StoryTabs from "@/app/club/_components/StoryTabs";
 
 // Bypasses the root layout's "%s · DYNI Blazers" template for a one-off
 // exact title, rather than doubling up ("… · DYNI Blazers · DYNI Blazers").
@@ -57,8 +56,8 @@ const HERO_SLIDES: HeroSlide[] = [
     lead: "Every coach on our roster is here every week, not just for match day — meet the people who'll actually be running your sessions.",
     tabTitle: "Our coaches",
     ctas: [
-      { label: "Meet the coaches", href: "#coaches" },
-      { label: "Safeguarding", href: "#safeguarding" },
+      { label: "Meet the coaches", href: "/club/coaches" },
+      { label: "Safeguarding", href: "/club/safeguarding" },
     ],
   },
 ];
@@ -87,6 +86,28 @@ const CULTURE_POINTS = [
     n: "03",
     title: "Nobody sits on the bench for a season",
     body: "If you're in a squad, you play. Rotation is planned in the session, not decided by who shouts loudest.",
+  },
+];
+
+const AUDIENCE_CARDS = [
+  {
+    title: "Players",
+    body: "Junior & senior players who want real coaching every session, not a bench for a season.",
+    href: "/club/roster",
+    linkLabel: "Full roster",
+  },
+  {
+    title: "Coaches",
+    body: "Coaches & volunteers who want to run real sessions for a community club, every week.",
+    href: "/club/coaches",
+    linkLabel: "Meet the coaches",
+    primary: true,
+  },
+  {
+    title: "Guardians",
+    body: "Parents & guardians who want to know exactly what it costs and who's coaching their kid.",
+    href: "#cost",
+    linkLabel: "Cost & safeguarding",
   },
 ];
 
@@ -120,7 +141,7 @@ const COST_ROWS = [
 ];
 
 export default async function ClubLandingPage() {
-  const [stats, players, coaches] = await Promise.all([getClubStats(), getPublicPlayers(6), getPublicCoaches(3)]);
+  const [stats, nextFixture] = await Promise.all([getClubStats(), getNextFixture()]);
 
   const statTiles = [
     { value: stats.teams, label: "Teams" },
@@ -131,25 +152,11 @@ export default async function ClubLandingPage() {
 
   return (
     <main id="top">
-      <HeroCarousel slides={HERO_SLIDES} />
+      <HeroCarousel slides={HERO_SLIDES} stats={statTiles} />
 
       <Ticker facts={TICKER_FACTS} />
 
-      <section className="stats" aria-label="Club by the numbers">
-        <div className="wrap">
-          <div className="stat-grid">
-            {statTiles.map((s, i) => (
-              <RevealBlock key={s.label} delayMs={i * 90} className="stat">
-                <div className="photo"></div>
-                <StatCount value={s.value} />
-                <p className="stat-l">{s.label}</p>
-              </RevealBlock>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="culture" id="about">
+      <section className="culture culture-dark" id="about">
         <div className="wrap culture-in">
           <RevealBlock className="photo"></RevealBlock>
           <RevealBlock delayMs={80}>
@@ -159,109 +166,103 @@ export default async function ClubLandingPage() {
               We&apos;re run by Diverse Youth Northern Ireland, and we&apos;re a community club first. That decides
               everything else: who gets in, who gets minutes, and what a session looks like.
             </p>
-            <ul className="culture-list">
-              {CULTURE_POINTS.map((c) => (
-                <li key={c.n}>
-                  <em>{c.n}</em>
-                  <div>
-                    <h3>{c.title}</h3>
-                    <p>{c.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <Link className="btn btn-secondary" href="/club/about" style={{ marginTop: 22 }}>
-              More about the club
-            </Link>
           </RevealBlock>
         </div>
       </section>
 
-      <section className="teams" id="roster">
+      <section className="built-for">
         <div className="wrap">
-          <RevealBlock className="head">
-            <div>
-              <p className="eyebrow">Meet the players</p>
-              <h2>The squad, on and off the court</h2>
-              <p className="lead">Junior players appear here only once a guardian and the club have both approved it.</p>
-            </div>
-            <Link className="btn btn-secondary btn-sm" href="/club/roster">
-              Full roster
-            </Link>
+          <RevealBlock as="div">
+            <p className="eyebrow">Who this is for</p>
+            <h2 style={{ fontSize: "var(--type-display-1)", marginTop: 8 }}>We are built for…</h2>
           </RevealBlock>
-          {players.length === 0 ? (
-            <p className="lead">No player profiles are public yet — check back soon.</p>
-          ) : (
-            <div className="team-grid">
-              {players.map((p, i) => (
-                <TiltCard key={p.id} className="team" href={`/club/players/${p.id}`} delayMs={i * 70}>
-                  <div className={`photo${p.photoUrl ? " has-img" : ""}`}>
-                    {p.photoUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.photoUrl} alt="" />
-                    )}
-                  </div>
-                  {p.jerseyNumber != null && (
-                    <span className="team-jersey" aria-hidden="true">
-                      {p.jerseyNumber}
-                    </span>
-                  )}
-                  <div className="team-top">
-                    <span className={`team-code${p.publicStatus === "Trialist" ? " trial" : ""}`}>
-                      {p.jerseyNumber != null ? `#${p.jerseyNumber}` : "—"}
-                    </span>
-                    {p.publicStatus && (
-                      <span className={`pill ${p.publicStatus === "Trialist" ? "pill-trial" : "pill-open"}`}>
-                        {p.publicStatus}
-                      </span>
-                    )}
-                  </div>
-                  <div className="team-body">
-                    <h3>{p.name}</h3>
-                    <div className="team-meta">
-                      {p.positionLabel && <span>{p.positionLabel}</span>}
-                      {p.team && <span>{p.team}</span>}
+          <div className="built-for-grid" style={{ marginTop: 28 }}>
+            {AUDIENCE_CARDS.map((c, i) => (
+              <RevealBlock
+                key={c.title}
+                delayMs={i * 80}
+                className={`built-for-card${c.primary ? " is-primary" : ""}`}
+              >
+                <h3>{c.title}</h3>
+                <p>{c.body}</p>
+                <Link href={c.href}>{c.linkLabel} →</Link>
+              </RevealBlock>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="story" id="story">
+        <div className="wrap">
+          <RevealBlock as="div">
+            <p className="eyebrow">The club</p>
+            <h2 style={{ fontSize: "var(--type-display-1)", marginTop: 8 }}>Why we exist</h2>
+          </RevealBlock>
+          <RevealBlock delayMs={80} className="story-reveal">
+            <StoryTabs
+              panels={[
+                {
+                  label: "Why we exist",
+                  content: (
+                    <p>
+                      We&apos;re run by Diverse Youth Northern Ireland, and we&apos;re a community club first. That
+                      decides everything else: who gets in, who gets minutes, and what a session looks like.
+                    </p>
+                  ),
+                },
+                {
+                  label: "About DYNI",
+                  content: (
+                    <div>
+                      <p>
+                        We&apos;re run by Diverse Youth Northern Ireland — a community basketball club running
+                        juniors through seniors out of one gym. Some of our players will go on to play at a high
+                        level. Most won&apos;t — and the season should be worth it either way.
+                      </p>
+                      <Link href="/club/about">Read more about the club →</Link>
                     </div>
-                  </div>
-                </TiltCard>
-              ))}
-            </div>
-          )}
+                  ),
+                },
+                {
+                  label: "Our culture",
+                  content: (
+                    <ul className="culture-list">
+                      {CULTURE_POINTS.map((c) => (
+                        <li key={c.n}>
+                          <em>{c.n}</em>
+                          <div>
+                            <h3>{c.title}</h3>
+                            <p>{c.body}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ),
+                },
+              ]}
+            />
+          </RevealBlock>
         </div>
       </section>
 
-      <section className="coaches" id="coaches">
-        <div className="wrap">
-          <RevealBlock className="head">
+      {nextFixture && (
+        <section className="fixture" id="fixture">
+          <div className="wrap fixture-in">
             <div>
-              <p className="eyebrow">Coaching staff</p>
-              <h2>Qualified coaches, every session</h2>
+              <p className="eyebrow">Next up</p>
+              <h2>{nextFixture.title}</h2>
+              <p>
+                {nextFixture.startAt.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+                {nextFixture.teamName ? ` · ${nextFixture.teamName}` : ""}
+                {nextFixture.venueName ? ` · ${nextFixture.venueName}` : ""}
+              </p>
             </div>
-            <Link className="btn btn-secondary btn-sm" href="/club/coaches">
-              All staff
+            <Link className="btn btn-secondary" href="#register">
+              Come along
             </Link>
-          </RevealBlock>
-          {coaches.length === 0 ? (
-            <p className="lead">No coach profiles are public yet — check back soon.</p>
-          ) : (
-            <div className="coach-grid">
-              {coaches.map((c, i) => (
-                <TiltCard key={c.id} className="coach" href={`/club/coaches/${c.id}`} delayMs={i * 90}>
-                  <div className={`photo${c.photoUrl ? " has-img" : ""}`}>
-                    {c.photoUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.photoUrl} alt="" />
-                    )}
-                  </div>
-                  <h3>{c.name}</h3>
-                  {c.roleLine && <p className="role">{c.roleLine}</p>}
-                  {c.bio && <p className="bio">{c.bio}</p>}
-                </TiltCard>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       <section className="gallery" id="moments">
         <div className="wrap">
@@ -313,14 +314,20 @@ export default async function ClubLandingPage() {
       </section>
 
       <section className="safe" id="safeguarding">
-        <div className="wrap safe-in">
-          <RevealBlock>
-            <p className="eyebrow">Safeguarding</p>
-            <h2>Nothing about a young player is public by default</h2>
-            <p>
-              Every coach is vetted and every junior profile is guardian-approved before it appears anywhere. If you
-              want something taken down, one message to the club is enough.
-            </p>
+        <div className="wrap">
+          <RevealBlock as="div" className="safe-top">
+            <div className="photo"></div>
+            <div className="safe-top-copy">
+              <p className="eyebrow">Safeguarding</p>
+              <h3>Every coach vetted. Every session planned.</h3>
+              <p>
+                Every coach is vetted and every junior profile is guardian-approved before it appears anywhere. If
+                you want something taken down, or need to report a concern, one message to the club is enough.
+              </p>
+              <Link className="btn btn-secondary btn-sm" href="/club/safeguarding" style={{ marginTop: 16 }}>
+                Full policy & report a concern →
+              </Link>
+            </div>
           </RevealBlock>
           <RevealBlock delayMs={80} className="safe-grid">
             {SAFE_CARDS.map((c) => (

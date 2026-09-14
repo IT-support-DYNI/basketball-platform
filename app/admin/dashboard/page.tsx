@@ -7,8 +7,8 @@ import { actionItemsFor } from "@/lib/action-items";
 import { recentAuditActivity } from "@/lib/audit";
 import StatTile from "@/components/StatTile";
 import StatusBadge from "@/components/StatusBadge";
-import ActionItems from "@/components/dashboard/ActionItems";
-import DashboardHero from "@/components/dashboard/DashboardHero";
+import ActionItems from "@/components/shared/dashboard/ActionItems";
+import DashboardHero from "@/components/shared/dashboard/DashboardHero";
 import Card from "@/components/ui/Card";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {

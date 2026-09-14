@@ -4,10 +4,10 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getActiveSeason } from "@/lib/season";
 import { loadPlayerProfileView } from "@/lib/player-profile-view";
-import EditProfileForm from "@/components/player/EditProfileForm";
-import PlayerProfileHero from "@/components/player/PlayerProfileHero";
-import PlayerProfileSections from "@/components/player/PlayerProfileSections";
-import ScrollReveal from "@/components/player/ScrollReveal";
+import EditProfileForm from "@/app/player/profile/_components/EditProfileForm";
+import PlayerProfileHero from "@/components/shared/player-profile/PlayerProfileHero";
+import PlayerProfileSections from "@/components/shared/player-profile/PlayerProfileSections";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 
 export default async function PlayerProfilePage() {
   const session = await getServerSession(authOptions);
@@ -31,7 +31,7 @@ export default async function PlayerProfilePage() {
   if (!player) {
     return (
       <main>
-        <h1 className="text-3xl font-extrabold tracking-tight text-ink">Profile</h1>
+        <h1 className="font-display text-3xl text-ink">Profile</h1>
         <p className="mt-3 text-sm text-ink-dim">Player profile not found.</p>
       </main>
     );

@@ -6,7 +6,7 @@ import StatusBadge from "@/components/StatusBadge";
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/states";
-import CreateTeamForm from "@/components/admin/CreateTeamForm";
+import CreateTeamForm from "@/app/admin/teams/_components/CreateTeamForm";
 
 export default async function AdminTeamsPage() {
   const season = await getActiveSeason();

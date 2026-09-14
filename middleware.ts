@@ -52,6 +52,9 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/api/v1/auth/") ||
     pathname.startsWith("/api/v1/register") ||
     pathname.startsWith("/api/v1/registration/") ||
+    // POST is anonymous by design; GET/PATCH still require ADMIN, enforced
+    // by the route handlers themselves (see this file's opening comment).
+    pathname.startsWith("/api/v1/safeguarding-reports") ||
     pathname.startsWith("/api/v1/public") ||
     pathname.startsWith("/api/v1/cron/"); // guarded by CRON_SECRET in the route
 

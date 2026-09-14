@@ -28,43 +28,47 @@ export default async function PublicCoachPage({ params }: { params: { id: string
         </div>
       </section>
 
-      <section style={{ paddingTop: 20 }}>
-        <div className="wrap">
-          <div className="profile-hero">
-            <div className="profile-hero-in">
-              <div className="profile-photo">
-                {coach.photoUrl ? (
-                  <div className="photo has-img">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={coach.photoUrl} alt="" />
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      display: "grid",
-                      placeItems: "center",
-                      background: "var(--photo-ground)",
-                      color: "var(--photo-text)",
-                      fontFamily: "var(--font-display)",
-                      fontStyle: "italic",
-                      fontWeight: 800,
-                      fontSize: "2rem",
-                    }}
-                  >
-                    {initials}
-                  </div>
-                )}
+      <div className="profile-banner">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="profile-banner-crest" src="/brand/dyni-blazers-crest.png" alt="" />
+        <div className="profile-banner-body">
+          <div className="profile-banner-photo">
+            {coach.photoUrl ? (
+              <div className="photo has-img">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={coach.photoUrl} alt="" />
               </div>
-              <div>
-                <p className="eyebrow">{coach.roleLine ?? "Coach"}</p>
-                <h1>{coach.name}</h1>
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "grid",
+                  placeItems: "center",
+                  background: "var(--photo-ground)",
+                  color: "var(--photo-text)",
+                  fontFamily: "var(--font-condensed)",
+                  fontWeight: 800,
+                  fontSize: "2.5rem",
+                }}
+              >
+                {initials}
               </div>
-            </div>
+            )}
+          </div>
+          <div className="profile-banner-info">
+            <p className="profile-banner-meta">DYNI Blazers | Coaching staff</p>
+            <h1 className="profile-banner-name">{coach.name}</h1>
           </div>
         </div>
-      </section>
+      </div>
+
+      <div className="profile-stat-bar">
+        <div className="profile-stat">
+          <span className="l">Role</span>
+          <span className="v">{coach.roleLine ?? "Coach"}</span>
+        </div>
+      </div>
 
       {coach.bio ? (
         <section style={{ padding: "20px 0 var(--section-y)" }}>

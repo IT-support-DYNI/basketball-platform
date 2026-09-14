@@ -1,0 +1,18 @@
+/* DYNI Blazers — radii, borders, elevation.
+   Wireframe-led: flat, shadowless, dashed-line boxes rather than soft-shadow
+   cards — the same "spec sheet" language the wireframes were drawn in.
+   Scoped to `.dyni-landing`, same reasoning as tokens/colors.css. */
+.dyni-landing {
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 999px;
+
+  --border-hairline: 1px dashed var(--border);
+
+  --shadow-glow: none;
+  --shadow-glow-soft: none;
+  --shadow-photo: none;
+  --shadow-lift: none;
+}

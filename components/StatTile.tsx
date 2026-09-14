@@ -37,23 +37,25 @@ const ACCENT_TEXT: Record<Accent, string> = {
   emerald: "text-success",
 };
 
-/** Hover glow matches each tile's own accent, not one fixed colour — a green
- *  attendance card glows green, a blue performance card glows blue. */
+/** Hover border matches each tile's own accent, not one fixed colour — a
+ *  green attendance card's border goes green, a blue performance card's
+ *  goes blue. Flat (no glow shadow, no lift) — the wireframe pass dropped
+ *  soft-shadow elevation everywhere in favour of the border-colour cue. */
 const ACCENT_HOVER: Record<Accent, string> = {
-  flame: "hover:border-flame/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--flame)/0.45)]",
-  ember: "hover:border-ember/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--ember)/0.45)]",
-  info: "hover:border-info/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--info)/0.45)]",
-  success: "hover:border-success/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--success)/0.45)]",
-  warning: "hover:border-warning/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--warning)/0.45)]",
-  danger: "hover:border-danger/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--danger)/0.45)]",
+  flame: "hover:border-flame",
+  ember: "hover:border-ember",
+  info: "hover:border-info",
+  success: "hover:border-success",
+  warning: "hover:border-warning",
+  danger: "hover:border-danger",
   neutral: "hover:border-line-strong",
-  orange: "hover:border-flame/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--flame)/0.45)]",
-  sky: "hover:border-info/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--info)/0.45)]",
-  violet: "hover:border-info/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--info)/0.45)]",
-  amber: "hover:border-warning/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--warning)/0.45)]",
-  rose: "hover:border-danger/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--danger)/0.45)]",
+  orange: "hover:border-flame",
+  sky: "hover:border-info",
+  violet: "hover:border-info",
+  amber: "hover:border-warning",
+  rose: "hover:border-danger",
   slate: "hover:border-line-strong",
-  emerald: "hover:border-success/50 hover:shadow-[0_12px_30px_-10px_rgb(var(--success)/0.45)]",
+  emerald: "hover:border-success",
 };
 
 type Props = {
@@ -70,7 +72,7 @@ type Props = {
 export default function StatTile({ label, value, sub, accent = "neutral", href }: Props) {
   const content = (
     <div
-      className={`h-full rounded-card border border-line bg-surface p-4 transition duration-200 hover:-translate-y-1 ${ACCENT_HOVER[accent]}`}
+      className={`h-full rounded-card border border-line bg-surface p-4 transition duration-200 ${ACCENT_HOVER[accent]}`}
     >
       <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">{label}</p>
       <p className={`mt-1.5 font-condensed text-3xl font-bold leading-none tabular ${ACCENT_TEXT[accent]}`}>

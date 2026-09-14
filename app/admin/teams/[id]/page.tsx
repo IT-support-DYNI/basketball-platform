@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import StatusBadge from "@/components/StatusBadge";
 import PageHeader from "@/components/ui/PageHeader";
-import ArchiveTeamButton from "@/components/admin/ArchiveTeamButton";
-import TeamManager from "@/components/admin/TeamManager";
+import ArchiveTeamButton from "@/app/admin/teams/[id]/_components/ArchiveTeamButton";
+import TeamManager from "@/components/shared/team/TeamManager";
 
 export default async function AdminTeamDetailPage({ params }: { params: { id: string } }) {
   const teamId = Number(params.id);

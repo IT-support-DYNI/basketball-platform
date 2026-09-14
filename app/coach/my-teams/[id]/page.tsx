@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
-import TeamManager from "@/components/admin/TeamManager";
+import TeamManager from "@/components/shared/team/TeamManager";
 
 export default async function CoachTeamDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

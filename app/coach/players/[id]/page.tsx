@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { loadPlayerProfileView } from "@/lib/player-profile-view";
-import PlayerProfileHero from "@/components/player/PlayerProfileHero";
-import PlayerProfileSections from "@/components/player/PlayerProfileSections";
+import PlayerProfileHero from "@/components/shared/player-profile/PlayerProfileHero";
+import PlayerProfileSections from "@/components/shared/player-profile/PlayerProfileSections";
 
 export default async function CoachPlayerProfilePage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

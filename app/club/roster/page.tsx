@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { getPublicPlayers } from "@/lib/public-site";
-import RosterFilterGrid from "@/components/public/landing/RosterFilterGrid";
+import RosterFilterGrid from "@/app/club/_components/RosterFilterGrid";
 
 export const metadata: Metadata = { title: "Roster" };
 

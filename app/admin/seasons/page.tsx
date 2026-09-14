@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getTenantContext } from "@/lib/tenant";
 import PageHeader from "@/components/ui/PageHeader";
-import SeasonManager from "@/components/admin/SeasonManager";
+import SeasonManager from "@/app/admin/seasons/_components/SeasonManager";
 
 export const metadata = { title: "Seasons" };
 

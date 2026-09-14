@@ -6,7 +6,7 @@ import { getTenantContext } from "@/lib/tenant";
 import { drillById } from "@/lib/drills";
 import { authorize } from "@/lib/authz/guard";
 import PageHeader from "@/components/ui/PageHeader";
-import DrillDetail from "@/components/training/DrillDetail";
+import DrillDetail from "@/app/coach/drills/[id]/_components/DrillDetail";
 
 export default async function DrillPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

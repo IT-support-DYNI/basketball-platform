@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
-import ConsentManager from "@/components/admin/ConsentManager";
+import ConsentManager from "@/app/admin/consent/_components/ConsentManager";
 
 export default async function AdminConsentPage() {
   const docs = await prisma.consentDocument.findMany({

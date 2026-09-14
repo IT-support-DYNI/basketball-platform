@@ -1,5 +1,5 @@
 import PageHeader from "@/components/ui/PageHeader";
-import AccountData from "@/components/settings/AccountData";
+import AccountData from "@/app/settings/account/_components/AccountData";
 
 export const metadata = { title: "Your data" };
 

@@ -351,7 +351,15 @@ Key points this diagram is making:
 
 **Single Next.js app, not a multi-package monorepo**, for the same reason as the backend choice: one team, one client, no shared-package problem to solve yet. A full monorepo (Turborepo/pnpm workspaces with `apps/` + `packages/`) earns its complexity once there's a second consumer of the domain logic — e.g. a native mobile app post-MVP. To keep that migration cheap *if/when* it happens, domain logic (validation schemas, authorization rules, business rules like attendance-% calculation) is isolated in `lib/` rather than scattered through route handlers, so it can be lifted into a shared package later with minimal rewrite.
 
-Route groups (`(admin)`, `(coach)`, `(player)`) don't appear in the URL, so three groups all defining a `dashboard/` segment would collide on the same `/dashboard` path — Next.js rejects that at build time. The tree below uses real top-level segments (`/admin`, `/coach`, `/player`) instead, each with its own `layout.tsx` that re-checks the caller's role server-side (defense-in-depth alongside `middleware.ts` — see §3.2) and renders that role's `NavBar`.
+**Components are colocated with the route that uses them, not filed by type.** A form, panel or button used on exactly one page lives in that page's own `_components/` folder, right next to its `page.tsx` — the leading underscore is a Next.js convention that excludes a folder from routing, so `app/admin/safeguarding/_components/` never becomes a URL. This is the rule of thumb for finding or changing anything on the site:
+
+- **See it on one page → its code is in that page's own `_components/` folder.** E.g. the safeguarding review form only shown on `/admin/safeguarding` lives in `app/admin/safeguarding/_components/ReviewSafeguardingReportForm.tsx`.
+- **See it on several pages → it's in `components/shared/<feature>/`.** E.g. `CalendarView` backs `/admin/training`, `/coach/training` and `/player/training`, so it lives in `components/shared/calendar/`, not under any one role.
+- **Generic, page-agnostic building blocks stay in the existing kit folders** — `components/ui/` (Button, Card, PageHeader, form controls, …), `components/nav/`, `components/theme/`, `components/app/` (the authenticated shell) — unchanged by the rule above.
+- **The public marketing site (`/club/*`) is one self-contained design system**, colocated as a unit rather than split per sub-page: `app/club/_components/` (nav, hero, roster grid, the safeguarding form, …) and `app/club/_styles/` (the "DYNI Blazers Landing" token/CSS system, scoped under the `.dyni-landing` class). None of it is reused by the authenticated app, so it sits entirely under `app/club/`.
+- **The six unauthenticated pages** (login, register, forgot/reset/set-password, verify-email) live under the `app/(auth)/` route group. A parenthesised folder name is invisible to the URL — `app/(auth)/login/page.tsx` is still served at `/login` — it just keeps them visually grouped instead of scattered loose among `app/`'s other top-level folders.
+
+Each role also keeps its own top-level segment (`/admin`, `/coach`, `/player`, `/guardian`) with its own `layout.tsx` that re-checks the caller's role server-side (defense-in-depth alongside `middleware.ts` — see §3.2) and renders that role's `NavBar`.
 
 ```
 basketball-platform/
@@ -362,80 +370,69 @@ basketball-platform/
 │   └── migrations/
 ├── middleware.ts
 ├── app/
-│   ├── login/
-│   ├── set-password/
+│   ├── (auth)/                        # route group — invisible in the URL
+│   │   ├── login/, register/, forgot-password/, reset-password/,
+│   │   │   set-password/, verify-email/
+│   ├── club/                          # public marketing site — /club/*
+│   │   ├── layout.tsx, page.tsx
+│   │   ├── _components/               # every component the public site uses
+│   │   ├── _styles/                   # the public site's own CSS system
+│   │   └── about/, coaches/, coaches/[id]/, players/[id]/, roster/,
+│   │       safeguarding/, news/, moments/, teams/, terms/, privacy/
 │   ├── admin/
-│   │   ├── layout.tsx       # role guard + Admin NavBar
-│   │   ├── dashboard/
-│   │   ├── users/
-│   │   ├── teams/[id]/
-│   │   ├── coaches/
-│   │   ├── players/
-│   │   ├── training/
-│   │   ├── attendance/
-│   │   ├── performance/
-│   │   └── settings/
+│   │   ├── layout.tsx                 # role guard + Admin NavBar
+│   │   ├── dashboard/, coaches/, players/, training/, attendance/, performance/
+│   │   ├── registrations/_components/, safeguarding/_components/,
+│   │   │   users/_components/, teams/_components/, teams/[id]/_components/,
+│   │   │   seasons/_components/, consent/_components/, audit/_components/,
+│   │   │   settings/_components/
 │   ├── coach/
 │   │   ├── layout.tsx
-│   │   ├── dashboard/
-│   │   ├── my-teams/[id]/
-│   │   ├── players/
-│   │   ├── training/[id]/
-│   │   ├── attendance/
-│   │   ├── videos/
-│   │   ├── performance/
-│   │   └── announcements/
+│   │   ├── dashboard/, my-teams/[id]/, players/[id]/, attendance/
+│   │   ├── training/_components/, training/[id]/_components/,
+│   │   │   training/[id]/checkin/_components/, training/plans/[id]/_components/,
+│   │   │   training/plans/new/_components/
+│   │   ├── drills/_components/, drills/[id]/_components/   # DrillForm + CourtDiagram
+│   │   │                                                    # live at drills/_components/,
+│   │   │                                                    # shared by both the "new" and
+│   │   │                                                    # "[id]" leaf routes
+│   │   ├── videos/_components/, performance/_components/
+│   │   └── announcements/                                  # redirect stub → /announcements
 │   ├── player/
 │   │   ├── layout.tsx
-│   │   ├── dashboard/
-│   │   ├── my-team/
-│   │   ├── training/
-│   │   ├── attendance/
-│   │   ├── videos/
-│   │   ├── performance/
-│   │   ├── feedback/
-│   │   ├── notifications/
-│   │   └── profile/
-│   ├── api/
-│   │   ├── auth/[...nextauth]/, auth/set-password/
-│   │   ├── users/, users/[id]/
-│   │   ├── teams/, teams/[id]/, teams/[id]/coaches/, teams/[id]/players/, teams/[id]/sessions/
-│   │   ├── players/[id]/, players/[id]/attendance|evaluations|feedback/
-│   │   ├── coaches/[id]/
-│   │   ├── sessions/[id]/, sessions/[id]/attendance/
-│   │   ├── videos/, videos/upload-url/, videos/[id]/, videos/[id]/assign/
-│   │   ├── evaluations/, evaluations/[id]/
-│   │   ├── feedback/
-│   │   ├── notifications/, notifications/[id]/read/, notifications/read-all/
-│   │   ├── announcements/, announcements/[id]/
-│   │   └── dashboard/
+│   │   ├── dashboard/_components/, profile/_components/
+│   │   └── my-team/, training/, attendance/, videos/, performance/, feedback/
+│   ├── guardian/
+│   ├── messages/_components/, notifications/_components/,
+│   │   announcements/_components/, consent/_components/,
+│   │   checkin/[eventId]/_components/, registration-status/_components/,
+│   │   settings/security/_components/, settings/account/_components/
+│   ├── api/v1/                        # see §3 — one route.ts per resource
 │   ├── manifest.ts
-│   ├── providers.tsx        # client-side SessionProvider wrapper
-│   └── layout.tsx
+│   ├── providers.tsx                  # client-side SessionProvider wrapper
+│   └── layout.tsx, globals.css
 ├── components/
-│   ├── admin/, coach/, player/, shared/   # role-scoped forms/widgets
-│   ├── NavBar.tsx, StatTile.tsx, StatusBadge.tsx, LogoutButton.tsx
-│   └── ServiceWorkerRegistration.tsx
+│   ├── shared/                        # cross-role: dashboard/, calendar/, attendance/,
+│   │                                   # team/, auth/, player-profile/
+│   ├── ui/                            # generic kit: Button, Card, PageHeader, form controls, …
+│   ├── nav/, theme/, app/             # nav chrome, theme toggle, authenticated shell
+│   └── NavBar.tsx, StatTile.tsx, StatusBadge.tsx, LogoutButton.tsx,
+│       ServiceWorkerRegistration.tsx, Brandmark.tsx
 ├── lib/
-│   ├── auth.ts             # Auth.js config
-│   ├── authorization.ts    # requireRole / requireTeamAccess / requirePlayerAccess
-│   ├── api.ts              # withApi() route wrapper — turns thrown errors into HTTP responses
+│   ├── auth.ts              # Auth.js config
+│   ├── authorization.ts     # requireRole / requireTeamAccess / requirePlayerAccess
+│   ├── api/                 # route() wrapper — turns thrown errors into HTTP responses
 │   ├── prisma.ts
-│   ├── password.ts         # temp-password generation + hashing
-│   ├── storage.ts          # S3-compatible presigned upload/playback URL helpers (private bucket)
-│   ├── notify.ts           # notification fan-out on write
-│   ├── attendance.ts       # attendance % rule (§6.2)
-│   ├── performance.ts      # overall-score averaging (§6.3)
-│   ├── dashboard.ts        # per-role dashboard queries — called directly by both
-│   │                       # the dashboard pages (Server Components) and
-│   │                       # /api/dashboard, so pages never fetch their own API
-│   │                       # (see the tournament-app sibling project's
-│   │                       # self-referential-HTTP-call bug for why that matters)
-│   └── validation/         # Zod schemas, one per resource
+│   ├── notify.ts, push.ts   # notification fan-out on write
+│   ├── attendance.ts        # attendance % rule (§6.2)
+│   ├── performance.ts       # overall-score averaging (§6.3)
+│   ├── dashboard.ts         # per-role dashboard queries — called directly by both
+│   │                        # the dashboard pages (Server Components) and
+│   │                        # /api/v1/dashboard, so pages never fetch their own API
+│   └── contracts/           # Zod schemas, one per resource
 ├── types/
-│   └── next-auth.d.ts      # session shape: role, teamIds, playerId, mustChangePassword
+│   └── next-auth.d.ts       # session shape: role, teamIds, playerId, mustChangePassword
 ├── public/
-│   └── icons/
 └── middleware.ts
 ```
 

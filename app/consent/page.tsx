@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { consentStatusFor, resolveConsentSubject } from "@/lib/consent";
 import { prisma } from "@/lib/prisma";
 import Brandmark from "@/components/Brandmark";
-import ConsentForm from "@/components/consent/ConsentForm";
+import ConsentForm from "@/app/consent/_components/ConsentForm";
 
 /**
  * The consent checklist. Players land here (redirected by the player layout)

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getOrCreateCalendarToken } from "@/lib/calendar-feed";
 import { baseUrl } from "@/lib/base-url";
-import CalendarView from "@/components/calendar/CalendarView";
+import CalendarView from "@/components/shared/calendar/CalendarView";
 
 /** Read-only for Player, per the PRD permission matrix. */
 export default async function PlayerSchedulePage() {
@@ -13,7 +13,7 @@ export default async function PlayerSchedulePage() {
   return (
     <main className="flex flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-ink">Schedule</h1>
+        <h1 className="font-display text-3xl text-ink">Schedule</h1>
         <p className="mt-1 text-ink-dim">Your team&apos;s events — training, matches and meetings.</p>
       </div>
 
