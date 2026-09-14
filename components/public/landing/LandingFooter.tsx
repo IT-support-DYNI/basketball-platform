@@ -7,13 +7,13 @@ const FOOTER_LINKS = [
   { href: "/club/moments", label: "Moments" },
   { href: "/club/news", label: "News" },
   { href: "/club/about", label: "About" },
-  { href: "/club#safeguarding", label: "Safeguarding" },
+  { href: "/club/safeguarding", label: "Safeguarding" },
   { href: "/club#cost", label: "Costs" },
 ];
 
 /** Shared across every /club/* page (rendered from app/club/layout.tsx) —
- *  the safeguarding/cost links point back at the home page's own sections
- *  since that content only lives there. */
+ *  the cost link points back at the home page's own section since that
+ *  content only lives there; safeguarding gets its own dedicated page. */
 export default function LandingFooter() {
   return (
     <footer className="foot">

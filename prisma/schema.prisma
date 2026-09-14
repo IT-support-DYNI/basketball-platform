@@ -180,6 +180,7 @@ enum NotificationType {
   NEW_FEEDBACK
   ANNOUNCEMENT
   REGISTRATION_UPDATE
+  SAFEGUARDING_REPORT
 }
 
 /// Coarse grouping a user can set channel preferences for.
@@ -190,6 +191,7 @@ enum NotificationCategory {
   VIDEOS
   REGISTRATION
   MESSAGES
+  SAFEGUARDING
 }
 
 enum AnnouncementScope {
@@ -225,6 +227,7 @@ model Club {
   venues  Venue[]
   consentDocuments ConsentDocument[]
   safeguardingPolicy ClubSafeguardingPolicy?
+  safeguardingReports SafeguardingReport[]
   drills  Drill[]
 }
 
@@ -238,6 +241,45 @@ model ClubSafeguardingPolicy {
   /// When a minor joins a conversation, their guardian(s) are added too.
   guardianAutoIncludedWithMinor Boolean @default(true)
   updatedAt DateTime @updatedAt
+}
+
+/// Status of a submitted SafeguardingReport as it moves through review.
+enum SafeguardingReportStatus {
+  NEW
+  IN_REVIEW
+  RESOLVED
+}
+
+/// A public safeguarding concern or complaint (brief §19.6/§25's safeguarding
+/// requirements). Submitted with or without an account — an anonymous
+/// reporter is a deliberate choice, not a gap, so most fields are optional
+/// except the description itself. Visible only to admins; never surfaced
+/// back to other members.
+model SafeguardingReport {
+  id     Int   @id @default(autoincrement())
+  clubId Int?
+  club   Club? @relation(fields: [clubId], references: [id], onDelete: SetNull)
+
+  /// Null when the reporter chose to stay anonymous.
+  reporterName  String?
+  reporterEmail String?
+  /// The reporter's relationship to the club (player, guardian, coach, other) — freeform, kept short.
+  relationship String?
+  /// Who or what the concern is about, in the reporter's own words.
+  concernAbout String?
+  description  String
+
+  status           SafeguardingReportStatus @default(NEW)
+  reviewedByUserId Int?
+  reviewedBy       User?                    @relation("SafeguardingReportReviewer", fields: [reviewedByUserId], references: [id])
+  reviewNotes      String?
+  reviewedAt       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([clubId])
 }
 
 model Season {
@@ -473,6 +515,7 @@ model User {
   registrationsReviewed PlayerProfile[] @relation("RegistrationReviewer")
   drillsCreated  Drill[]               @relation("DrillCreatedBy")
   trainingPlansCreated TrainingPlan[]  @relation("TrainingPlanCreatedBy")
+  safeguardingReportsReviewed SafeguardingReport[] @relation("SafeguardingReportReviewer")
 }
 
 // WEB PUSH

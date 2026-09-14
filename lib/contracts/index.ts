@@ -54,6 +54,7 @@ export {
 } from "./team";
 export { createStaffUserSchema, updateUserSchema, setPasswordSchema } from "./user";
 export { requestUploadSchema, createVideoSchema, assignVideoSchema } from "./video";
+export { submitSafeguardingReportSchema, reviewSafeguardingReportSchema } from "./safeguarding";
 
 import { createAnnouncementSchema } from "./announcement";
 import { deleteAccountSchema } from "./account";
@@ -84,6 +85,7 @@ import {
 } from "./team";
 import { createStaffUserSchema, updateUserSchema, setPasswordSchema } from "./user";
 import { requestUploadSchema, createVideoSchema, assignVideoSchema } from "./video";
+import { submitSafeguardingReportSchema, reviewSafeguardingReportSchema } from "./safeguarding";
 
 export type CreateAnnouncementInput = z.infer<typeof createAnnouncementSchema>;
 export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
@@ -118,3 +120,5 @@ export type SetPasswordInput = z.infer<typeof setPasswordSchema>;
 export type RequestUploadInput = z.infer<typeof requestUploadSchema>;
 export type CreateVideoInput = z.infer<typeof createVideoSchema>;
 export type AssignVideoInput = z.infer<typeof assignVideoSchema>;
+export type SubmitSafeguardingReportInput = z.infer<typeof submitSafeguardingReportSchema>;
+export type ReviewSafeguardingReportInput = z.infer<typeof reviewSafeguardingReportSchema>;

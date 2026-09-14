@@ -57,7 +57,7 @@ const HERO_SLIDES: HeroSlide[] = [
     tabTitle: "Our coaches",
     ctas: [
       { label: "Meet the coaches", href: "/club/coaches" },
-      { label: "Safeguarding", href: "#safeguarding" },
+      { label: "Safeguarding", href: "/club/safeguarding" },
     ],
   },
 ];
@@ -322,8 +322,11 @@ export default async function ClubLandingPage() {
               <h3>Every coach vetted. Every session planned.</h3>
               <p>
                 Every coach is vetted and every junior profile is guardian-approved before it appears anywhere. If
-                you want something taken down, one message to the club is enough.
+                you want something taken down, or need to report a concern, one message to the club is enough.
               </p>
+              <Link className="btn btn-secondary btn-sm" href="/club/safeguarding" style={{ marginTop: 16 }}>
+                Full policy & report a concern →
+              </Link>
             </div>
           </RevealBlock>
           <RevealBlock delayMs={80} className="safe-grid">

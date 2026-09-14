@@ -125,6 +125,10 @@ const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/registrations", summary: "Pending registrations", tag: "Auth", auth: "admin", list: true },
   { method: "PATCH", path: "/registrations/{id}", summary: "Approve / reject / request changes", tag: "Auth", auth: "admin" },
 
+  { method: "POST", path: "/safeguarding-reports", summary: "Submit a safeguarding concern (anonymous allowed)", tag: "Safeguarding", auth: "none" },
+  { method: "GET", path: "/safeguarding-reports", summary: "List submitted safeguarding reports", tag: "Safeguarding", auth: "admin", list: true },
+  { method: "PATCH", path: "/safeguarding-reports/{id}", summary: "Update a report's status / review notes", tag: "Safeguarding", auth: "admin" },
+
   { method: "GET", path: "/users", summary: "List users", tag: "People", auth: "admin", list: true },
   { method: "POST", path: "/users", summary: "Create a staff account", tag: "People", auth: "admin" },
   { method: "GET", path: "/users/{id}", summary: "Get a user", tag: "People", auth: "admin" },

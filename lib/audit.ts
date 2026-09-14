@@ -45,6 +45,8 @@ export const AUDIT_ACTIONS = [
   "MFA_DISABLED",
   "ACCOUNT_EXPORTED",
   "ACCOUNT_DELETED",
+  "SAFEGUARDING_REPORT_SUBMITTED",
+  "SAFEGUARDING_REPORT_UPDATED",
 ] as const;
 
 const AUDIT_ACTION_LABEL: Record<string, string> = {
@@ -60,6 +62,8 @@ const AUDIT_ACTION_LABEL: Record<string, string> = {
   MFA_DISABLED: "turned off two-factor auth",
   ACCOUNT_EXPORTED: "exported their account data",
   ACCOUNT_DELETED: "deleted their account",
+  SAFEGUARDING_REPORT_SUBMITTED: "submitted a safeguarding report",
+  SAFEGUARDING_REPORT_UPDATED: "updated a safeguarding report",
 };
 
 /** Human phrasing for an action, falling back to a humanised token. */

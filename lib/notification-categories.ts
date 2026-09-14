@@ -9,6 +9,7 @@ export const CATEGORY_FOR_TYPE: Record<NotificationType, NotificationCategory> =
   NEW_FEEDBACK: "PERFORMANCE",
   ANNOUNCEMENT: "ANNOUNCEMENTS",
   REGISTRATION_UPDATE: "REGISTRATION",
+  SAFEGUARDING_REPORT: "SAFEGUARDING",
 };
 
 export const CATEGORY_LABEL: Record<NotificationCategory, string> = {
@@ -18,6 +19,7 @@ export const CATEGORY_LABEL: Record<NotificationCategory, string> = {
   VIDEOS: "Training videos",
   REGISTRATION: "Registration updates",
   MESSAGES: "Messages",
+  SAFEGUARDING: "Safeguarding reports",
 };
 
 export const NOTIFICATION_CATEGORIES = Object.keys(CATEGORY_LABEL) as NotificationCategory[];
@@ -29,4 +31,5 @@ export const CATEGORY_DEFAULTS: Record<NotificationCategory, { email: boolean; p
   VIDEOS: { email: false, push: false },
   REGISTRATION: { email: false, push: true },
   MESSAGES: { email: false, push: true },
+  SAFEGUARDING: { email: false, push: true },
 };
