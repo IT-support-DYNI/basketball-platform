@@ -70,29 +70,8 @@ Recommended: **[Backblaze B2](https://www.backblaze.com/b2/cloud-storage.html)**
 4. **Set the bucket's CORS policy.** Uploads and playback go straight from the browser to the
    bucket via presigned URLs (never proxied through this app), so the bucket itself must allow
    your app's origin(s) to `PUT`/`GET` directly, or every upload fails with a CORS error that looks
-   identical to a broken network connection. The JSON shape depends on where you set it:
-
-   **Cloudflare R2 dashboard** (bucket → Settings → CORS Policy) uses R2's own schema, not the
-   classic S3 one — pasting an `AllowedOrigins`/`AllowedMethods`-style policy here gets rejected as
-   invalid:
-
-   ```json
-   {
-     "rules": [
-       {
-         "allowed": {
-           "origins": ["http://localhost:3000", "https://your-production-domain.vercel.app"],
-           "methods": ["GET", "PUT"],
-           "headers": ["*"]
-         },
-         "maxAgeSeconds": 3600
-       }
-     ]
-   }
-   ```
-
-   **Backblaze B2's dashboard, or the AWS CLI/SDK against either provider's S3-compatible API**
-   (`aws s3api put-bucket-cors`) uses the classic S3 shape instead:
+   identical to a broken network connection. Both R2's and B2's dashboards (and the AWS CLI/SDK
+   against either provider's S3-compatible API) take the same classic S3 shape:
 
    ```json
    [
@@ -104,6 +83,11 @@ Recommended: **[Backblaze B2](https://www.backblaze.com/b2/cloud-storage.html)**
      }
    ]
    ```
+
+   If the dashboard rejects it as invalid on the first attempt, that's been a transient glitch
+   rather than a real schema issue in practice — retry as-is, or save a minimal version first
+   (one origin, `AllowedMethods: ["GET"]`, nothing else) and build back up to the full policy
+   above.
 
    `next.config.mjs`'s Content Security Policy also needs the storage host allowed — this is
    handled automatically as long as `STORAGE_ENDPOINT`/`R2_ACCOUNT_ID` is set in the environment the
