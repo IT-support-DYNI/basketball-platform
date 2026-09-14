@@ -43,7 +43,9 @@ export const addPlayerToTeamSchema = z.object({
 export const updatePlayerSchema = z.object({
   name: z.string().min(1).optional(),
   dateOfBirth: z.string().nullable().optional(),
-  photoUrl: z.string().url().optional(),
+  // A private-bucket storage key ("player-photos/<uuid>"), not a public URL —
+  // see lib/player-profile-view.ts's resolvePhotoUrl for why.
+  photoUrl: z.string().min(1).max(500).optional(),
   contactPhone: z.string().max(40).optional(),
   guardianName: z.string().max(120).optional(),
   guardianContact: z.string().max(40).optional(),
