@@ -67,6 +67,26 @@ Recommended: **[Backblaze B2](https://www.backblaze.com/b2/cloud-storage.html)**
 
    (Env var names keep the `R2_` prefix for historical reasons — they work identically for B2, R2, or any other S3-compatible provider; only `STORAGE_ENDPOINT` differs. If you use Cloudflare R2 instead, leave `STORAGE_ENDPOINT` blank and set `R2_ACCOUNT_ID` instead — the endpoint is derived from it automatically. R2 also requires a card on file even for its free tier, which is the whole reason B2 is the default recommendation here.)
 
+4. **Set the bucket's CORS policy.** Uploads and playback go straight from the browser to the
+   bucket via presigned URLs (never proxied through this app), so the bucket itself must allow
+   your app's origin(s) to `PUT`/`GET` directly, or every upload fails with a CORS error that looks
+   identical to a broken network connection. On the bucket's Settings/CORS page:
+
+   ```json
+   [
+     {
+       "AllowedOrigins": ["http://localhost:3000", "https://your-production-domain.vercel.app"],
+       "AllowedMethods": ["GET", "PUT"],
+       "AllowedHeaders": ["*"],
+       "MaxAgeSeconds": 3600
+     }
+   ]
+   ```
+
+   `next.config.mjs`'s Content Security Policy also needs the storage host allowed — this is
+   handled automatically as long as `STORAGE_ENDPOINT`/`R2_ACCOUNT_ID` is set in the environment the
+   app builds with, no manual step needed there.
+
 ## Push notifications (Web Push)
 
 Players can opt in from `/player/notifications` to get browser push notifications for training changes, new videos, evaluations, feedback, and announcements — on top of the in-app notification list, which always works regardless of this. See `lib/push.ts` and `public/sw.js`.

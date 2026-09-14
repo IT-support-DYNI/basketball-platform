@@ -13,14 +13,28 @@ const isDev = process.env.NODE_ENV !== "production";
 const devScript = isDev ? " 'unsafe-eval' https://va.vercel-scripts.com" : "";
 const devConnect = isDev ? " ws: wss: https://va.vercel-scripts.com https://vitals.vercel-insights.com" : "";
 
+// Object storage (lib/storage.ts): uploads PUT straight from the browser to a
+// presigned URL, and photo/video playback loads straight from a signed GET
+// URL — neither is proxied through this app, so the storage provider's host
+// needs allowing here or the browser blocks both (a CSP block looks
+// identical to a real network failure / broken image, easy to mistake for a
+// CORS or credentials problem). R2's presigned URLs are virtual-hosted-style
+// (`<bucket>.<account-id>.r2.cloudflarestorage.com`), so this wildcards the
+// whole r2.cloudflarestorage.com host rather than hardcoding one bucket.
+const storageHost = process.env.STORAGE_ENDPOINT
+  ? ` ${process.env.STORAGE_ENDPOINT}`
+  : process.env.R2_ACCOUNT_ID
+    ? " https://*.r2.cloudflarestorage.com"
+    : "";
+
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${devScript}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  `img-src 'self' data: blob:${storageHost}`,
   "font-src 'self'",
-  `connect-src 'self'${devConnect}`,
-  "media-src 'self' blob:",
+  `connect-src 'self'${devConnect}${storageHost}`,
+  `media-src 'self' blob:${storageHost}`,
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   "frame-ancestors 'none'",
