@@ -15,8 +15,41 @@ export default function UploadVideoForm() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("SHOOTING");
   const [file, setFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  /** Presigned PUT straight to storage — same shape for the video itself and its optional thumbnail. */
+  async function uploadToStorage(fileToUpload: File, fallbackContentType: string) {
+    const contentType = fileToUpload.type || fallbackContentType;
+    const uploadUrlRes = await fetch("/api/v1/videos/upload-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contentType }),
+    });
+    const uploadUrlBody = await uploadUrlRes.json();
+    if (!uploadUrlRes.ok) {
+      throw new Error(uploadUrlBody.error ?? "Storage isn't configured yet — see README for R2 setup.");
+    }
+
+    let putRes: Response;
+    try {
+      putRes = await fetch(uploadUrlBody.uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": contentType },
+        body: fileToUpload,
+      });
+    } catch {
+      // A rejected fetch here (as opposed to a non-2xx response) almost always means the storage
+      // bucket's CORS rules don't allow this origin — see README's "Video/photo storage" section.
+      throw new Error("Upload to storage failed — likely a CORS setting on the bucket. Check the browser console for the exact blocked-origin error.");
+    }
+    if (!putRes.ok) {
+      throw new Error(`Upload to storage failed (HTTP ${putRes.status}).`);
+    }
+
+    return uploadUrlBody.key as string;
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,39 +61,13 @@ export default function UploadVideoForm() {
     setLoading(true);
 
     try {
-      const uploadUrlRes = await fetch("/api/v1/videos/upload-url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contentType: file.type || "video/mp4" }),
-      });
-      const uploadUrlBody = await uploadUrlRes.json();
-      if (!uploadUrlRes.ok) {
-        setError(uploadUrlBody.error ?? "Storage isn't configured yet — see README for R2 setup.");
-        return;
-      }
-
-      let putRes: Response;
-      try {
-        putRes = await fetch(uploadUrlBody.uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type || "video/mp4" },
-          body: file,
-        });
-      } catch {
-        // A rejected fetch here (as opposed to a non-2xx response) almost always means the storage
-        // bucket's CORS rules don't allow this origin — see README's "Video/photo storage" section.
-        setError("Upload to storage failed — likely a CORS setting on the bucket. Check the browser console for the exact blocked-origin error.");
-        return;
-      }
-      if (!putRes.ok) {
-        setError(`Upload to storage failed (HTTP ${putRes.status}).`);
-        return;
-      }
+      const key = await uploadToStorage(file, "video/mp4");
+      const thumbnailKey = thumbnailFile ? await uploadToStorage(thumbnailFile, "image/jpeg") : undefined;
 
       const createRes = await fetch("/api/v1/videos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description: description || undefined, category, key: uploadUrlBody.key }),
+        body: JSON.stringify({ title, description: description || undefined, category, key, thumbnailKey }),
       });
       const createBody = await createRes.json();
       if (!createRes.ok) {
@@ -71,6 +78,7 @@ export default function UploadVideoForm() {
       setTitle("");
       setDescription("");
       setFile(null);
+      setThumbnailFile(null);
       setOpen(false);
       router.refresh();
     } catch (err) {
@@ -95,7 +103,14 @@ export default function UploadVideoForm() {
       <select value={category} onChange={(e) => setCategory(e.target.value as typeof category)} className="w-full rounded-control border border-line px-3 py-2.5 outline-none focus:border-court-500 focus:ring-2 focus:ring-court-500/20">
         {CATEGORIES.map((c) => <option key={c} value={c}>{c.replace(/_/g, " ")}</option>)}
       </select>
-      <input type="file" accept="video/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required className="w-full text-sm" />
+      <div>
+        <label className="mb-1 block text-xs font-semibold text-slate-600">Video file</label>
+        <input type="file" accept="video/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required className="w-full text-sm" />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs font-semibold text-slate-600">Thumbnail (optional)</label>
+        <input type="file" accept="image/*" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} className="w-full text-sm" />
+      </div>
 
       {error && <p className="text-sm text-danger">{error}</p>}
 

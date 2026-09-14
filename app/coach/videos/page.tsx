@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getPlaybackUrl } from "@/lib/storage";
 import UploadVideoForm from "@/app/coach/videos/_components/UploadVideoForm";
 import AssignVideoForm from "@/app/coach/videos/_components/AssignVideoForm";
 
@@ -9,7 +10,7 @@ export default async function CoachVideosPage() {
   const session = await getServerSession(authOptions);
   const teamIds = session!.user.teamIds ?? [];
 
-  const [videos, teams] = await Promise.all([
+  const [rawVideos, teams] = await Promise.all([
     prisma.video.findMany({
       where: { uploadedByUserId: Number(session!.user.id) },
       orderBy: { createdAt: "desc" },
@@ -17,6 +18,15 @@ export default async function CoachVideosPage() {
     }),
     prisma.team.findMany({ where: { id: { in: teamIds } }, select: { id: true, name: true } }),
   ]);
+
+  // Signed fresh per page load — the bucket is private, nothing here is a permanent public URL (see lib/storage.ts).
+  const videos = await Promise.all(
+    rawVideos.map(async (v) => ({
+      ...v,
+      playbackUrl: await getPlaybackUrl(v.key),
+      thumbnailUrl: v.thumbnailKey ? await getPlaybackUrl(v.thumbnailKey) : null,
+    }))
+  );
 
   return (
     <main>
@@ -35,6 +45,14 @@ export default async function CoachVideosPage() {
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">{v.category.replace(/_/g, " ")}</span>
             </div>
             {v.description && <p className="mt-1 text-sm text-slate-500">{v.description}</p>}
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption -- coach-uploaded training clips, no caption track exists */}
+            <video
+              controls
+              preload="none"
+              poster={v.thumbnailUrl ?? undefined}
+              src={v.playbackUrl}
+              className="mt-3 aspect-video w-full rounded-control bg-black"
+            />
             <div className="mt-3 flex flex-wrap gap-1">
               {v.assignments.map((a) => (
                 <span key={a.id} className="rounded-full bg-court-50 px-2 py-0.5 text-xs font-semibold text-court-700">

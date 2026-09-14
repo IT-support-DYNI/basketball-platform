@@ -16,7 +16,11 @@ export default async function PlayerVideosPage() {
 
   // Signed fresh per page load — the bucket is private, nothing here is a permanent public URL (see lib/storage.ts).
   const assignments = await Promise.all(
-    assignmentRows.map(async (a) => ({ ...a, playbackUrl: await getPlaybackUrl(a.video.key) }))
+    assignmentRows.map(async (a) => ({
+      ...a,
+      playbackUrl: await getPlaybackUrl(a.video.key),
+      thumbnailUrl: a.video.thumbnailKey ? await getPlaybackUrl(a.video.thumbnailKey) : null,
+    }))
   );
 
   return (
@@ -27,6 +31,10 @@ export default async function PlayerVideosPage() {
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {assignments.map((a) => (
           <div key={a.id} className="rounded-card border border-line bg-surface p-5">
+            {a.thumbnailUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={a.thumbnailUrl} alt="" className="mb-3 aspect-video w-full rounded-control object-cover" />
+            )}
             <div className="flex items-start justify-between gap-2">
               <p className="font-bold text-slate-900">{a.video.title}</p>
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
