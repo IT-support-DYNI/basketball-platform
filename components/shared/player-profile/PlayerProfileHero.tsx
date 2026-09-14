@@ -83,7 +83,7 @@ export default function PlayerProfileHero({
         {player.jerseyNumber != null && (
           <span
             aria-hidden
-            className="pointer-events-none absolute -right-2 -top-6 select-none font-condensed text-[9rem] font-black leading-none text-on-flame/10 sm:text-[12rem]"
+            className="pointer-events-none absolute -right-2 -top-6 select-none font-condensed text-[11rem] font-black leading-none text-on-flame/10 sm:text-[15rem]"
           >
             {player.jerseyNumber}
           </span>
@@ -99,22 +99,28 @@ export default function PlayerProfileHero({
           <span className="font-mono text-[11px] uppercase tracking-wider text-on-flame/70">DYNI Blazers</span>
         </div>
 
-        <div className="relative mt-3 flex h-40 items-stretch gap-5 pr-6 sm:h-48 sm:pr-8">
-          {/* photo — a cropped rectangle flush to the bottom of the band,
-           *  not a floating circle, to match the cutout-to-the-edge look */}
-          <div className="animate-avatar-pop relative w-28 flex-none sm:w-40">
+        <div className="relative mt-3 flex h-56 items-stretch gap-5 pr-6 sm:h-64 sm:pr-8 md:h-72">
+          {/* photo — large, flush to the left/bottom band edges, with a
+           *  gradient fade into the band colour on its right edge standing
+           *  in for a real cutout (our uploads are plain rectangles, not
+           *  transparent-background cutout PNGs like the reference's) */}
+          <div className="animate-avatar-pop relative w-40 flex-none sm:w-56 md:w-72">
             {/* overflow-hidden lives on this inner wrapper, not the outer
              *  relative one — otherwise it clips PhotoUpload's edit badge,
              *  which deliberately hangs off the corner via negative insets */}
-            <div className="h-full w-full overflow-hidden">
+            <div className="relative h-full w-full overflow-hidden">
               {player.photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={player.photoUrl} alt="" className="h-full w-full object-cover object-top transition duration-200 hover:scale-105" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-black/15 font-condensed text-4xl font-bold text-on-flame">
+                <div className="flex h-full w-full items-center justify-center bg-black/15 font-condensed text-6xl font-bold text-on-flame">
                   {initials}
                 </div>
               )}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-transparent via-flame/40 to-flame"
+              />
             </div>
             {editable && <PhotoUpload playerId={player.id} />}
           </div>
@@ -125,8 +131,22 @@ export default function PlayerProfileHero({
                 .filter(Boolean)
                 .join(" · ") || "DYNI Blazers"}
             </p>
-            <h1 className="mt-1 font-condensed text-3xl font-extrabold uppercase leading-[0.95] tracking-tight text-on-flame sm:text-5xl">
-              {player.name}
+            {/* Stacked first-name/surname lines, same "big two-line name"
+             *  treatment as the reference — split on the last space so a
+             *  middle name or multi-word surname stays with the first line. */}
+            <h1 className="mt-1 font-condensed font-extrabold uppercase leading-[0.95] tracking-tight text-on-flame">
+              {(() => {
+                const words = player.name.trim().split(/\s+/);
+                const last = words.length > 1 ? words.pop() : null;
+                return (
+                  <>
+                    {words.length > 0 && (
+                      <span className="block text-3xl sm:text-5xl md:text-6xl">{words.join(" ")}</span>
+                    )}
+                    {last && <span className="block text-3xl sm:text-5xl md:text-6xl">{last}</span>}
+                  </>
+                );
+              })()}
             </h1>
             {player.status && player.status !== "ACTIVE" && (
               <span className="mt-2 inline-block w-fit rounded-full bg-black/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-on-flame">
