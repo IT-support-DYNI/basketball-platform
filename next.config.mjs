@@ -18,11 +18,17 @@ const devConnect = isDev ? " ws: wss: https://va.vercel-scripts.com https://vita
 // URL — neither is proxied through this app, so the storage provider's host
 // needs allowing here or the browser blocks both (a CSP block looks
 // identical to a real network failure / broken image, easy to mistake for a
-// CORS or credentials problem). R2's presigned URLs are virtual-hosted-style
-// (`<bucket>.<account-id>.r2.cloudflarestorage.com`), so this wildcards the
-// whole r2.cloudflarestorage.com host rather than hardcoding one bucket.
+// CORS or credentials problem). The AWS SDK addresses buckets virtual-hosted
+// -style — `<bucket>.<endpoint-host>` — for R2 *and* for a STORAGE_ENDPOINT
+// provider like B2 (confirmed live: a bare `s3.eu-central-003.backblazeb2.com`
+// allowlist entry did NOT match the actual request host
+// `baskeball-dyni.s3.eu-central-003.backblazeb2.com` and still got blocked),
+// so both the bare endpoint host and its `*.` subdomain wildcard are allowed.
 const storageHost = process.env.STORAGE_ENDPOINT
-  ? ` ${process.env.STORAGE_ENDPOINT}`
+  ? (() => {
+      const host = process.env.STORAGE_ENDPOINT.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+      return ` ${process.env.STORAGE_ENDPOINT} https://*.${host}`;
+    })()
   : process.env.R2_ACCOUNT_ID
     ? " https://*.r2.cloudflarestorage.com"
     : "";
