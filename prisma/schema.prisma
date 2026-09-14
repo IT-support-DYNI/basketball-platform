@@ -622,8 +622,24 @@ model PlayerProfile {
   memberships       TeamMembership[]
   consentRecords    ConsentRecord[]
   highlights        PlayerHighlight[]
+  photos            PlayerPhoto[]
 
   @@index([registrationStatus])
+}
+
+/// Every distinct photo a player has ever set as their profile photo, kept so
+/// they can re-select one later instead of re-uploading a duplicate — see
+/// PhotoUpload.tsx. storageKey follows the same private-bucket-key convention
+/// as PlayerProfile.photoUrl ("player-photos/<uuid>"), never a bare URL.
+model PlayerPhoto {
+  id              Int      @id @default(autoincrement())
+  playerProfileId Int
+  playerProfile   PlayerProfile @relation(fields: [playerProfileId], references: [id], onDelete: Cascade)
+  storageKey      String
+  createdAt       DateTime @default(now())
+
+  @@unique([playerProfileId, storageKey])
+  @@index([playerProfileId])
 }
 
 /// A link to an external video (YouTube/Hudl/etc) a player adds to their own

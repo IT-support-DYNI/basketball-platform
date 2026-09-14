@@ -93,5 +93,18 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params, re
   }
 
   const updated = await prisma.playerProfile.update({ where: { id: playerId }, data: editable });
+
+  // Remember every distinct photo key this player has ever set, so the
+  // picker in PhotoUpload.tsx can offer it again without a re-upload.
+  // Upsert (not create) because re-selecting an old photo hits this same
+  // path — @@unique([playerProfileId, storageKey]) makes that a no-op.
+  if (typeof editable.photoUrl === "string" && editable.photoUrl.startsWith("player-photos/")) {
+    await prisma.playerPhoto.upsert({
+      where: { playerProfileId_storageKey: { playerProfileId: playerId, storageKey: editable.photoUrl } },
+      create: { playerProfileId: playerId, storageKey: editable.photoUrl },
+      update: {},
+    });
+  }
+
   return ok(updated, { requestId });
 });
