@@ -19,11 +19,11 @@ const HOLD_MS = 7000;
 function GhostBall() {
   return (
     <svg className="hero-watermark" viewBox="0 0 200 200" aria-hidden="true">
-      <circle cx="100" cy="100" r="94" fill="none" stroke="yellow" strokeWidth="4"></circle>
+      <circle cx="100" cy="100" r="94" fill="none" stroke="#DC4D01" strokeWidth="4"></circle>
       <path
         d="M100 6v188M6 100h188M32 32c30 30 30 106 0 136M168 32c-30 30-30 106 0 136"
         fill="none"
-        stroke="yellow"
+        stroke="#DC4D01"
         strokeWidth="4"
       ></path>
     </svg>
