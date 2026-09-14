@@ -134,12 +134,12 @@ html[data-theme=dark] .toggle .sun{display:none}
 .tab-bar i{display:block;height:100%;width:0;background:var(--accent);transform-origin:left}
 @media (max-width:860px){.slide{grid-template-columns:1fr;grid-template-rows:1fr}.slide-photo{display:none}.hero-watermark{right:-26%}.tabs{grid-template-columns:repeat(2,1fr)}.tab{border-bottom:1px dashed var(--border)}}
 
-/* ---- hero inline stats (shared across every slide) ---- */
-.hero-stats{position:relative;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 clamp(24px,4.5vw,64px) clamp(24px,4vw,40px)}
+/* ---- hero inline stats — sits inside .slide-copy, right under the CTAs ---- */
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .hero-stat{background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:16px 18px;display:flex;flex-direction:column;gap:2px}
 .hero-stat .stat-n{font-size:1.75rem;line-height:1;color:var(--text-1)}
 .hero-stat-l{font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.16em;color:var(--text-3)}
-@media (max-width:860px){.hero-stats{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:1180px){.hero-stats{grid-template-columns:repeat(2,1fr)}}
 
 /* ---- ticker ---- */
 .ticker{overflow:hidden;background:var(--accent);border-block:1px solid rgba(23,19,16,.18);padding:11px 0}

@@ -42,8 +42,8 @@ export default function HeroCarousel({
   stats,
 }: {
   slides: HeroSlide[];
-  /** Same numbers as the old separate stats strip, shown inline in the hero
-   *  instead — one row shared across every slide rather than per-slide. */
+  /** Same numbers as the old separate stats strip, shown inline right under
+   *  each slide's CTAs instead of as a full-width row below the carousel. */
   stats?: { value: number; label: string }[];
 }) {
   const [active, setActive] = useState(0);
@@ -152,6 +152,16 @@ export default function HeroCarousel({
                   </Link>
                 ))}
               </div>
+              {stats && stats.length > 0 && (
+                <div className="hero-stats">
+                  {stats.map((s) => (
+                    <div className="hero-stat" key={s.label}>
+                      <StatCount value={s.value} />
+                      <p className="hero-stat-l">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="slide-photo">
               <div className="photo"></div>
@@ -159,17 +169,6 @@ export default function HeroCarousel({
           </article>
         ))}
       </div>
-
-      {stats && stats.length > 0 && (
-        <div className="hero-stats">
-          {stats.map((s) => (
-            <div className="hero-stat" key={s.label}>
-              <StatCount value={s.value} />
-              <p className="hero-stat-l">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="tabs" role="tablist" aria-label="Featured stories">
         {slides.map((slide, i) => (
