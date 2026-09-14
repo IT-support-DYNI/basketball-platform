@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { getClubStats, getNextFixture, getPublicPlayers, getPublicCoaches } from "@/lib/public-site";
+import { getClubStats, getNextFixture } from "@/lib/public-site";
 import HeroCarousel, { type HeroSlide } from "@/components/public/landing/HeroCarousel";
 import Ticker from "@/components/public/landing/Ticker";
-import TiltCard from "@/components/public/landing/TiltCard";
 import RegisterInterestForm from "@/components/public/landing/RegisterInterestForm";
 import RevealBlock from "@/components/public/landing/RevealBlock";
 import StoryTabs from "@/components/public/landing/StoryTabs";
@@ -57,7 +56,7 @@ const HERO_SLIDES: HeroSlide[] = [
     lead: "Every coach on our roster is here every week, not just for match day — meet the people who'll actually be running your sessions.",
     tabTitle: "Our coaches",
     ctas: [
-      { label: "Meet the coaches", href: "#coaches" },
+      { label: "Meet the coaches", href: "/club/coaches" },
       { label: "Safeguarding", href: "#safeguarding" },
     ],
   },
@@ -142,12 +141,7 @@ const COST_ROWS = [
 ];
 
 export default async function ClubLandingPage() {
-  const [stats, players, coaches, nextFixture] = await Promise.all([
-    getClubStats(),
-    getPublicPlayers(6),
-    getPublicCoaches(3),
-    getNextFixture(),
-  ]);
+  const [stats, nextFixture] = await Promise.all([getClubStats(), getNextFixture()]);
 
   const statTiles = [
     { value: stats.teams, label: "Teams" },
@@ -248,92 +242,6 @@ export default async function ClubLandingPage() {
               ]}
             />
           </RevealBlock>
-        </div>
-      </section>
-
-      <section className="teams" id="roster">
-        <div className="wrap">
-          <RevealBlock className="head">
-            <div>
-              <p className="eyebrow">Meet the players</p>
-              <h2>The squad, on and off the court</h2>
-              <p className="lead">Junior players appear here only once a guardian and the club have both approved it.</p>
-            </div>
-            <Link className="btn btn-secondary btn-sm" href="/club/roster">
-              Full roster
-            </Link>
-          </RevealBlock>
-          {players.length === 0 ? (
-            <p className="lead">No player profiles are public yet — check back soon.</p>
-          ) : (
-            <div className="team-grid">
-              {players.map((p, i) => (
-                <TiltCard key={p.id} className="team" href={`/club/players/${p.id}`} delayMs={i * 70}>
-                  <div className={`photo${p.photoUrl ? " has-img" : ""}`}>
-                    {p.photoUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.photoUrl} alt="" />
-                    )}
-                  </div>
-                  {p.jerseyNumber != null && (
-                    <span className="team-jersey" aria-hidden="true">
-                      {p.jerseyNumber}
-                    </span>
-                  )}
-                  <div className="team-top">
-                    <span className={`team-code${p.publicStatus === "Trialist" ? " trial" : ""}`}>
-                      {p.jerseyNumber != null ? `#${p.jerseyNumber}` : "—"}
-                    </span>
-                    {p.publicStatus && (
-                      <span className={`pill ${p.publicStatus === "Trialist" ? "pill-trial" : "pill-open"}`}>
-                        {p.publicStatus}
-                      </span>
-                    )}
-                  </div>
-                  <div className="team-body">
-                    <h3>{p.name}</h3>
-                    <div className="team-meta">
-                      {p.positionLabel && <span>{p.positionLabel}</span>}
-                      {p.team && <span>{p.team}</span>}
-                    </div>
-                  </div>
-                </TiltCard>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="coaches" id="coaches">
-        <div className="wrap">
-          <RevealBlock className="head">
-            <div>
-              <p className="eyebrow">Coaching staff</p>
-              <h2>Qualified coaches, every session</h2>
-            </div>
-            <Link className="btn btn-secondary btn-sm" href="/club/coaches">
-              All staff
-            </Link>
-          </RevealBlock>
-          {coaches.length === 0 ? (
-            <p className="lead">No coach profiles are public yet — check back soon.</p>
-          ) : (
-            <div className="coach-grid">
-              {coaches.map((c, i) => (
-                <TiltCard key={c.id} className="coach" href={`/club/coaches/${c.id}`} delayMs={i * 90}>
-                  <div className={`photo${c.photoUrl ? " has-img" : ""}`}>
-                    {c.photoUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.photoUrl} alt="" />
-                    )}
-                  </div>
-                  <h3>{c.name}</h3>
-                  {c.roleLine && <p className="role">{c.roleLine}</p>}
-                  {c.bio && <p className="bio">{c.bio}</p>}
-                </TiltCard>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 
