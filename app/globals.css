@@ -185,24 +185,6 @@ html {
 }
 
 /*
- * Architects Daughter (the wireframe display face, loaded in app/layout.tsx
- * as --font-archivo) only ships weight 400 and reads badly both uppercased
- * and tightly tracked — those combinations were written for Archivo (a real
- * bold condensed sans) across ~35 files. Neutralising them here, the same
- * "target the stable utility-class pair" trick as the card rules above,
- * beats hand-editing every one. font-condensed (Big Shoulders Display) is
- * NOT touched — it's still bold/condensed/uppercase-friendly by design.
- */
-.font-display {
-  font-weight: 400;
-  font-synthesis: none;
-  letter-spacing: 0;
-}
-.font-display.uppercase {
-  text-transform: none;
-}
-
-/*
  * Player-profile hero motion (Sept 2026 revision — brief feedback wanted more
  * colour and life in the profile pages; see docs/DESIGN-MIGRATION.md §4).
  * One rise-in for the hero, one pop for the avatar, both gated off entirely

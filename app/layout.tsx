@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Architects_Daughter, Big_Shoulders_Display, IBM_Plex_Mono } from "next/font/google";
+import { Big_Shoulders_Display, IBM_Plex_Mono, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -10,18 +10,24 @@ import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import ThemeScript from "@/components/theme/ThemeScript";
 
 // Same face swap as the public /club site (app/club/layout.tsx), applied
-// app-wide so the internal admin/coach/player/guardian screens match it
-// instead of keeping the old "performance analytics" system: handwritten
-// display face, condensed bold for stat-card/profile contexts, and mono
-// for body copy + labels. Variable NAMES are kept as-is (--font-inter,
-// --font-archivo, --font-barlow) even though they no longer hold Inter/
-// Archivo/Barlow — renaming them would mean touching every consumer in
-// tailwind.config.ts's fontFamily map and beyond for no functional gain.
-const inter = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-inter", display: "swap" });
-const archivo = Architects_Daughter({ subsets: ["latin"], weight: "400", variable: "--font-archivo", display: "swap" });
+// app-wide so the internal admin/coach/player/guardian screens match it:
+// Big Shoulders Display for headings and stat-card/profile contexts (one
+// face for both — --font-archivo and --font-barlow now load the same
+// family), Inter for body copy, IBM Plex Mono for labels. Variable NAMES
+// are kept as-is (--font-inter, --font-archivo, --font-barlow) even though
+// they no longer hold Inter/Archivo/Barlow — renaming them would mean
+// touching every consumer in tailwind.config.ts's fontFamily map and
+// beyond for no functional gain.
+const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-inter", display: "swap" });
+const archivo = Big_Shoulders_Display({
+  subsets: ["latin"],
+  weight: ["700", "800", "900"],
+  variable: "--font-archivo",
+  display: "swap",
+});
 const barlow = Big_Shoulders_Display({
   subsets: ["latin"],
-  weight: ["700", "800"],
+  weight: ["700", "800", "900"],
   variable: "--font-barlow",
   display: "swap",
 });

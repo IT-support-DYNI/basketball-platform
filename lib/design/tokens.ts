@@ -108,10 +108,10 @@ export const radius = {
   pill: 9999,
 } as const;
 
-/** var(--font-archivo) now holds Architects Daughter (handwritten display),
- *  var(--font-barlow) holds Big Shoulders Display (condensed/bold, stat-card
- *  contexts), and var(--font-inter) holds IBM Plex Mono (body) — see the
- *  comment in app/layout.tsx for why the variable names weren't renamed. */
+/** var(--font-archivo) and var(--font-barlow) both now hold Big Shoulders
+ *  Display (headings and stat-card/profile contexts — one face, matching
+ *  the public /club site), and var(--font-inter) holds Inter (body) — see
+ *  the comment in app/layout.tsx for why the variable names weren't renamed. */
 export const font = {
   display: "var(--font-archivo)",
   body: "var(--font-inter)",
