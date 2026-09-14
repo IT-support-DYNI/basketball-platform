@@ -13,6 +13,14 @@ export const updateTeamSchema = z.object({
   status: z.enum(["ACTIVE", "ARCHIVED"]).optional(),
 });
 
+/** A highlight is a link to video the player already has hosted elsewhere
+ *  (YouTube, Vimeo, Hudl…) — rendered as an outbound link, never embedded, so
+ *  there's no iframe/host-allowlist question to answer here. */
+export const createHighlightSchema = z.object({
+  title: z.string().trim().min(1).max(80),
+  url: z.string().trim().url().max(500),
+});
+
 export const assignCoachSchema = z.object({
   coachProfileId: z.number().int().positive(),
   isPrimary: z.boolean().optional(),
@@ -41,6 +49,7 @@ export const updatePlayerSchema = z.object({
   guardianContact: z.string().max(40).optional(),
   nationality: z.string().max(60).optional(),
   heightCm: z.number().int().min(80).max(260).optional(),
+  weightKg: z.number().int().min(20).max(200).optional(),
   preferredHand: z.enum(["LEFT", "RIGHT", "AMBIDEXTROUS"]).optional(),
   bio: z.string().max(1000).optional(),
   address: z.string().max(300).optional(),

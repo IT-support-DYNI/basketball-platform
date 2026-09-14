@@ -13,57 +13,61 @@
  */
 
 export const brand = {
-  /** Primary flame — the "BLAZERS" wordmark and the ball in the logo. */
-  flame: "#f04800",
-  /** Brighter amber-orange from the mid-flame; used for gradients and hover. */
-  ember: "#f5851f",
-  /** Gold from the flame tips; sparingly, for "live" / highlight states. */
-  gold: "#f5c451",
-  /** Near-black from the logo outline. */
-  black: "#0b0b0f",
-  /** Off-white from the logo lettering. */
-  white: "#f4f1ec",
+  /** Primary accent — same #FE440B used on the public /club site. One
+   *  brand colour, one app (was sampled from the logo separately before
+   *  the Sept 2026 wireframe pass unified the two). */
+  flame: "#fe440b",
+  /** Brighter amber-orange variant; used for gradients and hover. */
+  ember: "#ff6b3d",
+  /** Gold; sparingly, for "live" / highlight states. */
+  gold: "#d97706",
+  /** Near-black ink. */
+  black: "#171310",
+  /** Cream paper. */
+  white: "#f6f4ef",
 } as const;
 
 export const dark = {
-  ground: "#0b0b0f",
-  surface: "#141419",
-  surface2: "#1c1c23",
-  surface3: "#26262f",
-  ink: "#f4f1ec",
-  inkDim: "#9b9ba6",
-  inkFaint: "#6b6b77",
-  line: "rgba(255,255,255,0.09)",
-  lineStrong: "rgba(255,255,255,0.16)",
-  flame: "#f04800",
-  flameInk: "#ff7a3d",
-  ember: "#f5851f",
-  gold: "#f5c451",
-  onFlame: "#ffffff",
-  success: "#35c15e",
-  warning: "#e0a417",
-  danger: "#f0503c",
-  info: "#5b9bf0",
+  // Sept 2026 wireframe pass — see app/globals.css for the same values as
+  // the canonical CSS custom properties this mirrors.
+  ground: "#1c1915",
+  surface: "#262220",
+  surface2: "#362f2a",
+  surface3: "#4a443c",
+  ink: "#f1ede4",
+  inkDim: "#c9c3b6",
+  inkFaint: "#8f897c",
+  line: "rgba(241,237,228,0.3)",
+  lineStrong: "rgba(241,237,228,0.45)",
+  flame: "#fe440b",
+  flameInk: "#ff8156",
+  ember: "#ff8156",
+  gold: "#fbbf24",
+  onFlame: "#171310",
+  success: "#34d399",
+  warning: "#fbbf24",
+  danger: "#f87171",
+  info: "#5b8cff",
 } as const;
 
 export const light = {
-  ground: "#f7f4ef",
+  ground: "#f6f4ef",
   surface: "#ffffff",
-  surface2: "#f2eee7",
-  surface3: "#e9e3d9",
-  ink: "#18171c",
-  inkDim: "#57545e",
-  inkFaint: "#8a8792",
-  line: "rgba(20,16,12,0.12)",
-  lineStrong: "rgba(20,16,12,0.22)",
-  flame: "#d63e00",
-  flameInk: "#bf3900",
-  ember: "#c4670b",
-  gold: "#a9761a",
-  onFlame: "#ffffff",
-  success: "#1b923f",
+  surface2: "#ece8df",
+  surface3: "#dfd9cc",
+  ink: "#2a2723",
+  inkDim: "#514c44",
+  inkFaint: "#8b857a",
+  line: "#a39d92",
+  lineStrong: "#8b857a",
+  flame: "#fe440b",
+  flameInk: "#ff6b3d",
+  ember: "#ff6b3d",
+  gold: "#d97706",
+  onFlame: "#171310",
+  success: "#027a48",
   warning: "#b4790a",
-  danger: "#ce3b2a",
+  danger: "#b42318",
   info: "#2f6fd0",
 } as const;
 
@@ -71,39 +75,43 @@ export const light = {
  *  above so "injured red" never reads as "error red". Keys match the DB enums. */
 export const statusColor = {
   // player status
-  ACTIVE: "#35c15e",
-  PENDING: "#e0a417",
+  ACTIVE: "#4ade80",
+  PENDING: "#fbbf24",
   INJURED: "#f0503c",
   SUSPENDED: "#8b8177",
-  INACTIVE: "#6b6b77",
-  TRIALIST: "#5b9bf0",
-  FORMER: "#6b6b77",
+  INACTIVE: "#646e82",
+  TRIALIST: "#5b8cff",
+  FORMER: "#646e82",
   // event / session status
-  SCHEDULED: "#5b9bf0",
-  CONFIRMED: "#35c15e",
-  COMPLETED: "#35c15e",
+  SCHEDULED: "#5b8cff",
+  CONFIRMED: "#4ade80",
+  COMPLETED: "#4ade80",
   CANCELLED: "#f0503c",
-  POSTPONED: "#e0a417",
+  POSTPONED: "#fbbf24",
   // attendance
-  PRESENT: "#35c15e",
+  PRESENT: "#4ade80",
   ABSENT: "#f0503c",
-  LATE: "#e0a417",
-  EXCUSED: "#9b9ba6",
+  LATE: "#fbbf24",
+  EXCUSED: "#94a3b8",
   // registration
-  APPROVED: "#35c15e",
+  APPROVED: "#4ade80",
   REJECTED: "#f0503c",
-  CHANGES_REQUESTED: "#5b9bf0",
+  CHANGES_REQUESTED: "#5b8cff",
 } as const;
 
 export const space = [0, 4, 8, 12, 16, 24, 32, 48, 64, 80] as const;
 
 export const radius = {
-  control: 8,
-  card: 12,
-  lg: 16,
+  control: 4,
+  card: 6,
+  lg: 8,
   pill: 9999,
 } as const;
 
+/** var(--font-archivo) now holds Architects Daughter (handwritten display),
+ *  var(--font-barlow) holds Big Shoulders Display (condensed/bold, stat-card
+ *  contexts), and var(--font-inter) holds IBM Plex Mono (body) — see the
+ *  comment in app/layout.tsx for why the variable names weren't renamed. */
 export const font = {
   display: "var(--font-archivo)",
   body: "var(--font-inter)",

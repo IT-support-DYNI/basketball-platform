@@ -23,7 +23,12 @@ export function DialogContent({
 }) {
   return (
     <RadixDialog.Portal>
-      <RadixDialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-fade-in motion-reduce:animate-none" />
+      {/* A dim scrim, not a blur — backdrop-blur-sm here made the page
+          behind unreadable (a genuine legibility bug, not a stylistic
+          "frosted glass" choice) rather than the light softening it looks
+          like at a glance. Plain dimming is the more common, cheaper-to-
+          render pattern anyway. */}
+      <RadixDialog.Overlay className="fixed inset-0 z-50 bg-black/55 data-[state=open]:animate-fade-in motion-reduce:animate-none" />
       <RadixDialog.Content
         className={cn(
           "fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2",

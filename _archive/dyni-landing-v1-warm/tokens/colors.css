@@ -1,0 +1,127 @@
+/* DYNI Blazers — colour system.
+   Warm, editorial, photo-led. Light is the default; dark is a matching warm
+   near-black palette with the same role structure (never an inverted grey).
+   Fixed tokens (--accent, --on-accent, --status-trial-*, --photo-*) are
+   identical in both themes: anything sitting on a photograph keeps a fixed
+   warm-dark scrim/ink because photos always need it.
+
+   Scoped to `.dyni-landing` (not :root) so these generic-named custom
+   properties (--bg, --accent, --text-1…) never leak onto the rest of the
+   app's pages. The actual dark/light STATE still comes from the one place
+   the whole app keeps it — `<html data-theme="…">`, written by
+   components/theme/ThemeScript.tsx / ThemeToggle.tsx to localStorage key
+   `dyni-theme` — so this page's look follows the same toggle as everywhere
+   else, it just reads that state via a descendant selector instead of
+   redeclaring its own toggle. */
+
+.dyni-landing {
+  color-scheme: light;
+
+  /* Base surfaces */
+  --bg: #F6DEC1;
+  --bg-deep: #EAC896;
+  --surface: #FBF0DD;
+  --surface-alt: #EFDBB8;
+  --border: #E2C79C;
+
+  /* Ink */
+  --text-1: #161211;
+  --text-2: #4E443B;
+  --text-3: #8C7C68;
+
+  /* Semantic */
+  --positive: #027A48;
+  --positive-bg: #ECFDF3;
+  --negative: #B42318;
+  --negative-bg: #FEF3F2;
+
+  /* Brand accents (theme-aware partners) */
+  --accent-light: #FF6B3D;
+  --accent-deep: #772424;
+  /* Accent tuned for small text on a light ground (WCAG AA at 12–13px) */
+  --accent-on-bg: #C43600;
+
+  /* --- Fixed in both themes --- */
+  --accent: #FE440B;
+  --on-accent: #171310;
+  --status-trial: #D97706;
+  --status-trial-bg: rgba(217, 119, 6, 0.2);
+  --photo-ink: #161211;
+  --ground-dark: #0D0A06;
+  --photo-text: #F6E9D6;
+  --photo-ground: #2A2118;
+  --photo-ink-2: rgba(22, 18, 17, 0.72);
+  --photo-scrim: rgba(13, 10, 6, 0.55);
+
+  /* Aliases used across components */
+  --text-body: var(--text-2);
+  --text-heading: var(--text-1);
+  --surface-card: var(--surface);
+  --link: var(--accent);
+  --link-hover: var(--accent-deep);
+}
+
+/* OS preference fallback, only when the app-wide toggle hasn't set an
+   explicit choice on <html> (mirrors the app's own :root[data-theme] rule
+   in app/globals.css). */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .dyni-landing {
+    color-scheme: dark;
+    --bg: #17120B;
+    --bg-deep: #0D0A06;
+    --surface: #241C13;
+    --surface-alt: #362A1B;
+    --border: #4A3A25;
+    --text-1: #F6E9D6;
+    --text-2: #C7B49B;
+    --text-3: #8F7C64;
+    --positive: #34D399;
+    --positive-bg: #12271D;
+    --negative: #F87171;
+    --negative-bg: #2B1615;
+    --accent-light: #FF8156;
+    --accent-deep: #B4543C;
+    --accent-on-bg: #FF8156;
+    --link-hover: var(--accent-light);
+  }
+}
+
+html[data-theme="dark"] .dyni-landing {
+  color-scheme: dark;
+  --bg: #17120B;
+  --bg-deep: #0D0A06;
+  --surface: #241C13;
+  --surface-alt: #362A1B;
+  --border: #4A3A25;
+  --text-1: #F6E9D6;
+  --text-2: #C7B49B;
+  --text-3: #8F7C64;
+  --positive: #34D399;
+  --positive-bg: #12271D;
+  --negative: #F87171;
+  --negative-bg: #2B1615;
+  --accent-light: #FF8156;
+  --accent-deep: #B4543C;
+  --accent-on-bg: #FF8156;
+  --link-hover: var(--accent-light);
+}
+
+html[data-theme="light"] .dyni-landing {
+  color-scheme: light;
+  --bg: #F6DEC1;
+  --bg-deep: #EAC896;
+  --surface: #FBF0DD;
+  --surface-alt: #EFDBB8;
+  --border: #E2C79C;
+  --text-1: #161211;
+  --text-2: #4E443B;
+  --text-3: #8C7C68;
+  --positive: #027A48;
+  --positive-bg: #ECFDF3;
+  --negative: #B42318;
+  --negative-bg: #FEF3F2;
+  --accent-light: #FF6B3D;
+  --accent-deep: #772424;
+  --accent-on-bg: #C43600;
+  --link-hover: var(--accent-deep);
+}

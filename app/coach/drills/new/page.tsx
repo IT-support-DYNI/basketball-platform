@@ -1,6 +1,6 @@
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
-import DrillForm from "@/components/training/DrillForm";
+import DrillForm from "@/app/coach/drills/_components/DrillForm";
 
 export const metadata = { title: "New drill" };
 

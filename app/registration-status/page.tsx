@@ -6,8 +6,8 @@ import { prisma } from "@/lib/prisma";
 import Brandmark from "@/components/Brandmark";
 import StatusBadge from "@/components/StatusBadge";
 import Alert from "@/components/ui/Alert";
-import ResubmitRegistrationButton from "@/components/player/ResubmitRegistrationButton";
-import ResendVerificationButton from "@/components/auth/ResendVerificationButton";
+import ResubmitRegistrationButton from "@/app/registration-status/_components/ResubmitRegistrationButton";
+import ResendVerificationButton from "@/app/registration-status/_components/ResendVerificationButton";
 
 export default async function RegistrationStatusPage() {
   const session = await getServerSession(authOptions);

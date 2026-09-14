@@ -102,7 +102,7 @@ export function DataTable<T>({
           </thead>
           <tbody>
             {sorted.map((row) => (
-              <tr key={rowKey(row)} className="border-b border-line last:border-0 hover:bg-surface-2/60">
+              <tr key={rowKey(row)} className="border-b border-line last:border-0 transition-colors duration-150 hover:bg-surface-2/60">
                 {columns.map((col) => (
                   <td
                     key={col.key}

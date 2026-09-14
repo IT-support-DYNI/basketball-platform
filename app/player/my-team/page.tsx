@@ -37,7 +37,7 @@ export default async function PlayerMyTeamPage() {
   if (!team) {
     return (
       <main>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">My Team</h1>
+        <h1 className="font-display text-3xl text-ink">My Team</h1>
         <p className="mt-3 text-sm text-slate-500">You&apos;re not assigned to a team yet — ask your coach or admin.</p>
       </main>
     );
@@ -45,10 +45,10 @@ export default async function PlayerMyTeamPage() {
 
   return (
     <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">{team.name}</h1>
+      <h1 className="font-display text-3xl text-ink">{team.name}</h1>
       {team.ageGroup && <p className="mt-1 text-slate-600">{team.ageGroup}</p>}
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-surface p-5">
+      <section className="mt-6 rounded-card border border-line bg-surface p-5">
         <h2 className="font-bold text-slate-900">Staff</h2>
         <ul className="mt-3 space-y-1 text-sm text-slate-700">
           {team.staffAssignments.map((a) => (
@@ -60,7 +60,7 @@ export default async function PlayerMyTeamPage() {
         </ul>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-surface p-5">
+      <section className="mt-6 rounded-card border border-line bg-surface p-5">
         <h2 className="font-bold text-slate-900">Roster ({team.memberships.length})</h2>
         <ul className="mt-3 divide-y divide-slate-100">
           {team.memberships.map((m) => (

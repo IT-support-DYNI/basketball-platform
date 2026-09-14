@@ -49,6 +49,7 @@ export function anonymisedPlayerProfileFields(): Prisma.PlayerProfileUpdateInput
     photoUrl: null,
     nationality: null,
     heightCm: null,
+    weightKg: null,
     preferredHand: null,
     bio: null,
     dateOfBirth: null,

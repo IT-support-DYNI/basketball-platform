@@ -31,6 +31,10 @@ const STATUS_TONE: Record<string, Tone> = {
   CHANGES_REQUESTED: "info",
   // teams
   ARCHIVED: "neutral",
+  // safeguarding reports
+  NEW: "warning",
+  IN_REVIEW: "info",
+  RESOLVED: "success",
 };
 
 const TONE_VAR: Record<Tone, string> = {

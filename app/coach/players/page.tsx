@@ -54,7 +54,11 @@ export default async function CoachPlayersPage() {
             <tbody>
               {memberships.map((m) => (
                 <tr key={m.id} className="border-b border-line last:border-0">
-                  <td className="px-4 py-2.5 font-medium text-ink">{m.player.user.name}</td>
+                  <td className="px-4 py-2.5 font-medium text-ink">
+                    <Link href={`/coach/players/${m.player.id}`} className="hover:text-flame-ink hover:underline">
+                      {m.player.user.name}
+                    </Link>
+                  </td>
                   <td className="px-4 py-2.5 text-ink-dim">{m.team.name}</td>
                   <td className="px-4 py-2.5 tabular text-ink-dim">{m.jerseyNumber ?? "—"}</td>
                   <td className="px-4 py-2.5 text-ink-dim">{m.position ?? "—"}</td>

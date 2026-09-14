@@ -2,9 +2,9 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import RecordEvaluationForm from "@/components/coach/RecordEvaluationForm";
+import RecordEvaluationForm from "@/app/coach/performance/_components/RecordEvaluationForm";
 import { rosterPlayerFilter } from "@/lib/roster";
-import WriteFeedbackForm from "@/components/coach/WriteFeedbackForm";
+import WriteFeedbackForm from "@/app/coach/performance/_components/WriteFeedbackForm";
 
 export default async function CoachPerformancePage() {
   const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export default async function CoachPerformancePage() {
 
   return (
     <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Performance</h1>
+      <h1 className="font-display text-3xl text-ink">Performance</h1>
       <p className="mt-1 text-slate-600">Record weekly and monthly evaluations, and write feedback for your players.</p>
 
       <div className="mt-6 flex flex-wrap gap-3">
@@ -28,7 +28,7 @@ export default async function CoachPerformancePage() {
         <WriteFeedbackForm players={options} />
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-surface">
+      <div className="mt-6 overflow-x-auto rounded-card border border-line bg-surface">
         <table className="w-full min-w-[38rem] text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
             <tr>

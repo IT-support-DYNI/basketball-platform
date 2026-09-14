@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getOrCreateCalendarToken } from "@/lib/calendar-feed";
 import { baseUrl } from "@/lib/base-url";
-import CalendarView from "@/components/calendar/CalendarView";
+import CalendarView from "@/components/shared/calendar/CalendarView";
 
 /** Club-wide view. Coaches run their own team's schedule; admins also create
  *  club-wide events from here. */
@@ -14,7 +14,7 @@ export default async function AdminSchedulePage() {
   return (
     <main className="flex flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-ink">Schedule</h1>
+        <h1 className="font-display text-3xl text-ink">Schedule</h1>
         <p className="mt-1 text-ink-dim">Every event across every team.</p>
       </div>
 

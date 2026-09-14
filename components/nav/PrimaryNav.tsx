@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -76,6 +76,32 @@ export default function PrimaryNav({
     (item) => !primary.some((p) => p.href === item.href) && isActive(pathname, item.href),
   );
 
+  // Sliding active-pill indicator (desktop nav only) — measures the active
+  // item's real position/width and animates a shared background to it,
+  // rather than each link mounting its own background on/off. "more" is a
+  // synthetic key alongside real hrefs since the More button isn't a NavItem.
+  const navRef = useRef<HTMLElement>(null);
+  const itemRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [activePillRect, setActivePillRect] = useState({ left: 0, width: 0, visible: false });
+  const activeKey = moreActive || open ? "more" : primary.find((item) => isActive(pathname, item.href))?.href;
+
+  useLayoutEffect(() => {
+    const container = navRef.current;
+    const target = activeKey ? itemRefs.current[activeKey] : null;
+    if (!container || !target) {
+      setActivePillRect((r) => ({ ...r, visible: false }));
+      return;
+    }
+    const measure = () => {
+      const containerBox = container.getBoundingClientRect();
+      const targetBox = target.getBoundingClientRect();
+      setActivePillRect({ left: targetBox.left - containerBox.left, width: targetBox.width, visible: true });
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [activeKey]);
+
   // desktop pill
   const pill =
     "flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition whitespace-nowrap";
@@ -89,15 +115,44 @@ export default function PrimaryNav({
       <header className="sticky top-0 z-40 hidden border-b border-line bg-ground/85 backdrop-blur-md lg:block">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-8 py-2">
           <Brandmark size="sm" href={homeHref} className="shrink-0" />
-          <nav aria-label="Primary" className="flex flex-1 items-center gap-1">
+          <nav aria-label="Primary" ref={navRef} className="relative flex flex-1 items-center gap-1">
+            {/* Shared sliding indicator — one element that moves/resizes to
+                the active item, instead of each pill mounting its own
+                background. Off entirely under prefers-reduced-motion. */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-1 left-0 rounded-full bg-gradient-to-br from-flame to-ember shadow-[0_0_18px_-3px_rgb(var(--flame)/0.6)] transition-[transform,width,opacity] duration-300 ease-out motion-reduce:transition-none"
+              style={{
+                transform: `translateX(${activePillRect.left}px)`,
+                width: activePillRect.width,
+                opacity: activePillRect.visible ? 1 : 0,
+              }}
+            />
             {primary.map((item) => {
               const active = isActive(pathname, item.href);
+              // Text colour follows the *pill's* location (activeKey), not
+              // this item's own independent isActive check — the two can
+              // legitimately disagree: on a sub-route like /coach/training/
+              // plans, "Training" still matches isActive (prefix match) but
+              // moreActive has already moved the pill over to "More", since
+              // "Session plans" is a full-menu-only item. Colouring off the
+              // item's own check made "Training"'s text turn white with no
+              // orange pill under it — invisible text. This was a real,
+              // reproducible bug, not a screenshot fluke.
+              const pillIsHere = activeKey === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  ref={(el) => {
+                    itemRefs.current[item.href] = el;
+                  }}
                   aria-current={active ? "page" : undefined}
-                  className={cn(pill, active ? "bg-flame/10 text-flame-ink" : "text-ink-dim hover:bg-surface-2 hover:text-ink")}
+                  className={cn(
+                    pill,
+                    "relative z-10 transition-colors duration-300",
+                    pillIsHere ? "text-on-flame" : "text-ink-dim hover:bg-surface-2 hover:text-ink",
+                  )}
                 >
                   <NavIcon name={item.icon} className="h-4 w-4" />
                   {item.label}
@@ -106,8 +161,15 @@ export default function PrimaryNav({
             })}
             <button
               type="button"
+              ref={(el) => {
+                itemRefs.current.more = el;
+              }}
               onClick={() => setOpen(true)}
-              className={cn(pill, moreActive || open ? "bg-flame/10 text-flame-ink" : "text-ink-dim hover:bg-surface-2 hover:text-ink")}
+              className={cn(
+                pill,
+                "relative z-10 transition-colors duration-300",
+                moreActive || open ? "text-on-flame" : "text-ink-dim hover:bg-surface-2 hover:text-ink",
+              )}
             >
               <MoreIcon />
               More
@@ -162,7 +224,8 @@ export default function PrimaryNav({
       {/* ---- shared "More" drawer ---- */}
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm data-[state=open]:animate-fade-in motion-reduce:animate-none" />
+          {/* Dim, not blur — see components/ui/Dialog.tsx for why. */}
+          <Dialog.Overlay className="fixed inset-0 z-[60] bg-black/55 data-[state=open]:animate-fade-in motion-reduce:animate-none" />
           <Dialog.Content
             aria-describedby={undefined}
             className="fixed inset-x-0 bottom-0 z-[61] mx-auto max-h-[85vh] max-w-lg overflow-y-auto rounded-t-[20px] border border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-pop"

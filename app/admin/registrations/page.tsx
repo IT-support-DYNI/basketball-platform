@@ -3,7 +3,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
 import StatusBadge from "@/components/StatusBadge";
 import { EmptyState } from "@/components/ui/states";
-import ReviewRegistrationForm from "@/components/admin/ReviewRegistrationForm";
+import ReviewRegistrationForm from "@/app/admin/registrations/_components/ReviewRegistrationForm";
 
 export default async function AdminRegistrationsPage() {
   const [registrations, teams] = await Promise.all([

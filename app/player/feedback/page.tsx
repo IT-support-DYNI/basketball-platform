@@ -21,12 +21,12 @@ export default async function PlayerFeedbackPage() {
 
   return (
     <main>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Coach Feedback</h1>
+      <h1 className="font-display text-3xl text-ink">Coach Feedback</h1>
       <p className="mt-1 text-slate-600">Everything your coach has shared with you.</p>
 
       <ul className="mt-6 space-y-3">
         {feedback.map((f) => (
-          <li key={f.id} className="rounded-2xl border border-slate-200 bg-surface p-5">
+          <li key={f.id} className="rounded-card border border-line bg-surface p-5">
             <p className="italic text-slate-700">"{f.message}"</p>
             <p className="mt-2 text-xs text-slate-400">
               — {f.coach.user.name} · {new Date(f.createdAt).toLocaleDateString()}

@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import AppContainer from "@/components/app/AppContainer";
 import PageHeader from "@/components/ui/PageHeader";
-import MessagesClient from "@/components/messages/MessagesClient";
+import MessagesClient from "@/app/messages/_components/MessagesClient";
 
 /** Team / group / direct chat. Shared by every signed-in role. */
 export default async function MessagesPage({
