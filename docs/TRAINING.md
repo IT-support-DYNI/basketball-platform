@@ -73,11 +73,11 @@ No migration — uses the existing `TrainingPlan.eventId @unique`.
   be linked. `linkableSessionsFor(teamId, currentPlanId?)` lists the team's
   recent + upcoming training / matches that are free (or already this plan's).
 - **Where it's set** — the `PlanBuilder` header has a "Linked session" select.
-  The calendar event dialog (`components/calendar/CalendarView.tsx`), for a
+  The calendar event dialog (`components/shared/calendar/CalendarView.tsx`), for a
   coach on a plannable team event, shows the linked plan (a link) or a
   "Build a session plan →" link to `/coach/training/plans/new?eventId=…`, which
   pre-fills the team + date and links on create.
-- **Player read view** — `components/training/PlanReadView.tsx` renders a plan
+- **Player read view** — `components/shared/calendar/PlanReadView.tsx` renders a plan
   read-only (objectives, blocks with durations + drill names, running total).
   The calendar dialog embeds it for a player when the event's plan is
   `PUBLISHED` — it fetches `/api/v1/training-plans/{id}` (players are authorised
@@ -94,7 +94,7 @@ No migration — fills the `Drill.courtDiagram` jsonb column.
   `move` / `pass` / `dribble` / `screen` for arrows. **All coordinates are
   normalised 0–1** within a half-court box (basket at the top). The drill
   create/update schemas validate `courtDiagram` against this.
-- **Component** — `components/training/CourtDiagram.tsx` is both the editor and
+- **Component** — `app/coach/drills/_components/CourtDiagram.tsx` is both the editor and
   the read view (editor when passed `onChange`). It draws the half-court
   markings in SVG, then the arrows and markers. Editing: pick a tool, tap the
   court to drop a marker (drag to move it), or tap twice to draw an arrow;

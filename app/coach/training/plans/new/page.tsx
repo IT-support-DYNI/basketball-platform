@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { listPlans } from "@/lib/training-plans";
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
-import NewPlanForm from "@/components/training/NewPlanForm";
+import NewPlanForm from "@/app/coach/training/plans/new/_components/NewPlanForm";
 
 export const metadata = { title: "New session plan" };
 

@@ -3,7 +3,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
 import StatusBadge from "@/components/StatusBadge";
 import { EmptyState } from "@/components/ui/states";
-import ReviewSafeguardingReportForm from "@/components/admin/ReviewSafeguardingReportForm";
+import ReviewSafeguardingReportForm from "@/app/admin/safeguarding/_components/ReviewSafeguardingReportForm";
 
 export default async function AdminSafeguardingPage() {
   const reports = await prisma.safeguardingReport.findMany({

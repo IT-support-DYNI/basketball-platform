@@ -4,10 +4,10 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getActiveSeason } from "@/lib/season";
 import { loadPlayerProfileView } from "@/lib/player-profile-view";
-import EditProfileForm from "@/components/player/EditProfileForm";
-import PlayerProfileHero from "@/components/player/PlayerProfileHero";
-import PlayerProfileSections from "@/components/player/PlayerProfileSections";
-import ScrollReveal from "@/components/player/ScrollReveal";
+import EditProfileForm from "@/app/player/profile/_components/EditProfileForm";
+import PlayerProfileHero from "@/components/shared/player-profile/PlayerProfileHero";
+import PlayerProfileSections from "@/components/shared/player-profile/PlayerProfileSections";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 
 export default async function PlayerProfilePage() {
   const session = await getServerSession(authOptions);

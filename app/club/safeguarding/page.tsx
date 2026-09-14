@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import SafeguardingConcernForm from "@/components/public/landing/SafeguardingConcernForm";
+import SafeguardingConcernForm from "@/app/club/_components/SafeguardingConcernForm";
 
 export const metadata: Metadata = { title: "Safeguarding" };
 

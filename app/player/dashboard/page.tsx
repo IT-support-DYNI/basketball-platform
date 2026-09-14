@@ -6,12 +6,12 @@ import { getPlayerDashboard } from "@/lib/dashboard";
 import { actionItemsFor } from "@/lib/action-items";
 import { eventDayLabel, eventTimeRange } from "@/lib/events";
 import StatTile from "@/components/StatTile";
-import ActionItems from "@/components/dashboard/ActionItems";
-import ProgressBar from "@/components/dashboard/ProgressBar";
-import Sparkline from "@/components/dashboard/Sparkline";
-import CountUp from "@/components/player/CountUp";
-import ScrollReveal from "@/components/player/ScrollReveal";
-import DashboardHero from "@/components/dashboard/DashboardHero";
+import ActionItems from "@/components/shared/dashboard/ActionItems";
+import ProgressBar from "@/app/player/dashboard/_components/ProgressBar";
+import Sparkline from "@/app/player/dashboard/_components/Sparkline";
+import CountUp from "@/components/ui/CountUp";
+import ScrollReveal from "@/components/ui/ScrollReveal";
+import DashboardHero from "@/components/shared/dashboard/DashboardHero";
 import Card from "@/components/ui/Card";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {

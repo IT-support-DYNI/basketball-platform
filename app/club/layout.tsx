@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Architects_Daughter, Big_Shoulders_Display, Fraunces, IBM_Plex_Mono } from "next/font/google";
 
-import "@/styles/dyni-landing/tokens.css";
-import "@/styles/dyni-landing/landing.css";
+import "@/app/club/_styles/tokens.css";
+import "@/app/club/_styles/landing.css";
 
 // Self-hosted via next/font instead of a CSS @import from fonts.googleapis.com
 // — the site's CSP (next.config.mjs) is 'self'-only for style-src/font-src,
@@ -24,9 +24,9 @@ const ibmPlexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "
 // handwritten-headline marketing voice used everywhere else.
 const bigShouldersDisplay = Big_Shoulders_Display({ subsets: ["latin"], weight: ["700", "800"], variable: "--nf-condensed" });
 
-import ScrollProgressBar from "@/components/public/landing/ScrollProgressBar";
-import LandingNav from "@/components/public/landing/LandingNav";
-import LandingFooter from "@/components/public/landing/LandingFooter";
+import ScrollProgressBar from "@/app/club/_components/ScrollProgressBar";
+import LandingNav from "@/app/club/_components/LandingNav";
+import LandingFooter from "@/app/club/_components/LandingFooter";
 
 // The root layout (app/layout.tsx) already defines the "%s · DYNI Blazers"
 // template — redeclaring it here made a page with no title of its own read
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
  *  header middleware.ts stamps onto every request — see components/NavBar.tsx.
  *
  *  Every /club/* page shares the same "DYNI Blazers Landing" design
- *  (styles/dyni-landing/) — nav, footer and scroll-progress bar live here so
+ *  (app/club/_styles/, app/club/_components/) — nav, footer and scroll-progress bar live here so
  *  every page gets them for free instead of redeclaring them; a page that
  *  used the old Tailwind-styled PublicHeader/PublicFooter here would look
  *  like two different sites stitched together. */

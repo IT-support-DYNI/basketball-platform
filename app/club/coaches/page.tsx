@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { getPublicCoaches } from "@/lib/public-site";
-import TiltCard from "@/components/public/landing/TiltCard";
+import TiltCard from "@/app/club/_components/TiltCard";
 
 export const metadata: Metadata = { title: "Coaching staff" };
 

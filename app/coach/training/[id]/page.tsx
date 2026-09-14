@@ -9,9 +9,9 @@ import { describeRule } from "@/lib/recurrence";
 import { rosterPlayerFilter } from "@/lib/roster";
 import { RSVP_LABEL, tallyResponses } from "@/lib/rsvp";
 import StatusBadge from "@/components/StatusBadge";
-import MarkAttendanceForm from "@/components/coach/MarkAttendanceForm";
-import AttendanceCorrections from "@/components/coach/AttendanceCorrections";
-import SessionStatusControls from "@/components/coach/SessionStatusControls";
+import MarkAttendanceForm from "@/app/coach/training/[id]/_components/MarkAttendanceForm";
+import AttendanceCorrections from "@/app/coach/training/[id]/_components/AttendanceCorrections";
+import SessionStatusControls from "@/app/coach/training/[id]/_components/SessionStatusControls";
 
 export default async function CoachEventDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

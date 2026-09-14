@@ -5,7 +5,7 @@ import { getTenantContext } from "@/lib/tenant";
 import { listDrills } from "@/lib/drills";
 import PageHeader from "@/components/ui/PageHeader";
 import { ButtonLink } from "@/components/ui/Button";
-import DrillLibrary from "@/components/training/DrillLibrary";
+import DrillLibrary from "@/app/coach/drills/_components/DrillLibrary";
 
 export const metadata = { title: "Drills" };
 

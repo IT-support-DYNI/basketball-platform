@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getOrCreateCalendarToken } from "@/lib/calendar-feed";
 import { baseUrl } from "@/lib/base-url";
-import CalendarView from "@/components/calendar/CalendarView";
+import CalendarView from "@/components/shared/calendar/CalendarView";
 
 /** Club-wide view. Coaches run their own team's schedule; admins also create
  *  club-wide events from here. */

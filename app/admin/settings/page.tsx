@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import PostAnnouncementForm from "@/components/admin/PostAnnouncementForm";
-import DeleteAnnouncementButton from "@/components/admin/DeleteAnnouncementButton";
+import PostAnnouncementForm from "@/app/admin/settings/_components/PostAnnouncementForm";
+import DeleteAnnouncementButton from "@/app/admin/settings/_components/DeleteAnnouncementButton";
 
 export default async function AdminSettingsPage() {
   const [teams, announcements] = await Promise.all([

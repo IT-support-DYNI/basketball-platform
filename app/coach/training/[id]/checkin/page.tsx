@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { eventDayLabel, eventTimeRange } from "@/lib/events";
-import QrScreen from "@/components/checkin/QrScreen";
+import QrScreen from "@/app/coach/training/[id]/checkin/_components/QrScreen";
 
 export default async function CheckInScreenPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { AUDIT_ACTIONS, listAuditLog } from "@/lib/audit";
 import PageHeader from "@/components/ui/PageHeader";
-import AuditLogViewer from "@/components/admin/AuditLogViewer";
+import AuditLogViewer from "@/app/admin/audit/_components/AuditLogViewer";
 
 export const dynamic = "force-dynamic";
 

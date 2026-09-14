@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import CreateStaffUserForm from "@/components/admin/CreateStaffUserForm";
-import ToggleActiveButton from "@/components/admin/ToggleActiveButton";
+import CreateStaffUserForm from "@/app/admin/users/_components/CreateStaffUserForm";
+import ToggleActiveButton from "@/app/admin/users/_components/ToggleActiveButton";
 
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({

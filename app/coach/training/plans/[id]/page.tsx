@@ -7,7 +7,7 @@ import { planForCaller, linkableSessionsFor } from "@/lib/training-plans";
 import { listDrills } from "@/lib/drills";
 import { ApiError } from "@/lib/api/errors";
 import PageHeader from "@/components/ui/PageHeader";
-import PlanBuilder from "@/components/training/PlanBuilder";
+import PlanBuilder from "@/app/coach/training/plans/[id]/_components/PlanBuilder";
 
 export default async function PlanPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
