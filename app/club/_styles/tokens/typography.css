@@ -1,38 +1,39 @@
 /* DYNI Blazers — type system.
-   Display face is Architects Daughter, a handwritten script — the same
-   headline face used in the site's wireframes, brought into the real
-   design rather than left as a sketch-only placeholder. Fraunces italic is
-   a secondary display face used in exactly ONE place per page (the
-   pull-quote). IBM Plex Mono carries everything else — body copy as well
-   as every label, eyebrow, stat and timestamp — for the "spec sheet" read
-   (labels stay uppercase/tracked-out, body copy doesn't).
+   Display is Big Shoulders Display in ITALIC at 700-900: bold, condensed,
+   raked forward — matching the voice used on the dyni-blazers branch,
+   carried over here (the italic is CSS font-style triggering the browser's
+   own synthesis; the family has no true italic face, same as dyni-blazers).
+   Fraunces italic is a secondary display face used in exactly ONE place per
+   page (the pull-quote). Inter carries body copy. IBM Plex Mono carries
+   every label, eyebrow, stat and timestamp, always uppercase and tracked
+   out.
 
-   All three are loaded via next/font/google in app/club/layout.tsx (as
-   --nf-display/--nf-quote/--nf-mono on the .dyni-landing wrapper), not a
-   CSS @import — this stylesheet is bundled together with the other
-   tokens/*.css files, so an @import here wouldn't be the first rule in the
-   combined output and the CSS spec has browsers silently drop it; next/font
-   also self-hosts, which the page's 'self'-only CSP requires anyway.
-   Scoped to `.dyni-landing`, same reasoning as tokens/colors.css. */
+   All four are loaded via next/font/google in app/club/layout.tsx (as
+   --nf-condensed/--nf-quote/--nf-body/--nf-mono on the .dyni-landing
+   wrapper), not a CSS @import — this stylesheet is bundled together with
+   the other tokens/*.css files, so an @import here wouldn't be the first
+   rule in the combined output and the CSS spec has browsers silently drop
+   it; next/font also self-hosts, which the page's 'self'-only CSP requires
+   anyway. Scoped to `.dyni-landing`, same reasoning as tokens/colors.css. */
 
 .dyni-landing {
-  --font-display: var(--nf-display), "Comic Sans MS", cursive;
+  --font-display: var(--nf-condensed), "Arial Narrow", sans-serif;
   --font-quote: var(--nf-quote), Georgia, serif;
-  --font-body: var(--nf-mono), ui-monospace, monospace;
+  --font-body: var(--nf-body), system-ui, sans-serif;
   --font-mono: var(--nf-mono), ui-monospace, monospace;
-  /* Bold condensed uppercase — player/coach profile banners only, see
-     app/club/layout.tsx for why this is a second display face. */
+  /* Same face as --font-display — kept as its own name since it started as
+     a narrower-purpose token (player/coach profile banners) before the
+     rest of the site's headings switched to this face too. */
   --font-condensed: var(--nf-condensed), "Arial Narrow", sans-serif;
 
-  /* Display scale — handwritten, single weight, loose enough that
-     ascenders/descenders don't collide */
+  /* Display scale — italic, tight */
   --type-hero: clamp(2.75rem, 6.5vw, 5rem);
   --type-display-1: clamp(2rem, 3.6vw, 2.5rem);
   --type-display-2: clamp(1.625rem, 2.8vw, 2rem);
   --type-display-3: 1.375rem;
-  --display-weight: 400;
-  --display-tracking: 0em;
-  --display-leading: 1.08;
+  --display-weight: 800;
+  --display-tracking: -0.005em;
+  --display-leading: 0.88;
 
   /* Body scale */
   --type-lead: 1.0625rem;

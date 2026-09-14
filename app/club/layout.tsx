@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Architects_Daughter, Big_Shoulders_Display, Fraunces, IBM_Plex_Mono } from "next/font/google";
+import { Big_Shoulders_Display, Fraunces, IBM_Plex_Mono, Inter } from "next/font/google";
 
 import "@/app/club/_styles/tokens.css";
 import "@/app/club/_styles/landing.css";
@@ -10,7 +10,6 @@ import "@/app/club/_styles/landing.css";
 // very first rule is silently dropped by the CSS spec once the local
 // tokens/*.css files get bundled together. next/font sidesteps both: it
 // downloads the font at build time and serves it same-origin.
-const architectsDaughter = Architects_Daughter({ subsets: ["latin"], weight: "400", variable: "--nf-display" });
 const fraunces = Fraunces({
   subsets: ["latin"],
   style: ["italic"],
@@ -18,11 +17,12 @@ const fraunces = Fraunces({
   variable: "--nf-quote",
 });
 const ibmPlexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--nf-mono" });
-// A second display face, condensed/bold/uppercase — used only on player and
-// coach profile "stat card" banners (an NBA.com-style player-page layout),
-// which deliberately reads as a sports stat sheet rather than the site's
-// handwritten-headline marketing voice used everywhere else.
-const bigShouldersDisplay = Big_Shoulders_Display({ subsets: ["latin"], weight: ["700", "800"], variable: "--nf-condensed" });
+const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--nf-body" });
+// The site's one display face — bold, condensed, italic (matching
+// dyni-blazers' voice). Used for every heading as well as the player/coach
+// profile "stat card" banners (an NBA.com-style player-page layout), which
+// share the same broadcast-scoreboard read as the rest of the site now.
+const bigShouldersDisplay = Big_Shoulders_Display({ subsets: ["latin"], weight: ["700", "800", "900"], variable: "--nf-condensed" });
 
 import ScrollProgressBar from "@/app/club/_components/ScrollProgressBar";
 import LandingNav from "@/app/club/_components/LandingNav";
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
 export default function ClubLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={`dyni-landing ${architectsDaughter.variable} ${fraunces.variable} ${ibmPlexMono.variable} ${bigShouldersDisplay.variable}`}
+      className={`dyni-landing ${inter.variable} ${fraunces.variable} ${ibmPlexMono.variable} ${bigShouldersDisplay.variable}`}
     >
       <ScrollProgressBar />
       <LandingNav />
