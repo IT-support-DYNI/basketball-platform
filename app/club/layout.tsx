@@ -1,28 +1,58 @@
 import type { Metadata } from "next";
-import { Big_Shoulders_Display, Fraunces, IBM_Plex_Mono, Inter } from "next/font/google";
+import localFont from "next/font/local";
 
 import "@/app/club/_styles/tokens.css";
 import "@/app/club/_styles/landing.css";
 
-// Self-hosted via next/font instead of a CSS @import from fonts.googleapis.com
-// — the site's CSP (next.config.mjs) is 'self'-only for style-src/font-src,
-// and even with an allowance added, a same-stylesheet @import that isn't the
-// very first rule is silently dropped by the CSS spec once the local
-// tokens/*.css files get bundled together. next/font sidesteps both: it
-// downloads the font at build time and serves it same-origin.
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  style: ["italic"],
-  weight: ["400", "600"],
+// Self-hosted as static files (next/font/local) rather than next/font/google
+// — two reasons. First, the one this comment originally covered: the site's
+// CSP (next.config.mjs) is 'self'-only for style-src/font-src, and even with
+// an allowance added, a same-stylesheet @import that isn't the very first
+// rule is silently dropped by the CSS spec once the local tokens/*.css files
+// get bundled together, so a plain <link>/@import to fonts.googleapis.com
+// was never going to work cleanly. Second: next/font/google still means
+// fetching from Google's servers at every cold build/dev-compile — a hard
+// dependency on reaching fonts.gstatic.com at exactly that moment, which on
+// a flaky/filtered connection means every page compile hangs through several
+// retries before falling back to a system font. Bundling the actual woff2
+// files (app/fonts/, shared with the root layout) removes that network
+// round-trip entirely.
+const fraunces = localFont({
+  src: [
+    { path: "../fonts/fraunces-italic-400.woff2", weight: "400", style: "italic" },
+    { path: "../fonts/fraunces-italic-600.woff2", weight: "600", style: "italic" },
+  ],
   variable: "--nf-quote",
 });
-const ibmPlexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--nf-mono" });
-const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--nf-body" });
+const ibmPlexMono = localFont({
+  src: [
+    { path: "../fonts/ibm-plex-mono-400.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/ibm-plex-mono-500.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/ibm-plex-mono-600.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--nf-mono",
+});
+const inter = localFont({
+  src: [
+    { path: "../fonts/inter-400.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/inter-500.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/inter-600.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/inter-700.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--nf-body",
+});
 // The site's one display face — bold, condensed, italic (matching
 // dyni-blazers' voice). Used for every heading as well as the player/coach
 // profile "stat card" banners (an NBA.com-style player-page layout), which
 // share the same broadcast-scoreboard read as the rest of the site now.
-const bigShouldersDisplay = Big_Shoulders_Display({ subsets: ["latin"], weight: ["700", "800", "900"], variable: "--nf-condensed" });
+const bigShouldersDisplay = localFont({
+  src: [
+    { path: "../fonts/big-shoulders-display-700.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/big-shoulders-display-800.woff2", weight: "800", style: "normal" },
+    { path: "../fonts/big-shoulders-display-900.woff2", weight: "900", style: "normal" },
+  ],
+  variable: "--nf-condensed",
+});
 
 import ScrollProgressBar from "@/app/club/_components/ScrollProgressBar";
 import LandingNav from "@/app/club/_components/LandingNav";

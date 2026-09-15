@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Big_Shoulders_Display, IBM_Plex_Mono, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -18,22 +18,49 @@ import ThemeScript from "@/components/theme/ThemeScript";
 // they no longer hold Inter/Archivo/Barlow — renaming them would mean
 // touching every consumer in tailwind.config.ts's fontFamily map and
 // beyond for no functional gain.
-const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-inter", display: "swap" });
-const archivo = Big_Shoulders_Display({
-  subsets: ["latin"],
-  weight: ["700", "800", "900"],
+//
+// Self-hosted as static files (next/font/local) rather than next/font/google:
+// the latter fetches from Google's servers at every cold build/dev-compile,
+// which is a hard dependency on reaching fonts.gstatic.com at exactly that
+// moment — on a flaky/filtered connection this manifests as every page
+// compile hanging through several retries before falling back to a system
+// font (see the AbortError/"Failed to download" loop this was replacing).
+// Bundling the woff2 files removes that network round-trip entirely, for
+// every environment, not just unreliable ones — a straightforward reliability
+// and build-time win. See app/fonts/ for the actual files.
+const inter = localFont({
+  src: [
+    { path: "./fonts/inter-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/inter-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/inter-600.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/inter-700.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-inter",
+  display: "swap",
+});
+const archivo = localFont({
+  src: [
+    { path: "./fonts/big-shoulders-display-700.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/big-shoulders-display-800.woff2", weight: "800", style: "normal" },
+    { path: "./fonts/big-shoulders-display-900.woff2", weight: "900", style: "normal" },
+  ],
   variable: "--font-archivo",
   display: "swap",
 });
-const barlow = Big_Shoulders_Display({
-  subsets: ["latin"],
-  weight: ["700", "800", "900"],
+const barlow = localFont({
+  src: [
+    { path: "./fonts/big-shoulders-display-700.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/big-shoulders-display-800.woff2", weight: "800", style: "normal" },
+    { path: "./fonts/big-shoulders-display-900.woff2", weight: "900", style: "normal" },
+  ],
   variable: "--font-barlow",
   display: "swap",
 });
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const plexMono = localFont({
+  src: [
+    { path: "./fonts/ibm-plex-mono-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/ibm-plex-mono-500.woff2", weight: "500", style: "normal" },
+  ],
   variable: "--font-plex-mono",
   display: "swap",
 });
