@@ -1,10 +1,12 @@
 import type { MailMessage, MailPort } from "./port";
 import { ConsoleMailAdapter } from "./console-adapter";
+import { ResendMailAdapter } from "./resend-adapter";
 
 /**
  * Chooses the mail transport from `MAIL_TRANSPORT`:
  *   - "console" (default) — logs to the server console (dev / preview / free tier)
- *   - future: "resend" | "smtp" | "ses" — add the adapter and a case here only
+ *   - "resend" — real email via Resend's API (needs RESEND_API_KEY + MAIL_FROM, see .env.example)
+ *   - future: "smtp" | "ses" — add the adapter and a case here only
  *
  * `sendMail` never throws to the caller: a failed transactional email should not
  * fail the request that triggered it (registration, password reset). It logs and
@@ -12,6 +14,8 @@ import { ConsoleMailAdapter } from "./console-adapter";
  */
 function makeTransport(): MailPort {
   switch (process.env.MAIL_TRANSPORT) {
+    case "resend":
+      return new ResendMailAdapter();
     case "console":
     case undefined:
     case "":

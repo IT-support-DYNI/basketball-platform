@@ -112,6 +112,24 @@ Players can opt in from `/player/notifications` to get browser push notification
 
 Without these set, the "Enable push notifications" button just tells the user push isn't configured yet — nothing else breaks. A subscription a browser has revoked (uninstalled the PWA, cleared site data) gets cleaned up automatically the next time a push to it fails.
 
+## Email (verification links, password resets)
+
+Without a provider configured, `MAIL_TRANSPORT` defaults to `"console"` — every email (registration verification, forgot-password) just prints to the server log instead of sending. That's fine for local dev, but on a real deployment it means **nobody ever actually receives a password reset link**, they only exist in Vercel's function logs.
+
+To send real email via **[Resend](https://resend.com)** (free tier, no card required):
+
+1. Sign up, verify a sending domain under **Domains** (or use a subdomain you control — Resend walks you through the DNS records).
+2. Create an API key under **API Keys**.
+3. Set in `.env` (and Vercel → Settings → Environment Variables for production):
+
+   | Key | Value |
+   |---|---|
+   | `MAIL_TRANSPORT` | `"resend"` |
+   | `RESEND_API_KEY` | the API key from step 2 |
+   | `MAIL_FROM` | e.g. `"DYNI Blazers <noreply@your-verified-domain.com>"` — must be on the domain verified in step 1 |
+
+Until a domain is verified, Resend only delivers to the email address on the Resend account itself — sends to anyone else silently fail (logged server-side, per `sendMail`'s "never throws to the caller" rule in `lib/mail/index.ts`, but nothing reaches the user). Swapping providers later (SMTP, SES) is a one-file change — see `lib/mail/index.ts`.
+
 ## Deploying to Vercel
 
 - `@vercel/analytics` and `@vercel/speed-insights` are already installed and rendered in `app/layout.tsx` (`<Analytics />` / `<SpeedInsights />`) — they no-op locally and activate automatically once deployed on Vercel.
