@@ -80,7 +80,7 @@ export default function PublicVisibilityPanel({ player }: { player: PlayerProfil
       key: "showStats",
       patchField: "publicShowStats",
       label: "Season stats",
-      sublabel: "Height, weight, hand and country",
+      sublabel: "Height, weight and hand",
       hasContent: true,
     },
     {

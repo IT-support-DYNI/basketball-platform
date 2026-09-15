@@ -652,7 +652,10 @@ model PlayerPhoto {
 }
 
 /// A link to an external video (YouTube/Hudl/etc) a player adds to their own
-/// profile — recruiter-facing, so self-service rather than staff-only.
+/// profile — recruiter-facing, so self-service rather than staff-only. A
+/// player can instead upload a clip directly (storageKey, private-bucket
+/// key resolved via lib/storage.ts the same way a Video's key is) — exactly
+/// one of url/storageKey is set, never both.
 /// Visible on the public site only when the parent profile is
 /// publicProfileApproved; the field-visibility gate still governs it
 /// club-side the same as bio/photoUrl.
@@ -661,7 +664,8 @@ model PlayerHighlight {
   playerProfileId Int
   playerProfile   PlayerProfile @relation(fields: [playerProfileId], references: [id], onDelete: Cascade)
   title           String
-  url             String
+  url             String?
+  storageKey      String?
   createdAt       DateTime @default(now())
 
   @@index([playerProfileId])
@@ -1044,7 +1048,11 @@ model Video {
   /// playback URLs are signed on demand via lib/storage.ts's getPlaybackUrl,
   /// never stored, since several free-tier providers gate public bucket
   /// access behind payment info. See lib/storage.ts's file comment.
-  key              String
+  /// Exactly one of key/externalUrl is set — a coach either uploads a file
+  /// or links one already hosted elsewhere (YouTube, Hudl…), never both.
+  key              String?
+  /// A link to video already hosted elsewhere, in place of an upload.
+  externalUrl      String?
   thumbnailKey     String?
   uploadedByUserId Int
   uploadedBy       User          @relation("VideoUploader", fields: [uploadedByUserId], references: [id])

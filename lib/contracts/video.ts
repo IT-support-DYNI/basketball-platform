@@ -17,13 +17,22 @@ export const requestUploadSchema = z.object({
   contentType: z.string().min(1),
 });
 
-export const createVideoSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().optional(),
-  category: videoCategory,
-  key: z.string().min(1),
-  thumbnailKey: z.string().min(1).optional(),
-});
+/** A video is either uploaded (key, a private-bucket key) or linked from
+ *  wherever it's already hosted (externalUrl — YouTube, Hudl…) — exactly one
+ *  of the two. A linked video plays as an outbound link, same as a player's
+ *  external highlight; only an uploaded one gets the inline preview player. */
+export const createVideoSchema = z
+  .object({
+    title: z.string().min(1),
+    description: z.string().optional(),
+    category: videoCategory,
+    key: z.string().min(1).optional(),
+    externalUrl: z.string().trim().url().max(500).optional(),
+    thumbnailKey: z.string().min(1).optional(),
+  })
+  .refine((d) => (d.key ? 1 : 0) + (d.externalUrl ? 1 : 0) === 1, {
+    message: "Provide either an uploaded video or a link — not both.",
+  });
 
 export const assignVideoSchema = z
   .object({

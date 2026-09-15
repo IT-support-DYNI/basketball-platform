@@ -48,10 +48,11 @@ export const GET = route(async (req: NextRequest) => {
   });
 
   // The bucket is private (ARCHITECTURE.md / lib/storage.ts) — playback URLs are signed fresh per request, never stored.
+  // A linked video (externalUrl set, no key) plays straight from wherever it's hosted — nothing to sign.
   const withPlaybackUrls = await Promise.all(
     videos.map(async (v) => ({
       ...v,
-      playbackUrl: await getPlaybackUrl(v.key),
+      playbackUrl: v.externalUrl ?? (v.key ? await getPlaybackUrl(v.key) : ""),
       thumbnailUrl: v.thumbnailKey ? await getPlaybackUrl(v.thumbnailKey) : null,
     }))
   );
@@ -70,6 +71,7 @@ export const POST = route(async (req: NextRequest) => {
       description: body.description,
       category: body.category,
       key: body.key,
+      externalUrl: body.externalUrl,
       thumbnailKey: body.thumbnailKey,
       uploadedByUserId: Number(session.user.id),
     },

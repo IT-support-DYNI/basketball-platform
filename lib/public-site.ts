@@ -174,11 +174,13 @@ export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> 
 
 export type PublicPlayerProfile = PublicPlayerCard & {
   jerseyNumber: number | null;
-  highlights: { id: number; title: string; url: string }[];
+  highlights: { id: number; title: string; url: string; uploaded: boolean }[];
   /// Physicals — the only "season stats" this app actually tracks (no
-  /// points/rebounds/assists exist yet). Admin-gated like everything else
-  /// here; null means "not published", not "no data".
-  stats: { heightCm: number | null; weightKg: number | null; preferredHand: string | null; nationality: string | null } | null;
+  /// points/rebounds/assists exist yet). Nationality is deliberately not
+  /// part of this set (kept off the public site even when this is
+  /// published) — everything else at this tier is. Admin-gated like
+  /// everything else here; null means "not published", not "no data".
+  stats: { heightCm: number | null; weightKg: number | null; preferredHand: string | null } | null;
 };
 
 /** One player's public page. Returns null for anyone not approved — the
@@ -218,20 +220,30 @@ export async function getPublicPlayer(playerId: number): Promise<PublicPlayerPro
     ageGroup: membership?.team.ageGroup ?? null,
     bio: player.publicShowBio ? ((visible as { bio?: string | null }).bio ?? null) : null,
     jerseyNumber: membership?.jerseyNumber ?? null,
-    highlights: player.publicShowHighlights ? player.highlights.map((h) => ({ id: h.id, title: h.title, url: h.url })) : [],
-    // heightCm/weightKg/nationality/preferredHand aren't PUBLIC-tier in
+    highlights: player.publicShowHighlights
+      ? await Promise.all(
+          player.highlights.map(async (h) => ({
+            id: h.id,
+            title: h.title,
+            url: h.url ?? (h.storageKey ? await getPlaybackUrl(h.storageKey, 3600) : ""),
+            uploaded: !!h.storageKey,
+          })),
+        )
+      : [],
+    // heightCm/weightKg/preferredHand aren't PUBLIC-tier in
     // field-visibility.ts's general matrix (deliberately — see that file),
     // so this reads them straight off `player`, not through `visible`, and
     // only when this specific player's admin-controlled publicShowStats
     // flag is on. That keeps the general API's blanket privacy rule intact
     // for every other caller while allowing this one opt-in-per-player,
-    // admin-gated path to publish physicals on the public site.
+    // admin-gated path to publish physicals on the public site. Nationality
+    // is left out on purpose, even here — country of origin for a minor is
+    // one more fact than this needs to publish.
     stats: player.publicShowStats
       ? {
           heightCm: player.heightCm,
           weightKg: player.weightKg,
           preferredHand: player.preferredHand,
-          nationality: player.nationality,
         }
       : null,
   };

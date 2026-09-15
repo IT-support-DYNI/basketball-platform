@@ -15,10 +15,11 @@ export default async function PlayerVideosPage() {
   });
 
   // Signed fresh per page load — the bucket is private, nothing here is a permanent public URL (see lib/storage.ts).
+  // A linked video (externalUrl, no key) plays straight from wherever it's hosted.
   const assignments = await Promise.all(
     assignmentRows.map(async (a) => ({
       ...a,
-      playbackUrl: await getPlaybackUrl(a.video.key),
+      playbackUrl: a.video.externalUrl ?? (a.video.key ? await getPlaybackUrl(a.video.key) : ""),
       thumbnailUrl: a.video.thumbnailKey ? await getPlaybackUrl(a.video.thumbnailKey) : null,
     }))
   );

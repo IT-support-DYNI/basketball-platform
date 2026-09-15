@@ -64,7 +64,14 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
   // sees them — same bio/photoUrl visibility rule, applied by hand.
   const canSeePublicFields = scope.kinds.has("PUBLIC") ? rest.publicProfileApproved === true : true;
   const highlights = canSeePublicFields
-    ? rawHighlights.map((h) => ({ id: h.id, title: h.title, url: h.url }))
+    ? await Promise.all(
+        rawHighlights.map(async (h) => ({
+          id: h.id,
+          title: h.title,
+          url: h.url ?? (h.storageKey ? await getPlaybackUrl(h.storageKey, 3600) : "") ?? "",
+          uploaded: !!h.storageKey,
+        })),
+      )
     : [];
 
   const currentMembership =

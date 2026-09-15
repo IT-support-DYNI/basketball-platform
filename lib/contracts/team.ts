@@ -13,13 +13,21 @@ export const updateTeamSchema = z.object({
   status: z.enum(["ACTIVE", "ARCHIVED"]).optional(),
 });
 
-/** A highlight is a link to video the player already has hosted elsewhere
- *  (YouTube, Vimeo, Hudl…) — rendered as an outbound link, never embedded, so
- *  there's no iframe/host-allowlist question to answer here. */
-export const createHighlightSchema = z.object({
-  title: z.string().trim().min(1).max(80),
-  url: z.string().trim().url().max(500),
-});
+/** A highlight is either a link to video the player already has hosted
+ *  elsewhere (YouTube, Vimeo, Hudl…) — rendered as an outbound link, never
+ *  embedded, so there's no iframe/host-allowlist question to answer — or a
+ *  clip uploaded straight to storage (storageKey, a private-bucket key
+ *  resolved to a signed URL the same way Video.key already is). Exactly one
+ *  of the two, never both and never neither. */
+export const createHighlightSchema = z
+  .object({
+    title: z.string().trim().min(1).max(80),
+    url: z.string().trim().url().max(500).optional(),
+    storageKey: z.string().trim().min(1).max(500).optional(),
+  })
+  .refine((d) => (d.url ? 1 : 0) + (d.storageKey ? 1 : 0) === 1, {
+    message: "Provide either a link or an uploaded video — not both.",
+  });
 
 export const assignCoachSchema = z.object({
   coachProfileId: z.number().int().positive(),

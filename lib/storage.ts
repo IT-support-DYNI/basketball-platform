@@ -59,7 +59,7 @@ export interface PresignedUpload {
 
 /** folder is e.g. "videos" or "player-photos" — kept out of the caller's control to avoid arbitrary paths. */
 export async function createPresignedUpload(
-  folder: "videos" | "video-thumbnails" | "player-photos",
+  folder: "videos" | "video-thumbnails" | "player-photos" | "highlight-videos",
   contentType: string
 ): Promise<PresignedUpload> {
   const client = getClient();

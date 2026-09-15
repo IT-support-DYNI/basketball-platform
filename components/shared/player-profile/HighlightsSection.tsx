@@ -1,12 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Highlight = { id: number; title: string; url: string };
+type Highlight = { id: number; title: string; url: string; uploaded?: boolean };
 
-/** A YouTube/Vimeo-style watch icon — kept generic since a highlight can
- *  point anywhere the player has it hosted. */
+/** A YouTube/Vimeo-style watch icon — kept generic since a linked highlight
+ *  can point anywhere the player has it hosted. */
 function PlayIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 flex-none text-flame-ink" aria-hidden="true">
@@ -17,12 +17,13 @@ function PlayIcon() {
 }
 
 /**
- * A player's highlight reel — links out to video they already have hosted
- * elsewhere (YouTube, Vimeo, Hudl…), rendered as a plain outbound link, never
- * embedded. In edit mode (the player's own profile) they can add and remove
- * their own entries; everyone else just sees the list, gated the same way
- * bio/photo already are (club-visible always, public only once a guardian/
- * admin has approved it — see lib/player-profile-view.ts).
+ * A player's highlight reel — either a link to video they already have
+ * hosted elsewhere (YouTube, Vimeo, Hudl…), rendered as a plain outbound
+ * link, or a clip uploaded straight to storage, rendered inline. In edit
+ * mode (the player's own profile) they can add and remove their own
+ * entries; everyone else just sees the list, gated the same way bio/photo
+ * already are (club-visible always, public only once a guardian/admin has
+ * approved it — see lib/player-profile-view.ts).
  */
 export default function HighlightsSection({
   playerId,
@@ -34,31 +35,73 @@ export default function HighlightsSection({
   editable: boolean;
 }) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [highlights, setHighlights] = useState(initial);
   const [adding, setAdding] = useState(false);
+  const [mode, setMode] = useState<"link" | "upload">("link");
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function addHighlight(e: FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (mode === "upload" && !file) {
+      setError("Choose a video file first.");
+      return;
+    }
     setBusy(true);
     try {
+      let body: Record<string, unknown>;
+
+      if (mode === "upload" && file) {
+        const urlRes = await fetch(`/api/v1/players/${playerId}/highlight-upload-url`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contentType: file.type || "video/mp4" }),
+        });
+        const urlBody = await urlRes.json();
+        if (!urlRes.ok) {
+          setError(urlBody.error ?? "Couldn't start the upload.");
+          return;
+        }
+        let putRes: Response;
+        try {
+          putRes = await fetch(urlBody.uploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": file.type || "video/mp4" },
+            body: file,
+          });
+        } catch {
+          setError("Upload to storage failed — check the bucket's CORS settings.");
+          return;
+        }
+        if (!putRes.ok) {
+          setError(`Upload to storage failed (HTTP ${putRes.status}).`);
+          return;
+        }
+        body = { title, storageKey: urlBody.key };
+      } else {
+        body = { title, url };
+      }
+
       const res = await fetch(`/api/v1/players/${playerId}/highlights`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, url }),
+        body: JSON.stringify(body),
       });
-      const body = await res.json();
+      const resBody = await res.json();
       if (!res.ok) {
-        setError(body.error ?? "Couldn't add that link — check the URL is valid.");
+        setError(resBody.error ?? "Couldn't add that clip.");
         return;
       }
-      setHighlights((prev) => [body, ...prev]);
+      setHighlights((prev) => [resBody, ...prev]);
       setTitle("");
       setUrl("");
+      setFile(null);
       setAdding(false);
       router.refresh();
     } finally {
@@ -91,32 +134,45 @@ export default function HighlightsSection({
 
       {highlights.length === 0 && !adding && (
         <p className="mt-2 text-sm text-ink-dim">
-          {editable ? "Add a link to a highlight clip — YouTube, Vimeo, Hudl, anywhere it's hosted." : "No highlights yet."}
+          {editable ? "Add a highlight — link to where it's hosted, or upload the clip directly." : "No highlights yet."}
         </p>
       )}
 
       {highlights.length > 0 && (
         <ul className="mt-3 flex flex-col gap-2">
           {highlights.map((h) => (
-            <li key={h.id} className="flex items-center justify-between gap-3 rounded-control border border-line bg-surface-2 px-3 py-2">
-              <a
-                href={h.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink hover:text-flame-ink"
-              >
-                <PlayIcon />
-                <span className="truncate">{h.title}</span>
-              </a>
-              {editable && (
-                <button
-                  type="button"
-                  onClick={() => removeHighlight(h.id)}
-                  aria-label={`Remove ${h.title}`}
-                  className="flex-none text-xs font-semibold text-ink-faint hover:text-danger"
-                >
-                  Remove
-                </button>
+            <li key={h.id} className="rounded-control border border-line bg-surface-2 px-3 py-2">
+              <div className="flex items-center justify-between gap-3">
+                {h.uploaded ? (
+                  <span className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink">
+                    <PlayIcon />
+                    <span className="truncate">{h.title}</span>
+                  </span>
+                ) : (
+                  <a
+                    href={h.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink hover:text-flame-ink"
+                  >
+                    <PlayIcon />
+                    <span className="truncate">{h.title}</span>
+                  </a>
+                )}
+                {editable && (
+                  <button
+                    type="button"
+                    onClick={() => removeHighlight(h.id)}
+                    aria-label={`Remove ${h.title}`}
+                    className="flex-none text-xs font-semibold text-ink-faint hover:text-danger"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {h.uploaded && (
+                // eslint-disable-next-line jsx-a11y/media-has-caption -- player-uploaded clip, no caption track exists
+                <video controls preload="none" src={h.url} className="mt-2 w-full max-w-sm rounded-control bg-black" />
               )}
             </li>
           ))}
@@ -125,6 +181,22 @@ export default function HighlightsSection({
 
       {adding && (
         <form onSubmit={addHighlight} className="mt-3 flex flex-col gap-2">
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => setMode("link")}
+              className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${mode === "link" ? "border-flame/40 bg-flame/10 text-flame-ink" : "border-line text-ink-dim hover:text-ink"}`}
+            >
+              Paste a link
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("upload")}
+              className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${mode === "upload" ? "border-flame/40 bg-flame/10 text-flame-ink" : "border-line text-ink-dim hover:text-ink"}`}
+            >
+              Upload a video
+            </button>
+          </div>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -133,20 +205,39 @@ export default function HighlightsSection({
             maxLength={80}
             className="w-full rounded-control border border-line bg-surface-2 px-3 py-2 text-sm outline-none focus:border-flame-ink"
           />
-          <input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            type="url"
-            placeholder="https://youtube.com/..."
-            required
-            className="w-full rounded-control border border-line bg-surface-2 px-3 py-2 text-sm outline-none focus:border-flame-ink"
-          />
+          {mode === "link" ? (
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              type="url"
+              placeholder="https://youtube.com/..."
+              required
+              className="w-full rounded-control border border-line bg-surface-2 px-3 py-2 text-sm outline-none focus:border-flame-ink"
+            />
+          ) : (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/*"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              required
+              className="w-full text-sm"
+            />
+          )}
           {error && <p className="text-xs text-danger">{error}</p>}
           <div className="flex gap-2">
             <button type="submit" disabled={busy} className="rounded-full bg-flame px-4 py-1.5 text-xs font-bold text-on-flame disabled:opacity-50">
-              {busy ? "Adding…" : "Add"}
+              {busy ? (mode === "upload" ? "Uploading…" : "Adding…") : "Add"}
             </button>
-            <button type="button" onClick={() => setAdding(false)} className="rounded-full px-4 py-1.5 text-xs font-semibold text-ink-dim hover:text-ink">
+            <button
+              type="button"
+              onClick={() => {
+                setAdding(false);
+                setFile(null);
+                setUrl("");
+              }}
+              className="rounded-full px-4 py-1.5 text-xs font-semibold text-ink-dim hover:text-ink"
+            >
               Cancel
             </button>
           </div>

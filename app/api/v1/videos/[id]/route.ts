@@ -18,7 +18,7 @@ export const GET = route<{ id: string }>(async (_req, { params }) => {
   if (!video) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({
     ...video,
-    playbackUrl: await getPlaybackUrl(video.key),
+    playbackUrl: video.externalUrl ?? (video.key ? await getPlaybackUrl(video.key) : ""),
     thumbnailUrl: video.thumbnailKey ? await getPlaybackUrl(video.thumbnailKey) : null,
   });
 });

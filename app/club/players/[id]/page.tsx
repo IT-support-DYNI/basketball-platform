@@ -108,10 +108,6 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
                   <span className="l">Hand</span>
                   <span className="v">{player.stats.preferredHand ? player.stats.preferredHand[0] + player.stats.preferredHand.slice(1).toLowerCase() : "—"}</span>
                 </div>
-                <div className="profile-stat">
-                  <span className="l">Country</span>
-                  <span className="v">{player.stats.nationality ?? "—"}</span>
-                </div>
               </div>
             </div>
           </div>
