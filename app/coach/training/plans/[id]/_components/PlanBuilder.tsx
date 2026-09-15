@@ -15,7 +15,10 @@ import {
   TRAINING_PLAN_STATUS_LABEL,
   DRILL_CATEGORY_LABEL,
   planDurationMinutes,
+  EMPTY_DIAGRAM,
+  type CourtDiagram as CourtDiagramValue,
 } from "@/lib/training";
+import CourtDiagram from "@/app/coach/drills/_components/CourtDiagram";
 
 type Block = {
   category: string;
@@ -23,6 +26,7 @@ type Block = {
   durationMinutes: string;
   notes: string;
   drillId: number | null;
+  courtDiagram: CourtDiagramValue | null;
 };
 
 export type PlanView = {
@@ -45,6 +49,7 @@ export type PlanView = {
     notes: string | null;
     drillId: number | null;
     drillName: string | null;
+    courtDiagram: CourtDiagramValue | null;
   }[];
 };
 
@@ -77,6 +82,7 @@ export default function PlanBuilder({
       durationMinutes: b.durationMinutes?.toString() ?? "",
       notes: b.notes ?? "",
       drillId: b.drillId,
+      courtDiagram: b.courtDiagram,
     })),
   );
   const [busy, setBusy] = useState(false);
@@ -93,7 +99,7 @@ export default function PlanBuilder({
   const setBlock = (i: number, patch: Partial<Block>) =>
     setBlocks((bs) => bs.map((b, idx) => (idx === i ? { ...b, ...patch } : b)));
   const addBlock = () =>
-    setBlocks((bs) => [...bs, { category: "SKILL", title: "", durationMinutes: "", notes: "", drillId: null }]);
+    setBlocks((bs) => [...bs, { category: "SKILL", title: "", durationMinutes: "", notes: "", drillId: null, courtDiagram: null }]);
   const removeBlock = (i: number) => setBlocks((bs) => bs.filter((_, idx) => idx !== i));
   const move = (i: number, dir: -1 | 1) =>
     setBlocks((bs) => {
@@ -139,6 +145,7 @@ export default function PlanBuilder({
           durationMinutes: b.durationMinutes ? Number(b.durationMinutes) : undefined,
           notes: b.notes.trim() || undefined,
           drillId: b.drillId ?? null,
+          courtDiagram: b.courtDiagram,
         })),
       },
       "Plan saved",
@@ -271,6 +278,34 @@ export default function PlanBuilder({
                 )}
               </label>
             </div>
+
+            {b.courtDiagram ? (
+              <div className="mt-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">Court diagram</span>
+                  <button
+                    type="button"
+                    onClick={() => setBlock(i, { courtDiagram: null })}
+                    className="text-[11px] font-semibold text-ink-dim hover:text-danger"
+                  >
+                    Remove diagram
+                  </button>
+                </div>
+                <CourtDiagram
+                  value={b.courtDiagram}
+                  onChange={(d) => setBlock(i, { courtDiagram: d })}
+                  className="mt-1"
+                />
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setBlock(i, { courtDiagram: EMPTY_DIAGRAM })}
+                className="mt-3 rounded-control border border-dashed border-line px-3 py-2 text-[11px] font-semibold text-ink-dim hover:border-line-strong hover:text-ink"
+              >
+                + Add court diagram
+              </button>
+            )}
           </div>
         ))}
 

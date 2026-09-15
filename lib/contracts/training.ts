@@ -96,6 +96,7 @@ export const trainingBlockSchema = z.object({
   durationMinutes: z.number().int().min(1).max(180).optional(),
   notes: z.string().trim().max(2000).optional(),
   drillId: z.number().int().positive().nullable().optional(),
+  courtDiagram: courtDiagramSchema.nullable().optional(),
 });
 
 export const createTrainingPlanSchema = z.object({

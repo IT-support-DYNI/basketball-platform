@@ -1322,6 +1322,12 @@ model TrainingBlock {
   notes           String?
   drillId         Int?
   drill           Drill?                @relation(fields: [drillId], references: [id], onDelete: SetNull)
+  /// An ad-hoc court diagram for this block — same shape as Drill.courtDiagram
+  /// (see CourtDiagram component), but drawn directly for this block rather
+  /// than pulled from a saved library drill. Lets a coach sketch a match
+  /// plan (starting positions, movement) without first saving it as a
+  /// reusable Drill.
+  courtDiagram    Json?
 
   @@index([trainingPlanId, order])
 }

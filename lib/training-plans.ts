@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import type { Session } from "next-auth";
 
 import { prisma } from "./prisma";
@@ -163,6 +163,7 @@ type BlockInput = {
   durationMinutes?: number;
   notes?: string;
   drillId?: number | null;
+  courtDiagram?: Prisma.InputJsonValue | null;
 };
 
 export async function updatePlan(
@@ -203,6 +204,7 @@ export async function updatePlan(
           durationMinutes: b.durationMinutes ?? null,
           notes: b.notes ?? null,
           drillId: b.drillId ?? null,
+          courtDiagram: b.courtDiagram ?? Prisma.JsonNull,
         })),
       });
     }

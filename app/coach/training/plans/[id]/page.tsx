@@ -6,6 +6,7 @@ import { getTenantContext } from "@/lib/tenant";
 import { planForCaller, linkableSessionsFor } from "@/lib/training-plans";
 import { listDrills } from "@/lib/drills";
 import { ApiError } from "@/lib/api/errors";
+import type { CourtDiagram } from "@/lib/training";
 import PageHeader from "@/components/ui/PageHeader";
 import PlanBuilder from "@/app/coach/training/plans/[id]/_components/PlanBuilder";
 
@@ -50,6 +51,7 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
             notes: b.notes,
             drillId: b.drillId,
             drillName: b.drill?.name ?? null,
+            courtDiagram: b.courtDiagram as CourtDiagram | null,
           })),
         }}
         drills={drills

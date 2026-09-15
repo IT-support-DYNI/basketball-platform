@@ -1,7 +1,9 @@
 import {
   TRAINING_BLOCK_CATEGORY_LABEL,
   planDurationMinutes,
+  type CourtDiagram as CourtDiagramValue,
 } from "@/lib/training";
+import CourtDiagram from "@/app/coach/drills/_components/CourtDiagram";
 
 export type PlanReadData = {
   title: string;
@@ -12,6 +14,7 @@ export type PlanReadData = {
     durationMinutes: number | null;
     notes: string | null;
     drillName: string | null;
+    courtDiagram: CourtDiagramValue | null;
   }[];
 };
 
@@ -41,6 +44,7 @@ export default function PlanReadView({ plan }: { plan: PlanReadData }) {
             )}
             {b.drillName && <p className="mt-0.5 text-xs text-ink-dim">Drill: {b.drillName}</p>}
             {b.notes && <p className="mt-1 whitespace-pre-wrap text-xs text-ink-dim">{b.notes}</p>}
+            {b.courtDiagram && <CourtDiagram value={b.courtDiagram} className="mt-2 max-w-xs" />}
           </li>
         ))}
       </ol>

@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { cn } from "@/lib/cn";
 import { EVENT_TYPE_LABEL } from "@/lib/events";
+import type { CourtDiagram as CourtDiagramValue } from "@/lib/training";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { useToast } from "@/components/ui/toast";
 import RsvpControl from "./RsvpControl";
@@ -32,7 +33,7 @@ const PLANNABLE = new Set(["TRAINING", "MATCH", "FITNESS_TEST", "TEAM_MEETING"])
 type PlanReadDetail = {
   title: string;
   objectives: string | null;
-  blocks: { category: string; title: string | null; durationMinutes: number | null; notes: string | null; drillName: string | null }[];
+  blocks: { category: string; title: string | null; durationMinutes: number | null; notes: string | null; drillName: string | null; courtDiagram: CourtDiagramValue | null }[];
 };
 
 const ACCENT: Record<string, string> = {
@@ -388,12 +389,13 @@ function EventDialog({
         setPlanDetail({
           title: d.title,
           objectives: d.objectives ?? null,
-          blocks: (d.blocks ?? []).map((b: { category: string; title: string | null; durationMinutes: number | null; notes: string | null; drill: { name: string } | null }) => ({
+          blocks: (d.blocks ?? []).map((b: { category: string; title: string | null; durationMinutes: number | null; notes: string | null; drill: { name: string } | null; courtDiagram: CourtDiagramValue | null }) => ({
             category: b.category,
             title: b.title,
             durationMinutes: b.durationMinutes,
             notes: b.notes,
             drillName: b.drill?.name ?? null,
+            courtDiagram: b.courtDiagram ?? null,
           })),
         });
       })
@@ -462,7 +464,12 @@ function EventDialog({
         )}
         {!isCoach && plan?.status === "PUBLISHED" && (
           <div className="mt-4">
-            <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-ink-faint">What&rsquo;s planned</p>
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">What&rsquo;s planned</p>
+              <Link href={`/player/training/plans/${plan.id}`} className="text-xs font-semibold text-flame-ink hover:underline">
+                Open full plan →
+              </Link>
+            </div>
             {planDetail ? (
               <PlanReadView plan={planDetail} />
             ) : (
