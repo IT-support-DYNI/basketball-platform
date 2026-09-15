@@ -37,3 +37,23 @@ export function passwordResetMessage(to: string, name: string, url: string): Mai
     ]),
   };
 }
+
+/** Deliberately a brief notice, not the report content — same reasoning as
+ *  the in-app notification this pairs with (see the safeguarding reports
+ *  route): a safeguarding concern's details belong behind the admin
+ *  console's access control, not sitting in an inbox as a second,
+ *  unaudited copy. `to` is the club's safeguarding contact, not a user
+ *  account, so there's no name to greet by. */
+export function safeguardingReportSubmittedMessage(to: string, url: string, concernAbout: string | null): MailMessage {
+  return {
+    to,
+    subject: `New safeguarding report — ${CLUB}`,
+    text: shell([
+      concernAbout ? `A new safeguarding concern was submitted, about ${concernAbout}.` : "A new safeguarding concern was submitted.",
+      "",
+      "Review it here (sign in as an administrator):",
+      "",
+      url,
+    ]),
+  };
+}

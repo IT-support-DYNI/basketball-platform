@@ -130,6 +130,8 @@ To send real email via **[Resend](https://resend.com)** (free tier, no card requ
 
 Until a domain is verified, Resend only delivers to the email address on the Resend account itself — sends to anyone else silently fail (logged server-side, per `sendMail`'s "never throws to the caller" rule in `lib/mail/index.ts`, but nothing reaches the user). Swapping providers later (SMTP, SES) is a one-file change — see `lib/mail/index.ts`.
 
+Optionally set `SAFEGUARDING_CONTACT_EMAIL` to also send a direct email (a brief notice with a link into `/admin/safeguarding`, not the report content) to the club's safeguarding contact whenever someone submits a report — on top of, not instead of, the in-app admin notification. Leave it unset to rely on the in-app queue alone.
+
 ## Deploying to Vercel
 
 - `@vercel/analytics` and `@vercel/speed-insights` are already installed and rendered in `app/layout.tsx` (`<Analytics />` / `<SpeedInsights />`) — they no-op locally and activate automatically once deployed on Vercel.
