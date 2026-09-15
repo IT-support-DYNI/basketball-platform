@@ -42,7 +42,11 @@ export default async function AdminPlayersPage() {
             <tbody>
               {memberships.map((m) => (
                 <tr key={m.id} className="border-b border-line last:border-0">
-                  <td className="px-4 py-2.5 font-medium text-ink">{m.player.user.name}</td>
+                  <td className="px-4 py-2.5 font-medium text-ink">
+                    <Link href={`/admin/players/${m.player.id}`} className="hover:underline">
+                      {m.player.user.name}
+                    </Link>
+                  </td>
                   <td className="px-4 py-2.5">
                     <Link href={`/admin/teams/${m.team.id}`} className="font-semibold text-flame-ink hover:underline">
                       {m.team.name}

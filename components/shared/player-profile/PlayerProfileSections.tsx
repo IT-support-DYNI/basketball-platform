@@ -1,6 +1,7 @@
 import type { PlayerProfileView } from "@/lib/player-profile-view";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import HighlightsSection from "./HighlightsSection";
+import PublicVisibilityPanel from "./PublicVisibilityPanel";
 
 function timeAgo(date: Date): string {
   const days = Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000);
@@ -81,6 +82,12 @@ export default function PlayerProfileSections({
               <BreakdownBar label="Excused" count={b.excused} total={totalCounted + b.excused} colorClass="bg-info" />
             </div>
           </section>
+        </ScrollReveal>
+      )}
+
+      {(player.isSelf || player.canManagePublicVisibility) && (
+        <ScrollReveal delayMs={220}>
+          <PublicVisibilityPanel player={player} />
         </ScrollReveal>
       )}
 

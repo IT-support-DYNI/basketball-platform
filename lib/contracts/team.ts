@@ -61,4 +61,8 @@ export const updatePlayerSchema = z.object({
   medicalNotes: z.string().max(2000).optional(),
   welfareNotes: z.string().max(2000).optional(),
   publicProfileApproved: z.boolean().optional(),
+  publicShowPhoto: z.boolean().optional(),
+  publicShowBio: z.boolean().optional(),
+  publicShowStats: z.boolean().optional(),
+  publicShowHighlights: z.boolean().optional(),
 });

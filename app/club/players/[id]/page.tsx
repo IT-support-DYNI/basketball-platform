@@ -90,6 +90,34 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
         </div>
       </div>
 
+      {player.stats && (
+        <section style={{ paddingTop: 20 }}>
+          <div className="wrap">
+            <div className="card">
+              <p className="card-label">Season stats</p>
+              <div className="profile-stat-bar" style={{ marginTop: 14, border: "var(--border-hairline)", borderRadius: "var(--radius-sm)" }}>
+                <div className="profile-stat">
+                  <span className="l">Height</span>
+                  <span className="v">{player.stats.heightCm ? `${(player.stats.heightCm / 100).toFixed(2)}m` : "—"}</span>
+                </div>
+                <div className="profile-stat">
+                  <span className="l">Weight</span>
+                  <span className="v">{player.stats.weightKg ? `${player.stats.weightKg}kg` : "—"}</span>
+                </div>
+                <div className="profile-stat">
+                  <span className="l">Hand</span>
+                  <span className="v">{player.stats.preferredHand ? player.stats.preferredHand[0] + player.stats.preferredHand.slice(1).toLowerCase() : "—"}</span>
+                </div>
+                <div className="profile-stat">
+                  <span className="l">Country</span>
+                  <span className="v">{player.stats.nationality ?? "—"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {player.bio && (
         <section style={{ paddingTop: 20 }}>
           <div className="wrap">
@@ -139,7 +167,7 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
         </section>
       )}
 
-      {!player.bio && player.highlights.length === 0 && <div style={{ paddingBottom: "var(--section-y)" }} />}
+      {!player.stats && !player.bio && player.highlights.length === 0 && <div style={{ paddingBottom: "var(--section-y)" }} />}
     </main>
   );
 }

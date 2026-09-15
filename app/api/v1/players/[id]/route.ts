@@ -87,9 +87,15 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params, re
   if (body.dateOfBirth !== undefined) set("dateOfBirth", body.dateOfBirth ? new Date(body.dateOfBirth) : null);
   if (body.guardianName !== undefined) set("guardianName", body.guardianName);
   if (body.guardianContact !== undefined) set("guardianContact", body.guardianContact);
-  // Only an admin flips the public flag (opt-in is captured elsewhere).
-  if (body.publicProfileApproved !== undefined && session.user.role === "ADMIN") {
-    editable.publicProfileApproved = body.publicProfileApproved;
+  // Only an admin decides what's actually public (opt-in is captured
+  // elsewhere) — publicProfileApproved is the master listing gate;
+  // publicShow* are independent, finer-grained gates within that listing.
+  if (session.user.role === "ADMIN") {
+    if (body.publicProfileApproved !== undefined) editable.publicProfileApproved = body.publicProfileApproved;
+    if (body.publicShowPhoto !== undefined) editable.publicShowPhoto = body.publicShowPhoto;
+    if (body.publicShowBio !== undefined) editable.publicShowBio = body.publicShowBio;
+    if (body.publicShowStats !== undefined) editable.publicShowStats = body.publicShowStats;
+    if (body.publicShowHighlights !== undefined) editable.publicShowHighlights = body.publicShowHighlights;
   }
 
   const updated = await prisma.playerProfile.update({ where: { id: playerId }, data: editable });

@@ -159,14 +159,14 @@ export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> 
       return {
         id: p.id,
         name: p.user.name,
-        photoUrl: await resolvePhotoUrl(p.photoUrl),
+        photoUrl: p.publicShowPhoto ? await resolvePhotoUrl(p.photoUrl) : null,
         position: membership?.position ?? null,
         positionLabel: membership?.position ? POSITION_LABELS[membership.position] ?? membership.position : null,
         publicStatus,
         team: membership?.team.name ?? null,
         ageGroup: membership?.team.ageGroup ?? null,
         jerseyNumber: membership?.jerseyNumber ?? null,
-        bio: p.bio,
+        bio: p.publicShowBio ? p.bio : null,
       };
     }),
   );
@@ -175,6 +175,10 @@ export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> 
 export type PublicPlayerProfile = PublicPlayerCard & {
   jerseyNumber: number | null;
   highlights: { id: number; title: string; url: string }[];
+  /// Physicals — the only "season stats" this app actually tracks (no
+  /// points/rebounds/assists exist yet). Admin-gated like everything else
+  /// here; null means "not published", not "no data".
+  stats: { heightCm: number | null; weightKg: number | null; preferredHand: string | null; nationality: string | null } | null;
 };
 
 /** One player's public page. Returns null for anyone not approved — the
@@ -206,17 +210,30 @@ export async function getPublicPlayer(playerId: number): Promise<PublicPlayerPro
   return {
     id: player.id,
     name: player.user.name,
-    photoUrl: await resolvePhotoUrl((visible as { photoUrl?: string | null }).photoUrl),
+    photoUrl: player.publicShowPhoto ? await resolvePhotoUrl((visible as { photoUrl?: string | null }).photoUrl) : null,
     position: membership?.position ?? null,
     positionLabel: membership?.position ? POSITION_LABELS[membership.position] ?? membership.position : null,
     publicStatus,
     team: membership?.team.name ?? null,
     ageGroup: membership?.team.ageGroup ?? null,
-    bio: (visible as { bio?: string | null }).bio ?? null,
-    // heightCm/weightKg/nationality aren't PUBLIC-tier (field-visibility.ts)
-    // — deliberately not on this type at all, not just nulled out.
+    bio: player.publicShowBio ? ((visible as { bio?: string | null }).bio ?? null) : null,
     jerseyNumber: membership?.jerseyNumber ?? null,
-    highlights: player.highlights.map((h) => ({ id: h.id, title: h.title, url: h.url })),
+    highlights: player.publicShowHighlights ? player.highlights.map((h) => ({ id: h.id, title: h.title, url: h.url })) : [],
+    // heightCm/weightKg/nationality/preferredHand aren't PUBLIC-tier in
+    // field-visibility.ts's general matrix (deliberately — see that file),
+    // so this reads them straight off `player`, not through `visible`, and
+    // only when this specific player's admin-controlled publicShowStats
+    // flag is on. That keeps the general API's blanket privacy rule intact
+    // for every other caller while allowing this one opt-in-per-player,
+    // admin-gated path to publish physicals on the public site.
+    stats: player.publicShowStats
+      ? {
+          heightCm: player.heightCm,
+          weightKg: player.weightKg,
+          preferredHand: player.preferredHand,
+          nationality: player.nationality,
+        }
+      : null,
   };
 }
 

@@ -585,7 +585,16 @@ model PlayerProfile {
   /// WELFARE_OFFICER of the player's team + admin + self/guardian
   welfareNotes    String?
   /// Opt-in, then admin-confirmed, before anything renders on the public site.
+  /// This is the master "is this player listed at all" gate — the four flags
+  /// below are independent, finer-grained gates *within* that listing, each
+  /// admin-only to flip (see PATCH /api/v1/players/[id]). A player uploading
+  /// a photo, writing a bio, or adding a highlight never makes it public on
+  /// its own — it just becomes something the admin can choose to publish.
   publicProfileApproved Boolean @default(false)
+  publicShowPhoto       Boolean @default(false)
+  publicShowBio         Boolean @default(false)
+  publicShowStats       Boolean @default(false)
+  publicShowHighlights  Boolean @default(false)
 
   /// The team + position the applicant asked for at sign-up. Advisory only —
   /// the admin confirms the team and a coach assigns the jersey at approval,

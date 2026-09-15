@@ -125,6 +125,21 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
     attendanceBreakdown,
     latestFeedback,
     highlights,
+    // What the public site currently shows for this player, and whether
+    // this viewer is allowed to change it — publishing to the public
+    // internet is an admin-only call (same rule as publicProfileApproved
+    // itself), never something a player or coach can flip on their own.
+    publicVisibility: {
+      profileListed: rest.publicProfileApproved,
+      showPhoto: rest.publicShowPhoto,
+      showBio: rest.publicShowBio,
+      showStats: rest.publicShowStats,
+      showHighlights: rest.publicShowHighlights,
+      hasPhoto: !!rest.photoUrl,
+      hasBio: !!rest.bio,
+      hasHighlights: highlights.length > 0,
+    },
+    canManagePublicVisibility: scope.kinds.has("ADMIN"),
   };
 }
 
