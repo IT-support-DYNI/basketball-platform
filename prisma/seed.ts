@@ -924,6 +924,42 @@ async function main() {
       },
     },
   });
+  // A match plan for the U16 team's next fixture — the same session-plan
+  // shape as a practice, just linked to a MATCH event instead of TRAINING,
+  // with a hand-drawn court diagram in place of a library drill for its
+  // tactical block (a specific game plan isn't really a reusable drill).
+  await prisma.trainingPlan.create({
+    data: {
+      teamId: u16.id, seasonId: season.id, createdByUserId: headCoach.id,
+      eventId: u16Match.id,
+      title: "Match plan — vs Northgate Falcons", status: "PUBLISHED", date: u16Match.startAt,
+      objectives: "Start in Horns — both bigs to the elbows, get into our sets early before they set their zone.",
+      coachingNotes: "Falcons pressure the inbound — have a release valve ready.",
+      blocks: {
+        create: [
+          {
+            order: 0, category: "TACTICAL", title: "Opening set — Horns",
+            notes: "1 brings it up, into either elbow, then cuts through. Corners stay wide for spacing.",
+            courtDiagram: {
+              markers: [
+                { id: "pg", kind: "player", x: 0.5, y: 0.58, label: "1" },
+                { id: "ball", kind: "ball", x: 0.5, y: 0.62 },
+                { id: "elbowL", kind: "player", x: 0.34, y: 0.36, label: "4" },
+                { id: "elbowR", kind: "player", x: 0.66, y: 0.36, label: "5" },
+                { id: "cornerL", kind: "player", x: 0.1, y: 0.5, label: "2" },
+                { id: "cornerR", kind: "player", x: 0.9, y: 0.5, label: "3" },
+              ],
+              arrows: [
+                { id: "a1", kind: "pass", from: { x: 0.5, y: 0.58 }, to: { x: 0.64, y: 0.37 } },
+                { id: "a2", kind: "move", from: { x: 0.5, y: 0.58 }, to: { x: 0.5, y: 0.25 } },
+              ],
+            },
+          },
+          { order: 1, category: "TACTICAL", title: "Press break", durationMinutes: 5, notes: "Release to the corner if the inbound is denied — see practice notes." },
+        ],
+      },
+    },
+  });
   // A reusable template.
   await prisma.trainingPlan.create({
     data: {

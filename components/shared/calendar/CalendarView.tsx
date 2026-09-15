@@ -447,17 +447,21 @@ function EventDialog({
           </div>
         )}
 
-        {/* Session plan */}
+        {/* Session plan — "Match plan" for a MATCH event, same underlying
+         *  TrainingPlan either way (lib/training-plans.ts doesn't distinguish
+         *  by event type, only the label here does). */}
         {isCoach && event.team && PLANNABLE.has(event.type) && (
           <div className="mt-4 rounded-control border border-line bg-surface-2 p-3">
-            <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">Session plan</p>
+            <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">
+              {event.type === "MATCH" ? "Match plan" : "Session plan"}
+            </p>
             {plan ? (
               <Link href={`/coach/training/plans/${plan.id}`} className="mt-1 block text-sm font-semibold text-flame-ink hover:underline">
                 {plan.title} →
               </Link>
             ) : (
               <Link href={`/coach/training/plans/new?eventId=${event.id}`} className="mt-1 block text-sm font-semibold text-flame-ink hover:underline">
-                Build a session plan →
+                {event.type === "MATCH" ? "Build a match plan →" : "Build a session plan →"}
               </Link>
             )}
           </div>
@@ -465,7 +469,9 @@ function EventDialog({
         {!isCoach && plan?.status === "PUBLISHED" && (
           <div className="mt-4">
             <div className="mb-2 flex items-baseline justify-between gap-2">
-              <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">What&rsquo;s planned</p>
+              <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">
+                {event.type === "MATCH" ? "Match plan" : "What’s planned"}
+              </p>
               <Link href={`/player/training/plans/${plan.id}`} className="text-xs font-semibold text-flame-ink hover:underline">
                 Open full plan →
               </Link>
