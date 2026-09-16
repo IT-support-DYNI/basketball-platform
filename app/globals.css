@@ -35,7 +35,7 @@
   --line: #A39D92;
   --line-strong: #8B857A;
 
-  --flame: 254 68 11;      /* #FE440B — primary, buttons, active nav, key figures */
+  --flame: 214 62 0;      /* #D63E00 — primary, buttons, active nav, key figures */
   --flame-ink: 255 107 61; /* #FF6B3D — hover/lighter variant */
   --ember: 255 107 61;     /* gradient partner for --flame (135deg flame → ember) */
   --gold: 217 119 6;       /* flame-tip highlight, live indicator */
