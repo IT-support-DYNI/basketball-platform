@@ -53,7 +53,7 @@ export default async function CheckInPage({
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-5 px-4 py-10">
       <div>
-        <p className="font-mono text-[11px] uppercase tracking-wider text-flame">{EVENT_TYPE_LABEL[event.type]}</p>
+        <p className="font-mono text-[11px] uppercase tracking-wider text-flame-on-bg">{EVENT_TYPE_LABEL[event.type]}</p>
         <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink">{event.title}</h1>
         <p className="mt-1 text-ink-dim">
           {eventDayLabel(event.startAt)} · {eventTimeRange(event.startAt, event.endAt)}
@@ -81,7 +81,7 @@ export default async function CheckInPage({
         />
       )}
 
-      <Link href="/player/training" className="text-sm font-semibold text-flame-ink hover:underline">
+      <Link href="/player/training" className="text-sm font-semibold text-flame-on-bg hover:underline">
         ← Back to schedule
       </Link>
     </main>

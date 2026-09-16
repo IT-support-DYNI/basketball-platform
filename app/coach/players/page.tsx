@@ -29,7 +29,7 @@ export default async function CoachPlayersPage() {
         lead={
           <>
             Everyone on your roster this season. Manage the roster from{" "}
-            <Link href="/coach/my-teams" className="font-semibold text-flame-ink hover:underline">
+            <Link href="/coach/my-teams" className="font-semibold text-flame-on-bg hover:underline">
               Team
             </Link>
             .
@@ -55,7 +55,7 @@ export default async function CoachPlayersPage() {
               {memberships.map((m) => (
                 <tr key={m.id} className="border-b border-line last:border-0">
                   <td className="px-4 py-2.5 font-medium text-ink">
-                    <Link href={`/coach/players/${m.player.id}`} className="hover:text-flame-ink hover:underline">
+                    <Link href={`/coach/players/${m.player.id}`} className="hover:text-flame-on-bg hover:underline">
                       {m.player.user.name}
                     </Link>
                   </td>
@@ -65,7 +65,7 @@ export default async function CoachPlayersPage() {
                   <td className="px-4 py-2.5 text-right">
                     <Link
                       href={`/coach/performance?playerId=${m.player.id}`}
-                      className="text-xs font-semibold text-flame-ink hover:underline"
+                      className="text-xs font-semibold text-flame-on-bg hover:underline"
                     >
                       View performance
                     </Link>

@@ -194,7 +194,7 @@ export default function PhotoUpload({ playerId }: { playerId: number }) {
             >
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-1.5 rounded-control border border-dashed border-line-strong px-2 py-2 text-xs text-ink-dim outline-none transition hover:border-flame hover:text-flame data-[highlighted]:border-flame data-[highlighted]:text-flame"
+                className="flex w-full items-center justify-center gap-1.5 rounded-control border border-dashed border-line-strong px-2 py-2 text-xs text-ink-dim outline-none transition hover:border-flame hover:text-flame-on-bg data-[highlighted]:border-flame data-[highlighted]:text-flame-on-bg"
               >
                 Upload new photo
               </button>

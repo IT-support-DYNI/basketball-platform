@@ -103,7 +103,7 @@ export default function AnnouncementsBoard({
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <p className="font-display font-bold text-ink">
-                    {a.pinned && <span className="mr-1.5 text-flame-ink">📌</span>}
+                    {a.pinned && <span className="mr-1.5 text-flame-on-bg">📌</span>}
                     {a.title}
                   </p>
                   <p className="text-xs text-ink-faint">
@@ -132,7 +132,7 @@ export default function AnnouncementsBoard({
                 <div className="mt-3 border-t border-line pt-2">
                   <button
                     onClick={() => toggleBreakdown(a.id)}
-                    className="text-xs font-semibold text-flame-ink hover:underline"
+                    className="text-xs font-semibold text-flame-on-bg hover:underline"
                   >
                     {breakdownFor === a.id ? "Hide" : "Who's read it?"}
                   </button>

@@ -272,7 +272,7 @@ export default function PlanBuilder({
                   ))}
                 </select>
                 {b.drillId && (
-                  <Link href={`/coach/drills/${b.drillId}`} className="text-[11px] font-semibold text-flame-ink hover:underline">
+                  <Link href={`/coach/drills/${b.drillId}`} className="text-[11px] font-semibold text-flame-on-bg hover:underline">
                     Open drill →
                   </Link>
                 )}
@@ -337,7 +337,7 @@ export default function PlanBuilder({
                 className={cn(
                   "h-8 w-8 rounded-full border text-sm font-bold",
                   (plan.effectivenessRating ?? 0) >= n
-                    ? "border-flame/40 bg-flame/10 text-flame-ink"
+                    ? "border-flame/40 bg-flame/10 text-flame-on-bg"
                     : "border-line text-ink-faint",
                 )}
                 aria-label={`${n} out of 5`}

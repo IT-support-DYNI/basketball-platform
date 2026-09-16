@@ -65,7 +65,7 @@ export default function QrScreen({ eventId, eventTitle }: { eventId: number; eve
         {qr?.venuePin && (
           <p className="mt-5 text-ink-dim">
             No phone? PIN{" "}
-            <span className="font-mono text-3xl font-bold tracking-[0.3em] text-flame-ink">{qr.venuePin}</span>
+            <span className="font-mono text-3xl font-bold tracking-[0.3em] text-flame-on-bg">{qr.venuePin}</span>
           </p>
         )}
         <p className="mt-3 text-xs text-ink-faint">Code refreshes automatically.</p>

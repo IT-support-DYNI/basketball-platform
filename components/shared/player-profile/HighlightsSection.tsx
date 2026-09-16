@@ -9,7 +9,7 @@ type Highlight = { id: number; title: string; url: string; uploaded?: boolean };
  *  can point anywhere the player has it hosted. */
 function PlayIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 flex-none text-flame-ink" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 flex-none text-flame-on-bg" aria-hidden="true">
       <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.6" />
       <path d="M10 8.5v7l6-3.5-6-3.5Z" fill="currentColor" />
     </svg>
@@ -125,7 +125,7 @@ export default function HighlightsSection({
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="text-xs font-semibold text-flame-ink hover:underline"
+            className="text-xs font-semibold text-flame-on-bg hover:underline"
           >
             + Add a clip
           </button>
@@ -153,7 +153,7 @@ export default function HighlightsSection({
                     href={h.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink hover:text-flame-ink"
+                    className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink hover:text-flame-on-bg"
                   >
                     <PlayIcon />
                     <span className="truncate">{h.title}</span>
@@ -185,14 +185,14 @@ export default function HighlightsSection({
             <button
               type="button"
               onClick={() => setMode("link")}
-              className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${mode === "link" ? "border-flame/40 bg-flame/10 text-flame-ink" : "border-line text-ink-dim hover:text-ink"}`}
+              className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${mode === "link" ? "border-flame/40 bg-flame/10 text-flame-on-bg" : "border-line text-ink-dim hover:text-ink"}`}
             >
               Paste a link
             </button>
             <button
               type="button"
               onClick={() => setMode("upload")}
-              className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${mode === "upload" ? "border-flame/40 bg-flame/10 text-flame-ink" : "border-line text-ink-dim hover:text-ink"}`}
+              className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${mode === "upload" ? "border-flame/40 bg-flame/10 text-flame-on-bg" : "border-line text-ink-dim hover:text-ink"}`}
             >
               Upload a video
             </button>

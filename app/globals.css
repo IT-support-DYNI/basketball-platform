@@ -30,21 +30,27 @@
 
   --ink: 42 39 35;          /* #2A2723 */
   --ink-dim: 81 76 68;      /* #514C44 */
-  --ink-faint: 139 133 122; /* #8B857A */
+  --ink-faint: 97 92 84; /* #615C54 — darkened from #8B857A (3.66:1 on white); clears AA 4.5:1 on every surface tier up to --surface-3, not just white */
 
   --line: #A39D92;
   --line-strong: #8B857A;
 
-  --flame: 214 62 0;      /* #D63E00 — primary, buttons, active nav, key figures */
+  --flame: 254 68 11;      /* #FE440B — primary, buttons, active nav, key figures */
   --flame-ink: 255 107 61; /* #FF6B3D — hover/lighter variant */
+  /* Text-only variant: #FE440B/#FF6B3D read at 2.8-3.5:1 on white/cream, well
+   * under AA's 4.5:1 for body-sized text. Same fix /club already uses for its
+   * own --accent-on-bg — darken for text, leave --flame/--flame-ink at full
+   * saturation for buttons and borders, where page-background contrast isn't
+   * the thing being measured. */
+  --flame-on-bg: 181 50 0; /* #B53200 — 4.7:1 even on a bg-flame/15..30 tint, not just plain white/cream */
   --ember: 255 107 61;     /* gradient partner for --flame (135deg flame → ember) */
   --gold: 217 119 6;       /* flame-tip highlight, live indicator */
   --on-flame: 23 19 16;    /* text on a flame-filled surface (dark ink, not white — matches /club's buttons) */
 
   --success: 2 122 72;     /* #027A48 — court green */
-  --warning: 180 121 10;   /* #B4790A */
+  --warning: 133 89 7;     /* #855907 — darkened from #B4790A; 4.7:1 even on a bg-warning/10..15 tint */
   --danger: 180 35 24;     /* #B42318 */
-  --info: 47 111 208;      /* #2F6FD0 */
+  --info: 42 100 188;      /* #2A64BC — darkened from #2F6FD0; 4.7:1 even on a bg-info/15 tint */
 
   --radius-card: 6px;
   --radius-control: 4px;
@@ -67,6 +73,7 @@
     --line-strong: rgba(241, 237, 228, 0.45);
     --flame: 254 68 11;
     --flame-ink: 255 129 86; /* #FF8156 */
+    --flame-on-bg: 255 129 86; /* already bright against a near-black surface — no extra darkening needed */
     --ember: 255 129 86;
     --gold: 251 191 36;
     --success: 52 211 153;
@@ -86,17 +93,18 @@
   --surface-3: 223 217 204;
   --ink: 42 39 35;
   --ink-dim: 81 76 68;
-  --ink-faint: 139 133 122;
+  --ink-faint: 97 92 84;
   --line: #A39D92;
   --line-strong: #8B857A;
   --flame: 254 68 11;
   --flame-ink: 255 107 61;
+  --flame-on-bg: 181 50 0;
   --ember: 255 107 61;
   --gold: 217 119 6;
   --success: 2 122 72;
-  --warning: 180 121 10;
+  --warning: 133 89 7;
   --danger: 180 35 24;
-  --info: 47 111 208;
+  --info: 42 100 188;
   --shadow-card: none;
   --shadow-pop: 0 10px 28px -12px rgba(20, 16, 12, 0.22);
 }
@@ -114,6 +122,7 @@
   --line-strong: rgba(241, 237, 228, 0.45);
   --flame: 254 68 11;
   --flame-ink: 255 129 86;
+  --flame-on-bg: 255 129 86;
   --ember: 255 129 86;
   --gold: 251 191 36;
   --success: 52 211 153;

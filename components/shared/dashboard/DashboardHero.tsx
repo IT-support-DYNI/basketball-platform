@@ -47,7 +47,7 @@ export default function DashboardHero({
     <div className="animate-stagger-rise relative overflow-hidden rounded-card border border-line bg-surface px-6 py-7 sm:px-8 sm:py-9">
       <GhostBall />
       <div className="relative">
-        <p className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-flame">{eyebrow}</p>
+        <p className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-flame-on-bg">{eyebrow}</p>
         <h1 className="mt-2 font-display text-[2.5rem] font-extrabold uppercase leading-[0.92] tracking-tight text-ink sm:text-6xl">
           {greeting}
           {name && (

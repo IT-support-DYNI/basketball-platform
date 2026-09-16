@@ -216,7 +216,7 @@ function RosterSection({
         <ul className="mt-3 divide-y divide-line">
           {active.map((m) => (
             <li key={m.membershipId} className="flex flex-wrap items-center gap-3 py-3">
-              <span className="w-10 font-condensed text-xl font-bold tabular text-flame-ink">
+              <span className="w-10 font-condensed text-xl font-bold tabular text-flame-on-bg">
                 {m.jerseyNumber ?? "–"}
               </span>
               <div className="min-w-0 flex-1">

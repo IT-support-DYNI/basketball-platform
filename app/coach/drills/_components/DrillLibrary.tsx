@@ -72,14 +72,14 @@ export default function DrillLibrary({ drills }: { drills: DrillListItem[] }) {
           className="w-full max-w-sm rounded-control border border-line bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-flame/50"
         />
         <div className="flex flex-wrap gap-1.5">
-          <button onClick={() => setCategory("")} className={cn(chip, category === "" ? "border-flame/40 bg-flame/10 text-flame-ink" : "border-line text-ink-dim hover:text-ink")}>
+          <button onClick={() => setCategory("")} className={cn(chip, category === "" ? "border-flame/40 bg-flame/10 text-flame-on-bg" : "border-line text-ink-dim hover:text-ink")}>
             All
           </button>
           {presentCategories.map((c) => (
             <button
               key={c}
               onClick={() => setCategory(category === c ? "" : c)}
-              className={cn(chip, category === c ? "border-flame/40 bg-flame/10 text-flame-ink" : "border-line text-ink-dim hover:text-ink")}
+              className={cn(chip, category === c ? "border-flame/40 bg-flame/10 text-flame-on-bg" : "border-line text-ink-dim hover:text-ink")}
             >
               {DRILL_CATEGORY_LABEL[c]}
             </button>
@@ -90,7 +90,7 @@ export default function DrillLibrary({ drills }: { drills: DrillListItem[] }) {
             <button
               key={d}
               onClick={() => setDifficulty(difficulty === d ? "" : d)}
-              className={cn(chip, difficulty === d ? "border-flame/40 bg-flame/10 text-flame-ink" : "border-line text-ink-dim hover:text-ink")}
+              className={cn(chip, difficulty === d ? "border-flame/40 bg-flame/10 text-flame-on-bg" : "border-line text-ink-dim hover:text-ink")}
             >
               {DRILL_DIFFICULTY_LABEL[d]}
             </button>

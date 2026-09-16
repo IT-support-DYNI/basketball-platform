@@ -58,7 +58,7 @@ export default async function AdminDashboardPage() {
         <Card as="section">
           <div className="flex items-center justify-between">
             <SectionTitle>Active teams</SectionTitle>
-            <Link href="/admin/teams" className="text-sm font-semibold text-flame-ink hover:underline">
+            <Link href="/admin/teams" className="text-sm font-semibold text-flame-on-bg hover:underline">
               Manage →
             </Link>
           </div>
@@ -68,7 +68,7 @@ export default async function AdminDashboardPage() {
             <ul className="mt-3 divide-y divide-line">
               {activeTeams.map((team) => (
                 <li key={team.id} className="flex items-center justify-between py-2.5">
-                  <Link href={`/admin/teams/${team.id}`} className="font-medium text-ink hover:text-flame-ink">
+                  <Link href={`/admin/teams/${team.id}`} className="font-medium text-ink hover:text-flame-on-bg">
                     {team.name}
                   </Link>
                   <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ export default async function AdminDashboardPage() {
       <Card as="section">
         <div className="flex items-center justify-between">
           <SectionTitle>Recent activity</SectionTitle>
-          <Link href="/admin/audit" className="text-sm font-semibold text-flame-ink hover:underline">
+          <Link href="/admin/audit" className="text-sm font-semibold text-flame-on-bg hover:underline">
             Full log →
           </Link>
         </div>

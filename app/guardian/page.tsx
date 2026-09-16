@@ -45,7 +45,7 @@ export default async function GuardianDashboardPage() {
                 {c.outstandingConsents > 0 ? (
                   <Link
                     href={`/consent?child=${c.playerProfileId}`}
-                    className="flex items-center justify-between rounded-control border border-flame/40 bg-flame/10 px-3 py-2 font-semibold text-flame-ink"
+                    className="flex items-center justify-between rounded-control border border-flame/40 bg-flame/10 px-3 py-2 font-semibold text-flame-on-bg"
                   >
                     {c.outstandingConsents} document{c.outstandingConsents === 1 ? "" : "s"} to accept
                     <span aria-hidden>→</span>

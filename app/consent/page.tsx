@@ -69,7 +69,7 @@ export default async function ConsentPage({ searchParams }: { searchParams: { ch
       )}
 
       {subject.byGuardian && (
-        <Link href="/guardian" className="text-sm font-semibold text-flame-ink hover:underline">
+        <Link href="/guardian" className="text-sm font-semibold text-flame-on-bg hover:underline">
           ← Back to my children
         </Link>
       )}

@@ -93,7 +93,7 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
   return (
     <form onSubmit={submit} className="space-y-5">
       <fieldset className="space-y-2 rounded-control border border-flame/25 bg-flame/[0.04] p-4">
-        <legend className="px-1 font-mono text-[11px] uppercase tracking-wider text-flame-ink">Your bio</legend>
+        <legend className="px-1 font-mono text-[11px] uppercase tracking-wider text-flame-on-bg">Your bio</legend>
         <p className="text-xs text-ink-faint">
           Shown at the top of your profile — club members and coaches see this, and, if the club approves
           your profile as public, so could anyone scouting for talent. Make it count.

@@ -105,7 +105,7 @@ export default function AttendanceCorrections({ records }: { records: Rec[] }) {
               <button onClick={() => toggleHistory(r.id)} className="text-ink-faint hover:text-ink">
                 History
               </button>
-              <button onClick={() => startEdit(r)} className="text-flame-ink hover:underline">
+              <button onClick={() => startEdit(r)} className="text-flame-on-bg hover:underline">
                 Correct
               </button>
             </div>
@@ -121,7 +121,7 @@ export default function AttendanceCorrections({ records }: { records: Rec[] }) {
                     onClick={() => setStatus(s)}
                     className={cn(
                       "rounded-full border px-3 py-1 text-xs font-semibold",
-                      status === s ? "border-flame/40 bg-flame/15 text-flame-ink" : "border-line text-ink-dim",
+                      status === s ? "border-flame/40 bg-flame/15 text-flame-on-bg" : "border-line text-ink-dim",
                     )}
                   >
                     {s}
