@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-import { login } from "./support/helpers";
+import { login, logout } from "./support/helpers";
 
 test("Journey 6 — a coach links a plan to a session and the player sees it", async ({ page }) => {
   // --- the coach opens the linked training session ---
@@ -14,6 +14,10 @@ test("Journey 6 — a coach links a plan to a session and the player sees it", a
   await expect(coachDialog.getByRole("link", { name: /spacing & closeouts/ })).toBeVisible();
 
   // --- a player on that team sees the published plan for the same session ---
+  // Signing in again without logging out first would just bounce off /login —
+  // middleware redirects an already-authenticated visitor straight to their
+  // dashboard instead of showing the form (see middleware.ts).
+  await logout(page);
   await login(page, "player1@example.com");
   await page.goto("/player/training");
   await page.getByRole("button", { name: "agenda" }).click();

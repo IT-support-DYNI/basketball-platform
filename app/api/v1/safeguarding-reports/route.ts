@@ -9,6 +9,9 @@ import { primaryClubId } from "@/lib/safeguarding";
 import { logAudit } from "@/lib/audit";
 import { notifyUsers } from "@/lib/notify";
 import { sendPushToUsers } from "@/lib/push";
+import { sendMail } from "@/lib/mail";
+import { safeguardingReportSubmittedMessage } from "@/lib/mail/templates";
+import { baseUrl } from "@/lib/base-url";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -64,6 +67,19 @@ export const POST = route(async (req: NextRequest) => {
     { title: "New safeguarding report", body: "A new safeguarding concern needs review.", url: "/admin/safeguarding" },
     "SAFEGUARDING",
   );
+
+  // Also straight to the club's own safeguarding contact, not just admin
+  // accounts in-app — sendMail never throws to the caller (lib/mail),
+  // and no-ops quietly if this isn't configured.
+  if (process.env.SAFEGUARDING_CONTACT_EMAIL) {
+    await sendMail(
+      safeguardingReportSubmittedMessage(
+        process.env.SAFEGUARDING_CONTACT_EMAIL,
+        `${baseUrl()}/admin/safeguarding`,
+        body.concernAbout || null,
+      ),
+    );
+  }
 
   // Deliberately no `created(report)` — never hand the submitted content
   // back in the response for an unauthenticated caller to inspect.
