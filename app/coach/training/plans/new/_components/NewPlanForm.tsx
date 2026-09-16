@@ -64,7 +64,7 @@ export default function NewPlanForm({
       {error && <Alert tone="danger">{error}</Alert>}
 
       {forEvent && (
-        <p className="rounded-control border border-flame/30 bg-flame/10 px-3 py-2 text-sm text-flame-ink">
+        <p className="rounded-control border border-flame/30 bg-flame/10 px-3 py-2 text-sm text-flame-on-bg">
           Planning the <strong>{forEvent.teamName}</strong> session on{" "}
           {new Date(forEvent.startAt).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}.
         </p>

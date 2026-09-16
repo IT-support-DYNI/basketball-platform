@@ -139,7 +139,7 @@ export default function PublicVisibilityPanel({ player }: { player: PlayerProfil
                     type="button"
                     onClick={() => toggle(row, !on)}
                     disabled={busyKey === row.key}
-                    className="whitespace-nowrap text-xs font-semibold text-flame-ink hover:underline disabled:opacity-50"
+                    className="whitespace-nowrap text-xs font-semibold text-flame-on-bg hover:underline disabled:opacity-50"
                   >
                     {busyKey === row.key ? "…" : on ? "Make private" : "Publish"}
                   </button>

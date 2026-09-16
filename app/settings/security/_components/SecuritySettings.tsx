@@ -167,7 +167,7 @@ function MfaCard({
             <p className="mt-1 select-all break-all font-mono text-sm text-ink">{formatSecret(enrolling.secret)}</p>
             <a
               href={enrolling.otpauthUri}
-              className="mt-2 inline-block text-xs font-semibold text-flame-ink hover:underline"
+              className="mt-2 inline-block text-xs font-semibold text-flame-on-bg hover:underline"
             >
               Open in an app on this device
             </a>

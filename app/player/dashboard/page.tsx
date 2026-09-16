@@ -112,7 +112,7 @@ export default async function PlayerDashboardPage() {
           <SectionTitle>Monthly performance</SectionTitle>
           {monthlyEvaluation ? (
             <>
-              <p className="mt-2 font-condensed text-3xl font-bold tabular text-flame-ink">
+              <p className="mt-2 font-condensed text-3xl font-bold tabular text-flame-on-bg">
                 {Number(monthlyEvaluation.overallScore)}
                 <span className="text-lg text-ink-faint"> / 10</span>
               </p>
@@ -140,7 +140,7 @@ export default async function PlayerDashboardPage() {
             <>
               <p className="mt-2 font-semibold text-ink">{latestVideo.title}</p>
               <p className="text-sm text-ink-dim">{latestVideo.category.replace(/_/g, " ")}</p>
-              <Link href="/player/videos" className="mt-3 inline-block text-sm font-semibold text-flame-ink hover:underline">
+              <Link href="/player/videos" className="mt-3 inline-block text-sm font-semibold text-flame-on-bg hover:underline">
                 Watch now →
               </Link>
             </>
@@ -168,7 +168,7 @@ export default async function PlayerDashboardPage() {
       <Card as="section">
         <div className="flex items-center justify-between">
           <SectionTitle>Recent notifications</SectionTitle>
-          <Link href="/player/notifications" className="text-sm font-semibold text-flame-ink hover:underline">
+          <Link href="/player/notifications" className="text-sm font-semibold text-flame-on-bg hover:underline">
             View all →
           </Link>
         </div>

@@ -16,7 +16,7 @@ export default function PageHeader({
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
         {eyebrow && (
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-flame">{eyebrow}</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-flame-on-bg">{eyebrow}</p>
         )}
         <h1 className="mt-1 font-display text-2xl font-extrabold uppercase leading-tight tracking-tight text-ink sm:text-3xl">
           {title}

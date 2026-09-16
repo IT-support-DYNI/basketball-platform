@@ -73,7 +73,7 @@ export default function NotificationsFeed({ initial }: { initial: Item[] }) {
         <div className="flex flex-wrap gap-1.5">
           <button
             onClick={() => setFilter("")}
-            className={cn("rounded-full border px-3 py-1 text-xs font-semibold", filter === "" ? "border-flame/40 bg-flame/15 text-flame-ink" : "border-line text-ink-dim")}
+            className={cn("rounded-full border px-3 py-1 text-xs font-semibold", filter === "" ? "border-flame/40 bg-flame/15 text-flame-on-bg" : "border-line text-ink-dim")}
           >
             All
           </button>
@@ -81,7 +81,7 @@ export default function NotificationsFeed({ initial }: { initial: Item[] }) {
             <button
               key={c}
               onClick={() => setFilter(c)}
-              className={cn("rounded-full border px-3 py-1 text-xs font-semibold", filter === c ? "border-flame/40 bg-flame/15 text-flame-ink" : "border-line text-ink-dim")}
+              className={cn("rounded-full border px-3 py-1 text-xs font-semibold", filter === c ? "border-flame/40 bg-flame/15 text-flame-on-bg" : "border-line text-ink-dim")}
             >
               {CATEGORY_LABEL[c as keyof typeof CATEGORY_LABEL]}
             </button>
@@ -89,7 +89,7 @@ export default function NotificationsFeed({ initial }: { initial: Item[] }) {
         </div>
         <div className="flex items-center gap-3 text-xs font-semibold">
           {unread > 0 && (
-            <button onClick={markAll} className="text-flame-ink hover:underline">Mark all {unread} read</button>
+            <button onClick={markAll} className="text-flame-on-bg hover:underline">Mark all {unread} read</button>
           )}
           <button onClick={() => setShowPrefs((v) => !v)} className="text-ink-dim hover:text-ink">
             {showPrefs ? "Hide settings" : "Settings"}

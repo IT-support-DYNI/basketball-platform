@@ -41,6 +41,8 @@ export const dark = {
   lineStrong: "rgba(241,237,228,0.45)",
   flame: "#fe440b",
   flameInk: "#ff8156",
+  /** Already bright enough against a near-black surface — no extra darkening needed here. */
+  flameOnBg: "#ff8156",
   ember: "#ff8156",
   gold: "#fbbf24",
   onFlame: "#171310",
@@ -57,18 +59,27 @@ export const light = {
   surface3: "#dfd9cc",
   ink: "#2a2723",
   inkDim: "#514c44",
-  inkFaint: "#8b857a",
+  /** Darkened from #8b857a (3.66:1 on white); clears AA 4.5:1 on every surface tier up to surface3. */
+  inkFaint: "#615c54",
   line: "#a39d92",
   lineStrong: "#8b857a",
   flame: "#fe440b",
   flameInk: "#ff6b3d",
+  /** Text-only variant of flame/flameInk — those read at 2.8-3.5:1 on white/cream,
+   *  under AA's 4.5:1 for body text. Use this for flame-coloured copy; keep
+   *  flame/flameInk for buttons, borders and other non-text fills. Darkened
+   *  enough to clear 4.5:1 even sitting on a bg-flame/15..30 tint, not just
+   *  plain white/cream. */
+  flameOnBg: "#b53200",
   ember: "#ff6b3d",
   gold: "#d97706",
   onFlame: "#171310",
   success: "#027a48",
-  warning: "#b4790a",
+  /** Darkened from #b4790a; clears 4.5:1 even on a bg-warning/10..15 tint. */
+  warning: "#855907",
   danger: "#b42318",
-  info: "#2f6fd0",
+  /** Darkened from #2f6fd0; clears 4.5:1 even on a bg-info/15 tint. */
+  info: "#2a64bc",
 } as const;
 
 /** Player / event status colours — deliberately distinct from the semantic set

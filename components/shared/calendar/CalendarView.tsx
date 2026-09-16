@@ -37,7 +37,7 @@ type PlanReadDetail = {
 };
 
 const ACCENT: Record<string, string> = {
-  TRAINING: "bg-flame/15 text-flame-ink border-flame/30",
+  TRAINING: "bg-flame/15 text-flame-on-bg border-flame/30",
   MATCH: "bg-info/15 text-info border-info/30",
   TOURNAMENT: "bg-info/15 text-info border-info/30",
   TEAM_MEETING: "bg-ember/15 text-ember border-ember/30",
@@ -168,7 +168,7 @@ export default function CalendarView({
               <button
                 key={v}
                 onClick={() => setView(v)}
-                className={cn("rounded-full px-3 py-1 capitalize transition", view === v ? "bg-flame/15 text-flame-ink" : "text-ink-dim hover:text-ink")}
+                className={cn("rounded-full px-3 py-1 capitalize transition", view === v ? "bg-flame/15 text-flame-on-bg" : "text-ink-dim hover:text-ink")}
               >
                 {v}
               </button>
@@ -303,7 +303,7 @@ function WeekGrid({
           const list = byDay.get(day.toDateString()) ?? [];
           return (
             <div key={i} className="min-h-[10rem] border-r border-line p-2 last:border-r-0">
-              <div className={cn("mb-2 text-xs font-semibold", sameDay(day, today) ? "text-flame-ink" : "text-ink-dim")}>
+              <div className={cn("mb-2 text-xs font-semibold", sameDay(day, today) ? "text-flame-on-bg" : "text-ink-dim")}>
                 {DOW[i]} {day.getDate()}
               </div>
               <div className="space-y-1">
@@ -456,11 +456,11 @@ function EventDialog({
               {event.type === "MATCH" ? "Match plan" : "Session plan"}
             </p>
             {plan ? (
-              <Link href={`/coach/training/plans/${plan.id}`} className="mt-1 block text-sm font-semibold text-flame-ink hover:underline">
+              <Link href={`/coach/training/plans/${plan.id}`} className="mt-1 block text-sm font-semibold text-flame-on-bg hover:underline">
                 {plan.title} →
               </Link>
             ) : (
-              <Link href={`/coach/training/plans/new?eventId=${event.id}`} className="mt-1 block text-sm font-semibold text-flame-ink hover:underline">
+              <Link href={`/coach/training/plans/new?eventId=${event.id}`} className="mt-1 block text-sm font-semibold text-flame-on-bg hover:underline">
                 {event.type === "MATCH" ? "Build a match plan →" : "Build a session plan →"}
               </Link>
             )}
@@ -472,7 +472,7 @@ function EventDialog({
               <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">
                 {event.type === "MATCH" ? "Match plan" : "What’s planned"}
               </p>
-              <Link href={`/player/training/plans/${plan.id}`} className="text-xs font-semibold text-flame-ink hover:underline">
+              <Link href={`/player/training/plans/${plan.id}`} className="text-xs font-semibold text-flame-on-bg hover:underline">
                 Open full plan →
               </Link>
             </div>

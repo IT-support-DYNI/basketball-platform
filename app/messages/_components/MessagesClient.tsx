@@ -176,7 +176,7 @@ export default function MessagesClient({
         >
           <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
             <p className="text-sm font-semibold text-ink">
-              Conversations {totalUnread > 0 && <span className="text-flame-ink">({totalUnread})</span>}
+              Conversations {totalUnread > 0 && <span className="text-flame-on-bg">({totalUnread})</span>}
             </p>
             <button
               onClick={() => setShowNew(true)}
@@ -204,7 +204,7 @@ export default function MessagesClient({
                       </span>
                       <span className="flex flex-none items-center gap-1.5">
                         {c.safeguarded && (
-                          <span className="rounded-full bg-flame/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-flame-ink">
+                          <span className="rounded-full bg-flame/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-flame-on-bg">
                             Safeguarded
                           </span>
                         )}

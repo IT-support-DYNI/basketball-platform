@@ -40,7 +40,7 @@ export default function Brandmark({
         <span
           className={`font-display font-extrabold uppercase leading-none tracking-tight text-ink ${WORDMARK[size]}`}
         >
-          DYNI <span className="text-flame">Blazers</span>
+          DYNI <span className="text-flame-on-bg">Blazers</span>
         </span>
       )}
     </span>

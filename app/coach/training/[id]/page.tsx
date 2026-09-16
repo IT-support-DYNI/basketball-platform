@@ -82,7 +82,7 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
             {event.venue?.name ? ` · ${event.venue.name}` : event.locationText ? ` · ${event.locationText}` : ""}
           </p>
           {event.recurrence && (
-            <p className="mt-1 text-xs text-flame-ink">{describeRule({
+            <p className="mt-1 text-xs text-flame-on-bg">{describeRule({
               frequency: event.recurrence.frequency,
               interval: event.recurrence.interval,
               byWeekday: event.recurrence.byWeekday,

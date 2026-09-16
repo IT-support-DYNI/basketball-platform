@@ -86,7 +86,7 @@ export default function RsvpControl({ eventId }: { eventId: number }) {
                 className={cn(
                   "flex-1 rounded-full border px-2 py-1.5 text-xs font-semibold transition disabled:opacity-40",
                   active
-                    ? "border-flame/40 bg-flame/15 text-flame-ink"
+                    ? "border-flame/40 bg-flame/15 text-flame-on-bg"
                     : "border-line text-ink-dim hover:text-ink",
                 )}
               >

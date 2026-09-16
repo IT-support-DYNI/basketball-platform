@@ -91,20 +91,20 @@ export default function LoginPage() {
               setTotp("");
               setError("");
             }}
-            className="font-semibold text-flame-ink hover:underline"
+            className="font-semibold text-flame-on-bg hover:underline"
           >
             Start over
           </button>
         ) : (
           <>
             New player or parent?{" "}
-            <Link href="/register" className="font-semibold text-flame-ink hover:underline">
+            <Link href="/register" className="font-semibold text-flame-on-bg hover:underline">
               Start registration
             </Link>
             <span className="mt-1 block text-xs text-ink-faint">
               An administrator reviews every registration before full access is granted.
             </span>
-            <Link href="/club" className="mt-3 block text-xs font-semibold text-ink-dim hover:text-flame-ink hover:underline">
+            <Link href="/club" className="mt-3 block text-xs font-semibold text-ink-dim hover:text-flame-on-bg hover:underline">
               Just looking? Visit the public club site →
             </Link>
           </>
@@ -157,7 +157,7 @@ export default function LoginPage() {
 
         {!needsMfa && (
           <p className="text-center text-xs text-ink-faint">
-            <Link href="/forgot-password" className="font-semibold text-flame-ink hover:underline">
+            <Link href="/forgot-password" className="font-semibold text-flame-on-bg hover:underline">
               Forgot your password?
             </Link>
           </p>

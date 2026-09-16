@@ -21,14 +21,14 @@ type Accent =
   | "emerald";
 
 const ACCENT_TEXT: Record<Accent, string> = {
-  flame: "text-flame-ink",
+  flame: "text-flame-on-bg",
   ember: "text-ember",
   info: "text-info",
   success: "text-success",
   warning: "text-warning",
   danger: "text-danger",
   neutral: "text-ink",
-  orange: "text-flame-ink",
+  orange: "text-flame-on-bg",
   sky: "text-info",
   violet: "text-info",
   amber: "text-warning",

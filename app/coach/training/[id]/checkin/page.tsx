@@ -28,7 +28,7 @@ export default async function CheckInScreenPage({ params }: { params: { id: stri
             {event.venue?.name ? ` · ${event.venue.name}` : ""}
           </p>
         </div>
-        <Link href={`/coach/training/${event.id}`} className="text-sm font-semibold text-flame-ink hover:underline">
+        <Link href={`/coach/training/${event.id}`} className="text-sm font-semibold text-flame-on-bg hover:underline">
           ← Back to event
         </Link>
       </div>

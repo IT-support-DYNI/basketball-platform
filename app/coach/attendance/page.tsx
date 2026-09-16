@@ -38,7 +38,7 @@ export default async function CoachAttendancePage() {
               <span className="font-medium text-ink">
                 {e.title} · {e.team?.name ?? "Club-wide"} · {new Date(e.startAt).toLocaleDateString()}
               </span>
-              <Link href={`/coach/training/${e.id}`} className="text-xs font-semibold text-flame-ink hover:underline">
+              <Link href={`/coach/training/${e.id}`} className="text-xs font-semibold text-flame-on-bg hover:underline">
                 Mark attendance →
               </Link>
             </li>

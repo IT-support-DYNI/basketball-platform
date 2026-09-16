@@ -126,7 +126,7 @@ export default function ConsentManager({ docs }: { docs: Doc[] }) {
                 </button>
                 <button
                   onClick={() => { setPublishFor(publishFor === d.id ? null : d.id); setPublishBody(""); }}
-                  className="rounded-full border border-line px-3 py-1 text-flame-ink"
+                  className="rounded-full border border-line px-3 py-1 text-flame-on-bg"
                 >
                   New version
                 </button>

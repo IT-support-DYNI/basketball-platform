@@ -53,7 +53,7 @@ export default async function RegistrationStatusPage() {
       <p className="mt-4 text-ink-dim">{body}</p>
 
       <div className="mt-6 w-full rounded-card border border-line bg-surface p-4 text-left">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-flame">Checklist</p>
+        <p className="font-mono text-[11px] uppercase tracking-wider text-flame-on-bg">Checklist</p>
         <ul className="mt-2 space-y-2 text-sm">
           <li className="flex items-center gap-2 text-success">
             <Check /> Profile submitted

@@ -39,6 +39,7 @@ const config: Config = {
         flame: {
           DEFAULT: rgb('--flame'),
           ink: rgb('--flame-ink'),
+          'on-bg': rgb('--flame-on-bg'),
         },
         ember: rgb('--ember'),
         gold: rgb('--gold'),

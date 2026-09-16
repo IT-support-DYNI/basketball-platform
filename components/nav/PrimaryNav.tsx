@@ -200,7 +200,7 @@ export default function PrimaryNav({
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={cn(tab, active ? "text-flame-ink" : "text-ink-dim hover:text-ink")}
+                className={cn(tab, active ? "text-flame-on-bg" : "text-ink-dim hover:text-ink")}
               >
                 <NavIcon
                   name={item.icon}
@@ -213,7 +213,7 @@ export default function PrimaryNav({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className={cn(tab, moreActive || open ? "text-flame-ink" : "text-ink-dim hover:text-ink")}
+            className={cn(tab, moreActive || open ? "text-flame-on-bg" : "text-ink-dim hover:text-ink")}
           >
             <MoreIcon />
             More
@@ -262,7 +262,7 @@ export default function PrimaryNav({
                       className={cn(
                         "flex items-center gap-2.5 rounded-control border px-3 py-2.5 text-sm font-medium transition",
                         active
-                          ? "border-flame/40 bg-flame/10 text-flame-ink"
+                          ? "border-flame/40 bg-flame/10 text-flame-on-bg"
                           : "border-line bg-surface-2 text-ink-dim hover:text-ink",
                       )}
                     >

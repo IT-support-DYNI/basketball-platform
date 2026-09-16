@@ -232,7 +232,7 @@ function ToolButton({
       aria-pressed={active}
       className={cn(
         "rounded-full border px-2.5 py-1 text-xs font-semibold transition disabled:opacity-40",
-        active ? "border-flame/40 bg-flame/10 text-flame-ink" : "border-line text-ink-dim hover:text-ink",
+        active ? "border-flame/40 bg-flame/10 text-flame-on-bg" : "border-line text-ink-dim hover:text-ink",
       )}
     >
       {children}

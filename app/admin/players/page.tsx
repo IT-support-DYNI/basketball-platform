@@ -48,7 +48,7 @@ export default async function AdminPlayersPage() {
                     </Link>
                   </td>
                   <td className="px-4 py-2.5">
-                    <Link href={`/admin/teams/${m.team.id}`} className="font-semibold text-flame-ink hover:underline">
+                    <Link href={`/admin/teams/${m.team.id}`} className="font-semibold text-flame-on-bg hover:underline">
                       {m.team.name}
                     </Link>
                   </td>

@@ -90,7 +90,7 @@ export function DataTable<T>({
                         className="inline-flex items-center gap-1 transition hover:text-ink"
                       >
                         {col.header}
-                        <span className="text-flame">{active ? (sort!.dir === "asc" ? "▲" : "▼") : ""}</span>
+                        <span className="text-flame-on-bg">{active ? (sort!.dir === "asc" ? "▲" : "▼") : ""}</span>
                       </button>
                     ) : (
                       col.header

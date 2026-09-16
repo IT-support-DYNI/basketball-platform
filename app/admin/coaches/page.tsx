@@ -20,7 +20,7 @@ export default async function AdminCoachesPage() {
         lead={
           <>
             Every coach and the teams they&apos;re on. Create accounts from{" "}
-            <Link href="/admin/users" className="font-semibold text-flame-ink hover:underline">
+            <Link href="/admin/users" className="font-semibold text-flame-on-bg hover:underline">
               Members
             </Link>
             ; assign them on each team&apos;s page.

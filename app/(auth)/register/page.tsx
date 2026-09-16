@@ -166,7 +166,7 @@ export default function RegisterPage() {
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-flame-ink hover:underline">Sign in</Link>
+          <Link href="/login" className="font-semibold text-flame-on-bg hover:underline">Sign in</Link>
         </>
       }
     >
@@ -180,7 +180,7 @@ export default function RegisterPage() {
                 key={m}
                 type="button"
                 onClick={() => setMode(m)}
-                className={cn("flex-1 rounded-full px-3 py-1.5 transition", mode === m ? "bg-flame/15 text-flame-ink" : "text-ink-dim hover:text-ink")}
+                className={cn("flex-1 rounded-full px-3 py-1.5 transition", mode === m ? "bg-flame/15 text-flame-on-bg" : "text-ink-dim hover:text-ink")}
               >
                 {m === "self" ? "I'm the player (18+)" : "I'm a parent or guardian"}
               </button>
@@ -201,7 +201,7 @@ export default function RegisterPage() {
         <div className="flex flex-col gap-5">
           <ol className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold uppercase tracking-wider">
             {titles.map((t, i) => (
-              <li key={t} className={cn(i + 1 === step ? "text-flame-ink" : i + 1 < step ? "text-ink-dim" : "text-ink-faint")}>
+              <li key={t} className={cn(i + 1 === step ? "text-flame-on-bg" : i + 1 < step ? "text-ink-dim" : "text-ink-faint")}>
                 {i + 1}. {t}
               </li>
             ))}
