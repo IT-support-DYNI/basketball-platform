@@ -1,20 +1,44 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 export const metadata: Metadata = { title: "Privacy Policy" };
+
+/** Simple bordered table for the two retention schedules below — matches
+ *  the site's hairline-border aesthetic rather than introducing a new
+ *  visual language just for these two tables. */
+function RetentionTable({ rows }: { rows: [string, string][] }) {
+  return (
+    <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 16 }}>
+      <tbody>
+        {rows.map(([label, value]) => (
+          <tr key={label} style={{ borderBottom: "1px solid var(--border)" }}>
+            <td style={{ padding: "10px 12px 10px 0", verticalAlign: "top", fontWeight: 600, color: "var(--text-1)", width: "42%" }}>
+              {label}
+            </td>
+            <td style={{ padding: "10px 0", verticalAlign: "top", color: "var(--text-2)" }}>{value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 /**
  * Drafted to cover what UK GDPR (Art. 13/14) requires a privacy notice to
  * say, based on what this platform actually collects and does (see
  * lib/consent.ts, prisma/schema.prisma, docs/SECURITY.md) — not generic
- * boilerplate. Three facts only the club can supply are left as clearly
- * marked placeholders: the named Data Controller/contact, the Welfare and
- * Medical Officers' names, and final retention periods (a suggested
- * approach is given, not asserted as settled). This is a working draft,
- * not a substitute for a solicitor or the club's own sign-off — see the
- * notice banner below before publishing it as final.
+ * boilerplate. The staff/volunteer employment-record retention table
+ * (section 12) is sourced directly from the club's own Staff Policies
+ * Handbook (2025–2027); the member/player retention table (section 6) is
+ * a proposed schedule modelled on the same approach, since no equivalent
+ * document exists yet for player data — it's the club's call, not settled
+ * law. The named Data Controller and contact email are still bracketed
+ * placeholders. This is a working draft, not a substitute for a
+ * solicitor or the club's own sign-off — see the notice banner below
+ * before publishing it as final.
  */
 
-const SECTIONS: { n: string; title: string; body: string }[] = [
+const SECTIONS: { n: string; title: string; body: ReactNode }[] = [
   {
     n: "1",
     title: "Who we are",
@@ -42,8 +66,43 @@ const SECTIONS: { n: string; title: string; body: string }[] = [
   },
   {
     n: "6",
-    title: "How long we keep it",
-    body: "[ The club has not yet finalised its retention schedule — this section describes a commonly used starting point for youth sports clubs, not a final policy. It should be reviewed and confirmed by the club, ideally with input from its insurer and a data protection adviser, before this notice is treated as final. ]\n\nAs a general approach: we keep active membership and participation records for as long as you're a member, and after you leave we keep a minimal record for a limited period to meet insurance, legal and safeguarding obligations rather than deleting everything immediately. Safeguarding records in particular are typically kept for longer than ordinary membership records, in line with sector guidance, because concerns can resurface or need to be referenced years later.\n\nWhen you delete your account through the platform, most personal data is deleted outright; a small set of records that other people's history depends on (like attendance or messages) is anonymised rather than deleted, so the record stays accurate for everyone else without identifying you. See section 7 for how to do this.",
+    title: "How long we keep player & member data",
+    body: (
+      <>
+        <span>
+          Proposed schedule — put together for the club to review and approve, not yet a final, adopted policy. When
+          you delete your account through the platform, most personal data is deleted outright regardless of the
+          table below; a small set of records that other people&apos;s history depends on (like attendance or
+          messages) is anonymised rather than deleted, so the record stays accurate for everyone else without
+          identifying you — see section 7.
+        </span>
+        <RetentionTable
+          rows={[
+            ["Active membership & registration records", "For as long as you're an active member"],
+            ["Membership & registration records after leaving", "6 years after you leave"],
+            ["Attendance & participation history", "6 years after you leave"],
+            ["Coach evaluations & development feedback", "2 years after you leave"],
+            ["Team & direct messages on the platform", "2 years, then anonymised"],
+            [
+              "Emergency contact & medical/welfare information",
+              "Deleted when you leave, unless it's part of an open or resolved safeguarding record",
+            ],
+            [
+              "Safeguarding reports and their review",
+              "Until the player's 25th birthday (or, for a report about an adult, 25 years from the report)",
+            ],
+            ["Photos & video used under media consent", "Until consent is withdrawn, or 6 years after you leave if never withdrawn"],
+            ["Login & account security records", "12 months, on a rolling basis"],
+          ]}
+        />
+        <span style={{ display: "block", marginTop: 16 }}>
+          The 6-year figure mirrors the retention period the club already applies to its own staff personnel files.
+          The safeguarding period follows standard UK youth-sport safeguarding practice, since a concern can resurface
+          or need to be referenced many years later — not a figure set by a specific statute, but a widely used and
+          defensible approach.
+        </span>
+      </>
+    ),
   },
   {
     n: "7",
@@ -72,6 +131,32 @@ const SECTIONS: { n: string; title: string; body: string }[] = [
   },
   {
     n: "12",
+    title: "Staff & volunteer employment records",
+    body: (
+      <>
+        <span>
+          Coaches, welfare and medical officers and other club staff are also covered by this notice for anything
+          collected to run the club (see sections 1–11) — but employment-related records are kept to the specific
+          minimum periods below, set by UK employment law and the club&apos;s Staff Policies Handbook (2025–2027):
+        </span>
+        <RetentionTable
+          rows={[
+            ["PAYE & National Insurance tax code notices, taxable expenses/benefits", "3 years from the end of the relevant tax year"],
+            ["National Minimum Wage records", "3 years after the pay reference period"],
+            ["Working time records — holiday pay, opt-outs, night work, young workers' hours", "2 years from when the record was made"],
+            ["Statutory Maternity/Adoption/Paternity/Shared Parental Pay records", "3 years after the end of the tax year the pay period ends"],
+            ["Pension auto-enrolment records", "6 years (opt-out notices: 4 years)"],
+            ["Immigration checks", "2 years from termination of employment"],
+            ["Work-related injury records (3+ days' incapacity)", "At least 3 years"],
+            ["Medical examinations related to hazardous substances", "40 years from the date of the last entry"],
+            ["Whole personnel file", "Throughout employment, and up to 6 years after leaving"],
+          ]}
+        />
+      </>
+    ),
+  },
+  {
+    n: "13",
     title: "Contact us",
     body: "Questions about this notice, or a request relating to your data: [ club contact email — to be added ].\n\nA safeguarding concern shouldn't wait for a data request — use the safeguarding report form at dyniblazers.co.uk/club/safeguarding instead, which goes straight to the club's admin team.",
   },
@@ -94,10 +179,10 @@ export default function PublicPrivacyPage() {
             <p className="card-label">Draft — pending sign-off</p>
             <p>
               This policy reflects what the platform actually collects and does today, but it hasn&apos;t yet been
-              confirmed by the club or reviewed by a solicitor, and it still has a few placeholders (marked in
-              brackets) for facts only the club can supply — who the named Data Controller is, and the club&apos;s
-              final data-retention periods. Please don&apos;t treat it as final until those are filled in and the
-              club has signed off on it.
+              confirmed by the club or reviewed by a solicitor. Section 6&apos;s member/player retention schedule is
+              a proposal for the club to approve, not an adopted policy; the named Data Controller (section 1) and
+              contact email (section 13) are still placeholders. Please don&apos;t treat this as final until those
+              are settled and the club has signed off on it.
             </p>
           </div>
         </div>
