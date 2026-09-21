@@ -41,7 +41,7 @@ mutate it. Local runs reuse a server already on :3000; CI always starts fresh.
 ## CI
 
 - **`check` job** — lint, typecheck, `test:run`, `next build` (build uses a
-  throwaway `DATABASE_URL`; it must never touch a real DB — see `SECURITY.md`
+  throwaway `DATABASE_URL`; it must never touch a real DB — see `docs/SECURITY-INTERNAL.md`
   and the `force-dynamic` note for DB-backed route handlers).
 - **`e2e` job** — spins up a `postgres:16` service, `prisma migrate deploy`,
   `prisma db seed`, `next build`, `playwright test`. Uploads the HTML report on

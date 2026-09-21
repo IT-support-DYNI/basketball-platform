@@ -2,7 +2,7 @@
 
 First moves for the incidents most likely in Phase 1. Scope: one club, free
 tier (Vercel Hobby + Neon), one maintainer. See `DEPLOYMENT.md` for the deploy
-model and `SECURITY.md` for the security posture.
+model and `docs/SECURITY-INTERNAL.md` for the security posture.
 
 ## Triage order
 
@@ -60,7 +60,7 @@ The deploy stops at `prisma migrate deploy`, production stays on the old build.
 ## "Please delete my data" / data request
 
 - **Self-service first**: point them to Settings → Your data (`/settings/account`)
-  for export and account closure. See `SECURITY.md` for exactly what closure
+  for export and account closure. See `docs/SECURITY-INTERNAL.md` for exactly what closure
   scrubs vs. keeps (anonymised).
 - A guardian's request covers their linked children.
 - An admin-initiated erasure (person can't sign in) has no UI yet — run
@@ -73,7 +73,7 @@ The deploy stops at `prisma migrate deploy`, production stays on the old build.
    surface offline if you can isolate it, or roll back to a version without it.
 3. Fix on a branch, verify with a test that would have caught it, ship.
 4. If personal data was accessed, note it — the club may have a notification
-   obligation (a question for the club, in `SECURITY.md`'s "waiting on the club").
+   obligation (a question for the club, in `docs/SECURITY-INTERNAL.md`'s retention notes).
 
 ## Someone bricked their session by re-seeding
 

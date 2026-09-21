@@ -14,6 +14,7 @@ import { BadRequestError, ForbiddenError } from "./api/errors";
 export const CONSENT_TYPE_LABEL: Record<ConsentDocumentType, string> = {
   CODE_OF_CONDUCT: "Code of conduct",
   PRIVACY_NOTICE: "Privacy notice",
+  TERMS_OF_SERVICE: "Terms of service",
   MEDIA_CONSENT: "Photography & media consent",
   MEDICAL_CONSENT: "Emergency medical treatment consent",
   DATA_PROCESSING: "Data processing agreement",

@@ -9,7 +9,7 @@ import { logAudit } from "./audit";
  * player's attendance, evaluations and messages are operational club records
  * that other people's history depends on, so the personal data is scrubbed and
  * the rows kept under legitimate interest. Retention periods for the anonymised
- * shell are a club policy input (Doc 6 §19.6) — tracked in docs/SECURITY.md.
+ * shell are a club policy input (Doc 6 §19.6) — tracked in docs/SECURITY-INTERNAL.md.
  */
 
 /* ── Guard: may this account delete itself? ────────────────────────────── */

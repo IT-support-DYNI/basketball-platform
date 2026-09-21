@@ -3,6 +3,7 @@ import { z } from "zod";
 export const CONSENT_DOCUMENT_TYPES = [
   "CODE_OF_CONDUCT",
   "PRIVACY_NOTICE",
+  "TERMS_OF_SERVICE",
   "MEDIA_CONSENT",
   "MEDICAL_CONSENT",
   "DATA_PROCESSING",

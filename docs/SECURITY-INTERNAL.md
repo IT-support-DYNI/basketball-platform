@@ -1,4 +1,11 @@
-# Security posture
+# Security posture — internal engineering reference
+
+**Not for public distribution.** This is the detailed technical record for
+maintainers: exactly what's implemented, what's been checked, and what's
+deliberately deferred. The public-facing policy (scope, how to report a
+vulnerability) is [/SECURITY.md](../SECURITY.md) — keep specifics like
+exact header values, named gaps, and route-level audit detail out of that
+file; that's what this one is for.
 
 Phase 1 hardening pass (build plan W8). Covers what the platform enforces today
 and what is deliberately deferred.
@@ -89,8 +96,10 @@ Session revocation on deletion is automatic — `anonymiseAccount` deletes the
 `AuthSession` rows, so the JWT stops resolving on the next request regardless of
 the client also calling `signOut()`.
 
-## Waiting on the club (Doc 6 §19.6)
+## Retention
 
-- **Retention periods** for the anonymised shell of a former player/staff
-  member, and whether any of it should eventually be hard-deleted.
-- Confirmation that anonymise-not-delete satisfies the club's obligations.
+See `/club/privacy` (section 6 for member/player data, section 12 for staff
+records) for the retention schedule shown to the public — the member/player
+one is a proposal pending the club's approval, not yet adopted policy. Once
+approved, implement it as a scheduled job rather than leaving it as
+documentation only; nothing currently enforces these periods automatically.
