@@ -4,8 +4,9 @@ import Link from "next/link";
 
 export const metadata: Metadata = { title: "Terms & Conditions" };
 
-/** See app/club/privacy/page.tsx's file comment — same drafting approach
- *  and same "pending sign-off" caveat applies here. */
+/** Adopted 2026-09-21 — the "draft, pending sign-off" banner this page
+ *  carried while under review has been removed. app/club/privacy/page.tsx
+ *  still carries it; that one hasn't been signed off yet. */
 const SECTIONS: { n: string; title: string; body: ReactNode }[] = [
   {
     n: "1",
@@ -92,19 +93,6 @@ export default function PublicTermsPage() {
           <p className="eyebrow">Legal</p>
           <h1>Terms &amp; Conditions</h1>
           <p className="lead">What membership of DYNI Blazers involves, for members, guardians and the club alike.</p>
-        </div>
-      </section>
-
-      <section style={{ padding: "0 0 var(--section-y)" }}>
-        <div className="wrap">
-          <div className="card" style={{ borderColor: "var(--accent)" }}>
-            <p className="card-label">Draft — pending sign-off</p>
-            <p>
-              This is a working draft covering how the platform and club actually operate today. It hasn&apos;t yet
-              been reviewed by a solicitor or formally adopted by the club — please don&apos;t treat it as the
-              club&apos;s final terms until it has been.
-            </p>
-          </div>
         </div>
       </section>
 
