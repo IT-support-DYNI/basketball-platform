@@ -7,7 +7,7 @@ import "./globals.css";
 import Providers from "./providers";
 import NavBar from "@/components/NavBar";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
-import ThemeScript from "@/components/theme/ThemeScript";
+import DisplayPrefsScript from "@/components/theme/DisplayPrefsScript";
 
 // Same face swap as the public /club site (app/club/layout.tsx), applied
 // app-wide so the internal admin/coach/player/guardian screens match it:
@@ -92,7 +92,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${inter.variable} ${archivo.variable} ${barlow.variable} ${plexMono.variable}`}
     >
       <head>
-        <ThemeScript />
+        <DisplayPrefsScript />
       </head>
       <body className="min-h-screen bg-ground font-sans text-ink antialiased">
         <Providers>

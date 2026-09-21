@@ -74,6 +74,12 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <path d="M5 20c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5" />
     </>
   ),
+  display: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 3.5a8.5 8.5 0 0 1 0 17Z" fill="currentColor" stroke="none" />
+    </>
+  ),
 };
 
 export default function NavIcon({

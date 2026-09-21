@@ -162,15 +162,13 @@ enum EvaluationPeriod {
   MONTHLY
 }
 
-enum PerformanceCategory {
-  SHOOTING
-  DEFENSE
-  PASSING
-  BALL_HANDLING
-  FITNESS
-  TEAMWORK
-  EFFORT
-  DISCIPLINE
+/// Font-size step for the personal display/accessibility settings
+/// (Settings > Display). MEDIUM is the unscaled default.
+enum FontSizePreference {
+  SMALL
+  MEDIUM
+  LARGE
+  XLARGE
 }
 
 enum NotificationType {
@@ -485,6 +483,12 @@ model User {
   /// (/api/v1/calendar/feed.ics?token=…). Null until the user first reveals
   /// their feed; rotating it invalidates the old URL. Not a login credential.
   calendarToken String? @unique
+  /// Personal display/accessibility settings (Settings > Display). Theme
+  /// itself stays a client-only preference (components/theme/ThemeToggle) —
+  /// these two are the settings that need to follow the user across
+  /// devices, so they're stored server-side instead of only in localStorage.
+  highContrast       Boolean            @default(false)
+  fontSizePreference FontSizePreference @default(MEDIUM)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -1104,13 +1108,34 @@ model PerformanceEvaluation {
 }
 
 model PerformanceCategoryScore {
-  id           Int                    @id @default(autoincrement())
+  id           Int                            @id @default(autoincrement())
   evaluationId Int
-  evaluation   PerformanceEvaluation  @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
-  category     PerformanceCategory
+  evaluation   PerformanceEvaluation          @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  categoryId   Int
+  category     PerformanceCategoryDefinition  @relation(fields: [categoryId], references: [id])
   score        Int
 
-  @@unique([evaluationId, category])
+  @@unique([evaluationId, categoryId])
+}
+
+/// Admin-configurable — Platform-wide settings > Performance categories.
+/// Was a fixed enum; a club can now rename, reorder, add or retire the
+/// categories coaches score players on. `key` is the stable machine
+/// identifier (immutable once created); `label` is what's shown. Retiring a
+/// category sets isActive false rather than deleting it, since past
+/// evaluations still reference it via PerformanceCategoryScore.
+model PerformanceCategoryDefinition {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  label     String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  scores PerformanceCategoryScore[]
+
+  @@index([isActive, sortOrder])
 }
 
 // FEEDBACK

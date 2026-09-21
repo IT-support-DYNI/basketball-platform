@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import PostAnnouncementForm from "@/app/admin/settings/_components/PostAnnouncementForm";
 import DeleteAnnouncementButton from "@/app/admin/settings/_components/DeleteAnnouncementButton";
+import PerformanceCategoriesManager from "@/app/admin/settings/_components/PerformanceCategoriesManager";
 
 export default async function AdminSettingsPage() {
   const [teams, announcements] = await Promise.all([
@@ -47,11 +48,23 @@ export default async function AdminSettingsPage() {
         </ul>
       </section>
 
+      <section className="mt-6 rounded-card border border-line bg-surface p-5">
+        <h2 className="font-bold text-slate-900">Performance categories</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          What coaches score players on when they record an evaluation. Reorder, rename, add new
+          ones, or retire ones you no longer use — retiring keeps past evaluations intact.
+        </p>
+        <div className="mt-4">
+          <PerformanceCategoriesManager />
+        </div>
+      </section>
+
       <section className="mt-6 rounded-card border border-dashed border-line-strong bg-surface p-6">
         <p className="text-sm font-semibold text-slate-700">Planned for later</p>
         <p className="mt-1 text-sm text-slate-500">
-          Multi-club configuration, configurable performance categories, and notification channels
-          (email/SMS/push) are post-MVP — see ARCHITECTURE.md §8 (Future Features).
+          Multi-club configuration and SMS notifications are post-MVP — see ARCHITECTURE.md §8
+          (Future Features). Email notifications are already live: see each category&apos;s toggle
+          on the <a href="/notifications" className="underline">Notifications</a> page.
         </p>
       </section>
     </main>

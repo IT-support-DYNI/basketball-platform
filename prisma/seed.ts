@@ -14,7 +14,7 @@
  * The four canonical logins are stable — password "password123":
  *   admin@example.com · coach@example.com · player1@example.com · guardian@example.com
  */
-import { PrismaClient, type PlayerPosition, type StaffRole, type PerformanceCategory } from "@prisma/client";
+import { PrismaClient, type PlayerPosition, type StaffRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -717,14 +717,23 @@ async function main() {
   }
 
   /* ── Performance evaluations with a monthly trend ──────────────────── */
-  const CATS: [PerformanceCategory, number][] = [
-    ["SHOOTING", 7], ["DEFENSE", 6], ["PASSING", 8], ["BALL_HANDLING", 7],
-    ["FITNESS", 7], ["TEAMWORK", 8], ["EFFORT", 9], ["DISCIPLINE", 7],
-  ];
+  // Categories are seeded by the 20260921120100_configurable_performance_categories
+  // migration (they're admin-configurable now, not a fixed enum — see
+  // app/admin/settings), so this run just reads the base scores from what
+  // exists rather than hardcoding key names.
+  const BASE_SCORE_BY_KEY: Record<string, number> = {
+    SHOOTING: 7, DEFENSE: 6, PASSING: 8, BALL_HANDLING: 7,
+    FITNESS: 7, TEAMWORK: 8, EFFORT: 9, DISCIPLINE: 7,
+  };
+  const categoryDefs = await prisma.performanceCategoryDefinition.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: "asc" },
+  });
+  const CATS: [number, number][] = categoryDefs.map((c) => [c.id, BASE_SCORE_BY_KEY[c.key] ?? 7]);
   async function evaluate(profileId: number, monthsBack: number, bump: number, period: "WEEKLY" | "MONTHLY") {
-    const scores = CATS.map(([category, base]) => ({
-      category,
-      score: Math.max(1, Math.min(10, base + bump + ((profileId + category.length) % 2))),
+    const scores = CATS.map(([categoryId, base]) => ({
+      categoryId,
+      score: Math.max(1, Math.min(10, base + bump + ((profileId + categoryId) % 2))),
     }));
     const overall = scores.reduce((s, c) => s + c.score, 0) / scores.length;
     await prisma.performanceEvaluation.create({

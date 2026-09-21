@@ -11,7 +11,7 @@ export default async function PlayerPerformancePage() {
   const evaluations = playerId
     ? await prisma.performanceEvaluation.findMany({
         where: { playerId },
-        include: { categoryScores: true },
+        include: { categoryScores: { include: { category: true }, orderBy: { category: { sortOrder: "asc" } } } },
         orderBy: { periodStart: "desc" },
       })
     : [];
@@ -59,7 +59,7 @@ export default async function PlayerPerformancePage() {
             <div className="mt-3 flex flex-wrap gap-2">
               {e.categoryScores.map((c) => (
                 <span key={c.id} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                  {c.category.replace(/_/g, " ")}: {c.score}
+                  {c.category.label}: {c.score}
                 </span>
               ))}
             </div>
