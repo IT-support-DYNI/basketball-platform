@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 const TYPES = [
   ["CODE_OF_CONDUCT", "Code of conduct"],
   ["PRIVACY_NOTICE", "Privacy notice"],
+  ["TERMS_OF_SERVICE", "Terms of service"],
   ["MEDIA_CONSENT", "Photography & media"],
   ["MEDICAL_CONSENT", "Emergency medical treatment"],
   ["DATA_PROCESSING", "Data processing"],

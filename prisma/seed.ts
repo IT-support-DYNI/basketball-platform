@@ -510,7 +510,12 @@ async function main() {
     {
       type: "PRIVACY_NOTICE" as const,
       title: "Privacy notice",
-      body: "We hold the personal data you (or, for a junior player, your guardian) provide to run the club safely: contact details, date of birth, emergency contacts, attendance, and — where you've chosen to share it — medical and welfare information.\n\nAccess is limited by role: a coach sees their own team, a welfare officer sees welfare-relevant information club-wide, and nothing is shared outside the club except where the law requires it. We never sell your data.\n\nThis is a summary — the full notice, covering your rights, how long data is kept, and who our data controller is, is published at dyniblazers.co.uk/club/privacy. Please read it before accepting.",
+      body: "We hold the personal data you (or, for a junior player, your guardian) provide to run the club safely: contact details, date of birth, emergency contacts, attendance, and — where you've chosen to share it — medical and welfare information.\n\nAccess is limited by role: a coach sees their own team, a welfare officer sees welfare-relevant information club-wide, and nothing is shared outside the club except where the law requires it. We never sell your data.\n\nHow long we keep it after you leave: general membership and attendance records for 6 years; safeguarding reports until the player's 25th birthday (or, for a report about an adult, 25 years from the report); messages for 2 years, then anonymised. Emergency contact and medical/welfare information is deleted when you leave unless it's part of an open or resolved safeguarding record.\n\nThis is a summary — the full notice, covering your rights and who our data controller is, is published at dyniblazers.co.uk/club/privacy. Please read it before accepting.",
+    },
+    {
+      type: "TERMS_OF_SERVICE" as const,
+      title: "Terms of service",
+      body: "By accepting, you agree to the club's Terms & Conditions, covering membership and registration, fees (none are currently collected through this platform), the code of conduct, attendance and session changes, health and safety, photography and public profiles, safeguarding, data protection, platform messaging rules, and suspension or termination of membership.\n\nThe full terms are published at dyniblazers.co.uk/club/terms — please read them before accepting. These terms are governed by the law of Northern Ireland.",
     },
   ];
   const consentVersionId: Record<string, number> = {};
