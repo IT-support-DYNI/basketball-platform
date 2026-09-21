@@ -5,13 +5,14 @@ import { authOptions } from "@/lib/auth";
 import { route } from "@/lib/api";
 import { requireAuth, requireRole } from "@/lib/authorization";
 import { getPlaybackUrl } from "@/lib/storage";
+import { visibleVideoWhere } from "@/lib/videos";
 import { prisma } from "@/lib/prisma";
 
 export const GET = route<{ id: string }>(async (_req, { params }) => {
-  requireAuth(await getServerSession(authOptions));
+  const session = requireAuth(await getServerSession(authOptions));
 
-  const video = await prisma.video.findUnique({
-    where: { id: Number(params.id) },
+  const video = await prisma.video.findFirst({
+    where: { id: Number(params.id), ...visibleVideoWhere(session) },
     include: { assignments: { include: { team: true, player: { include: { user: true } } } } },
   });
 
