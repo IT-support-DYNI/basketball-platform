@@ -70,7 +70,7 @@ export default function DisplaySettings() {
         <div className="border-t border-line pt-6">
           <Checkbox
             label="High contrast"
-            description="Darker text and more visible borders — useful in bright light or for low vision."
+            description="A solid black-and-white high-contrast theme (like VS Code's) instead of the usual palette — combines with your light/dark choice above."
             checked={prefs.highContrast}
             onCheckedChange={(checked) => save({ highContrast: checked })}
           />

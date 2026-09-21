@@ -134,30 +134,78 @@
 }
 
 /*
- * Display & accessibility (Settings > Display). Layered the same way theme
- * is above: light values are the unconditional default, dark overrides them
- * under either the OS preference or an explicit data-theme="dark" — see
- * components/theme/displayPrefs.ts for what sets these attributes.
+ * High contrast (Settings > Display) — a real high-contrast *theme*, not a
+ * subtler-grays tweak: pure black or white, every text role collapsed to
+ * full ink (no dimmed secondary text), and — see the border-style/width
+ * overrides further down — solid, thicker borders in place of the wireframe
+ * dashes. Modelled on VS Code's Light/Dark High Contrast themes. It combines
+ * with whichever base theme is active: on light this reads as "Light High
+ * Contrast", on dark as "Dark High Contrast" — see
+ * components/theme/displayPrefs.ts for what sets the attribute. Layered the
+ * same way theme is above: light values are the unconditional default, dark
+ * overrides them under either the OS preference or an explicit
+ * data-theme="dark".
+ *
+ * Known gap: this only reaches UI built on the design tokens (--ink,
+ * --surface, border-line, …). A handful of older pages still use hardcoded
+ * Tailwind slate/gray classes instead of the tokens and won't pick this up —
+ * a pre-existing inconsistency, not something high contrast broke.
  */
 :root[data-contrast="high"] {
-  --ink-dim: 42 39 35;     /* == --ink — no dimming */
-  --ink-faint: 42 39 35;
-  --line: #514C44;
-  --line-strong: #2A2723;
+  --ground: 255 255 255;
+  --surface: 255 255 255;
+  --surface-2: 255 255 255;
+  --surface-3: 255 255 255;
+  --ink: 0 0 0;
+  --ink-dim: 0 0 0;
+  --ink-faint: 0 0 0;
+  --line: #000000;
+  --line-strong: #000000;
+  --flame-on-bg: 181 50 0;
+  --shadow-card: none;
+  --shadow-pop: none;
 }
 @media (prefers-color-scheme: dark) {
   :root[data-contrast="high"]:not([data-theme="light"]) {
-    --ink-dim: 241 237 228;
-    --ink-faint: 241 237 228;
-    --line: rgba(241, 237, 228, 0.6);
-    --line-strong: rgba(241, 237, 228, 0.85);
+    --ground: 0 0 0;
+    --surface: 0 0 0;
+    --surface-2: 0 0 0;
+    --surface-3: 0 0 0;
+    --ink: 255 255 255;
+    --ink-dim: 255 255 255;
+    --ink-faint: 255 255 255;
+    --line: #FFFFFF;
+    --line-strong: #FFFFFF;
+    --flame-on-bg: 255 160 122;
   }
 }
 :root[data-theme="dark"][data-contrast="high"] {
-  --ink-dim: 241 237 228;
-  --ink-faint: 241 237 228;
-  --line: rgba(241, 237, 228, 0.6);
-  --line-strong: rgba(241, 237, 228, 0.85);
+  --ground: 0 0 0;
+  --surface: 0 0 0;
+  --surface-2: 0 0 0;
+  --surface-3: 0 0 0;
+  --ink: 255 255 255;
+  --ink-dim: 255 255 255;
+  --ink-faint: 255 255 255;
+  --line: #FFFFFF;
+  --line-strong: #FFFFFF;
+  --flame-on-bg: 255 160 122;
+}
+
+/* Solid, thicker card borders under high contrast — the dashed wireframe
+ * look (below) is a stylistic choice that works against a high-contrast
+ * mode's job, and a thin 1px hairline is easy to miss at low vision. */
+[data-contrast="high"] .rounded-card.border-line {
+  border-style: solid;
+  border-width: 2px;
+}
+
+/* A high-contrast mode is exactly the situation where "where's the focus
+ * ring" can't be left to a browser default — VS Code's high-contrast themes
+ * are known for this same always-visible treatment. */
+[data-contrast="high"] :focus-visible {
+  outline: 2px solid rgb(var(--flame));
+  outline-offset: 2px;
 }
 
 /* Font size steps — scale the root so every rem-based Tailwind size
