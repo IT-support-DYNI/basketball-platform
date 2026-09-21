@@ -42,12 +42,9 @@ const HERO_SLIDES: HeroSlide[] = [
     label: "Hero 03 — Trials",
     eyebrow: "Open trials",
     words: ["Come", "down", "and", "play."],
-    lead: "Bring trainers and a water bottle — we'll sort the rest. Cost is never the reason someone can't play; see our cost breakdown below.",
+    lead: "Bring trainers and a water bottle — we'll sort the rest. Come down and see if you like us.",
     tabTitle: "Open trials",
-    ctas: [
-      { label: "Register for trials", href: "/register", primary: true },
-      { label: "What it costs", href: "#cost" },
-    ],
+    ctas: [{ label: "Register for trials", href: "/register", primary: true }],
   },
   {
     label: "Hero 04 — Coaches",
@@ -67,7 +64,7 @@ const TICKER_FACTS = [
   "Everyone develops",
   "Qualified coaches, every session",
   "Nobody sits on the bench for a season",
-  "Cost is never the reason",
+  "Real coaching, every session",
   "Junior to senior, one club",
 ];
 
@@ -105,9 +102,9 @@ const AUDIENCE_CARDS = [
   },
   {
     title: "Guardians",
-    body: "Parents & guardians who want to know exactly what it costs and who's coaching their kid.",
-    href: "#cost",
-    linkLabel: "Cost & safeguarding",
+    body: "Parents & guardians who want to know who's coaching their kid and how the club keeps them safe.",
+    href: "/club/safeguarding",
+    linkLabel: "Safeguarding",
   },
 ];
 
@@ -129,15 +126,6 @@ const SAFE_CARDS = [
     body: "The club has a designated safeguarding lead — ask at registration or via the club's contact details for who to reach and how.",
   },
   { title: "Open sessions", body: "Parents and guardians are welcome to stay and watch any session, any age group." },
-];
-
-const COST_ROWS = [
-  { label: "Trials & taster sessions", value: "Free" },
-  { label: "Juniors, per term", value: "£40" },
-  { label: "Academy, per term", value: "£55" },
-  { label: "Senior squads, per term", value: "£70" },
-  { label: "Club kit", value: "Loaned" },
-  { label: "Hardship fund", value: "Ask us" },
 ];
 
 export default async function ClubLandingPage() {
@@ -334,30 +322,6 @@ export default async function ClubLandingPage() {
               <div className="safe-card" key={c.title}>
                 <strong>{c.title}</strong>
                 <p>{c.body}</p>
-              </div>
-            ))}
-          </RevealBlock>
-        </div>
-      </section>
-
-      <section className="cost" id="cost">
-        <div className="wrap cost-in">
-          <RevealBlock>
-            <p className="eyebrow">Cost transparency</p>
-            <h2>
-              Cost is never <em>the reason</em>
-            </h2>
-            <p className="lead" style={{ marginTop: 14 }}>
-              Here&apos;s the whole picture, up front. If any of it is a problem, tell us — the hardship fund exists
-              for exactly that and no one needs to explain themselves twice.
-            </p>
-            <p className="cost-note">Illustrative figures for the current term. Confirm with the club before registering.</p>
-          </RevealBlock>
-          <RevealBlock delayMs={80} className="cost-rows">
-            {COST_ROWS.map((r) => (
-              <div className="cost-row" key={r.label}>
-                <strong>{r.label}</strong>
-                <span>{r.value}</span>
               </div>
             ))}
           </RevealBlock>
