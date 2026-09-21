@@ -476,11 +476,42 @@ async function main() {
   });
 
   /* ── Consent documents ─────────────────────────────────────────────── */
+  // Drafted as real working documents (see app/club/privacy and
+  // app/club/terms's own file comments for the same caveat): reflects what
+  // the club/platform actually does today, but still needs the club's own
+  // sign-off — particularly the Data Controller name and retention periods
+  // referenced from the full Privacy Policy these point to.
   const consentDocs = [
-    { type: "CODE_OF_CONDUCT" as const, title: "Player code of conduct", body: "As a member of DYNI Blazers you agree to treat teammates, coaches, officials and opponents with respect; to arrive on time and ready; to represent the club positively; and to speak to a coach or the welfare officer straight away if something isn't right." },
-    { type: "MEDIA_CONSENT" as const, title: "Photography & media consent", body: "The club sometimes takes photos and short videos at training and matches for the team channel, the club website and social media. By accepting you agree images of you (or your child) may be used for those purposes. You can withdraw this at any time by contacting the club administrator." },
-    { type: "MEDICAL_CONSENT" as const, title: "Emergency treatment consent", body: "In the event of injury or illness where you (or your child's named contacts) cannot be reached, you authorise club staff to arrange emergency first aid or medical treatment as advised by a qualified professional." },
-    { type: "PRIVACY_NOTICE" as const, title: "Privacy notice", body: "We hold the personal data you provide to run the club: contact details, dates of birth, emergency contacts and, where relevant, medical and welfare information. Access is limited by role. We keep it only as long as needed and never sell it. Full notice on the club website." },
+    {
+      type: "CODE_OF_CONDUCT" as const,
+      title: "Player code of conduct",
+      body: "As a member of DYNI Blazers, I agree to:\n\n• Treat teammates, coaches, officials, opponents and their families with respect, on and off the court, including in team messages on this platform.\n• Arrive on time and ready to train or play, and tell a coach in advance if I can't make a session.\n• Follow the direction of coaches and volunteers during sessions, matches and trips.\n• Never use discriminatory, threatening or abusive language or behaviour towards anyone connected with the club or an opponent.\n• Look after club and venue property, and any kit loaned to me.\n• Speak to a coach, the welfare officer, or use the safeguarding report form straight away if something isn't right — for myself or on behalf of someone else.\n• Understand that breaching this code may lead to a warning, suspension, or removal from the club, at the club's discretion and following a fair process.\n\nFor a guardian accepting on behalf of a junior player: you're confirming your child has been told what this means in an age-appropriate way, and that you'll support the club in upholding it.",
+    },
+    {
+      type: "MEDIA_CONSENT" as const,
+      title: "Photography & media consent",
+      body: "The club sometimes takes photos and short videos at training and matches. By accepting, you agree images of you (or your child) may be used for:\n\n• The team channel and internal club communications\n• The public club website (dyniblazers.co.uk), including a public player profile if separately approved by an administrator\n• The club's social media accounts\n\nWe never publish a junior player's surname, school, or home address alongside their image. You can withdraw this consent at any time by contacting the club administrator — we'll stop using new images of you or your child going forward, though we can't always recall images already shared or printed before you withdrew.\n\nThis consent is separate from, and doesn't by itself make you (or your child) appear on the public roster — a public profile also needs a specific administrator approval on top of this consent.",
+    },
+    {
+      type: "MEDICAL_CONSENT" as const,
+      title: "Emergency treatment consent",
+      body: "In the event of injury or illness during a club session, match or trip, where I (or, for a junior player, their named emergency contacts) cannot be reached in time, I authorise club staff to:\n\n• Administer basic first aid\n• Call emergency services if needed\n• Arrange emergency medical treatment as advised by a qualified professional (paramedic, doctor or hospital) acting in the player's best interests\n\nI understand club staff will always try to contact the named emergency contact(s) first, and that this consent covers emergency action only — not routine or ongoing medical decisions, which remain mine (or the guardian's) to make.\n\nI also agree to keep the player's emergency contact details, and any medical condition or allergy relevant to their safety during club activity, up to date on this platform — see the Data Processing Consent document for how that information is used and protected.",
+    },
+    {
+      type: "DATA_PROCESSING" as const,
+      title: "Medical & welfare data processing consent",
+      body: "Alongside the club's general Privacy Policy (dyniblazers.co.uk/club/privacy), UK data protection law treats health and welfare information as a special category of data that needs its own, explicit consent to be processed.\n\nBy accepting, I give my explicit consent for DYNI Blazers to hold and use any medical condition, allergy, disability or welfare information I (or, for a junior player, their guardian) choose to provide, for the purpose of:\n\n• Keeping the player safe during sessions, matches and trips\n• Informing coaches and first-aid trained staff of anything they need to know to respond appropriately\n• Supporting a welfare or safeguarding concern, where one is raised\n\nThis information is only shared with staff who need it for one of those purposes (see the club's field-visibility rules), is never used for any other purpose, and is never sold or shared with third parties outside the club except where the law requires it (for example, a genuine child protection concern). I can withdraw this consent at any time, though the club may need to limit a player's participation in some activities if it no longer holds information needed to keep them safe.",
+    },
+    {
+      type: "TRIP_CONSENT" as const,
+      title: "Away trips & travel consent",
+      body: "For matches, tournaments or trips away from the club's usual venue, I give my consent for the named player to travel with the team under the supervision of club coaches and volunteers, using transport arranged or approved by the club.\n\nI understand that for a specific trip, the club may ask for further details (departure/return times, transport method, overnight arrangements) and may ask for this consent to be reconfirmed for trips involving an overnight stay or travel outside Northern Ireland. The emergency contact and medical information held on this platform applies to any trip covered by this consent, and I'm responsible for keeping it current.\n\nThis consent can be withdrawn for a specific trip at any time before it takes place by contacting the club.",
+    },
+    {
+      type: "PRIVACY_NOTICE" as const,
+      title: "Privacy notice",
+      body: "We hold the personal data you (or, for a junior player, your guardian) provide to run the club safely: contact details, date of birth, emergency contacts, attendance, and — where you've chosen to share it — medical and welfare information.\n\nAccess is limited by role: a coach sees their own team, a welfare officer sees welfare-relevant information club-wide, and nothing is shared outside the club except where the law requires it. We never sell your data.\n\nThis is a summary — the full notice, covering your rights, how long data is kept, and who our data controller is, is published at dyniblazers.co.uk/club/privacy. Please read it before accepting.",
+    },
   ];
   const consentVersionId: Record<string, number> = {};
   for (const d of consentDocs) {
