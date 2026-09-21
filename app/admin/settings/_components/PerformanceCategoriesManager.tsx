@@ -154,7 +154,7 @@ export default function PerformanceCategoriesManager() {
         <button
           type="submit"
           disabled={adding}
-          className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+          className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-4 py-2 text-sm font-bold text-on-flame disabled:opacity-50"
         >
           Add
         </button>

@@ -146,10 +146,17 @@
  * overrides them under either the OS preference or an explicit
  * data-theme="dark".
  *
- * Known gap: this only reaches UI built on the design tokens (--ink,
- * --surface, border-line, …). A handful of older pages still use hardcoded
- * Tailwind slate/gray classes instead of the tokens and won't pick this up —
- * a pre-existing inconsistency, not something high contrast broke.
+ * `slate-*` classes are aliased onto these same tokens in tailwind.config.ts
+ * (a deliberate bridge for screens not yet migrated to `ink`/`surface`/
+ * `border-line` directly — see docs/DESIGN-MIGRATION.md), so they pick this
+ * up too. What doesn't: a small number of deliberately theme-invariant
+ * colors (a QR code's required white background, a video player's black
+ * letterbox, modal scrim overlays, PlayerProfileHero's intentional
+ * always-dark photo treatment) and `text-white` on `bg-success`/`bg-danger`/
+ * `bg-warning` badges and Button.tsx's `destructive` variant, which have no
+ * "on-X" token yet (on-flame's `bg-flame` counterpart was fixed to use it
+ * everywhere it was missing) and can fail contrast in dark theme even
+ * without high contrast on — a separate, pre-existing issue.
  */
 :root[data-contrast="high"] {
   --ground: 255 255 255;

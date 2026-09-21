@@ -209,7 +209,7 @@ export default function MessagesClient({
                           </span>
                         )}
                         {c.unread > 0 && (
-                          <span className="min-w-[1.25rem] rounded-full bg-flame px-1 text-center text-[11px] font-bold text-white">
+                          <span className="min-w-[1.25rem] rounded-full bg-flame px-1 text-center text-[11px] font-bold text-on-flame">
                             {c.unread}
                           </span>
                         )}
@@ -275,7 +275,7 @@ export default function MessagesClient({
                           m.deleted
                             ? "border border-dashed border-line text-ink-faint"
                             : mine
-                              ? "bg-flame text-white"
+                              ? "bg-flame text-on-flame"
                               : "bg-surface-2 text-ink",
                         )}
                       >
@@ -287,7 +287,7 @@ export default function MessagesClient({
                         <span
                           className={cn(
                             "ml-2 align-baseline text-[10px]",
-                            mine && !m.deleted ? "text-white/70" : "text-ink-faint",
+                            mine && !m.deleted ? "text-on-flame/70" : "text-ink-faint",
                           )}
                         >
                           {timeOf(m.createdAt)}
@@ -296,7 +296,7 @@ export default function MessagesClient({
                         {mine && !m.deleted && (
                           <button
                             onClick={() => removeMessage(m.id)}
-                            className="ml-2 hidden text-[10px] text-white/70 hover:text-white group-hover:inline"
+                            className="ml-2 hidden text-[10px] text-on-flame/70 hover:text-on-flame group-hover:inline"
                           >
                             Delete
                           </button>
@@ -327,7 +327,7 @@ export default function MessagesClient({
                   <button
                     onClick={send}
                     disabled={sending || !draft.trim()}
-                    className="rounded-control bg-flame px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+                    className="rounded-control bg-flame px-4 py-2 text-sm font-semibold text-on-flame disabled:opacity-40"
                   >
                     Send
                   </button>
@@ -455,7 +455,7 @@ function NewConversationDialog({
           <button
             onClick={create}
             disabled={selected.size === 0 || busy}
-            className="rounded-control bg-flame px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            className="rounded-control bg-flame px-4 py-2 text-sm font-semibold text-on-flame disabled:opacity-40"
           >
             {selected.size === 1 ? "Start DM" : "Create group"}
           </button>

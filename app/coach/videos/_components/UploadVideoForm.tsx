@@ -100,7 +100,7 @@ export default function UploadVideoForm() {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white shadow-court-500/30 transition hover:border-flame">
+      <button type="button" onClick={() => setOpen(true)} className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-on-flame shadow-court-500/30 transition hover:border-flame">
         + Add Video
       </button>
     );
@@ -155,7 +155,7 @@ export default function UploadVideoForm() {
       {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="flex gap-2">
-        <button type="submit" disabled={loading} className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50">
+        <button type="submit" disabled={loading} className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-on-flame disabled:opacity-50">
           {loading ? (mode === "upload" ? "Uploading…" : "Saving…") : mode === "upload" ? "Upload" : "Add link"}
         </button>
         <button type="button" onClick={() => setOpen(false)} className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100">
