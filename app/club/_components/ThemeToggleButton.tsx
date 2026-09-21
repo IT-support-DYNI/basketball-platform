@@ -3,7 +3,7 @@
 /** Theme toggle styled for the landing page's own `.toggle` class — but the
  *  underlying mechanism (the `dyni-theme` localStorage key, the `data-theme`
  *  attribute on <html>) is the exact same one components/theme/ThemeToggle.tsx
- *  and ThemeScript.tsx already use everywhere else in the app, so this page's
+ *  and DisplayPrefsScript.tsx already use everywhere else in the app, so this page's
  *  toggle and the app's toggle stay in sync. Unlike ThemeToggle.tsx, both
  *  sun/moon icons are always in the DOM and the *CSS* swaps which one shows
  *  (app/club/_styles/landing.css's `.toggle .sun`/`.toggle .moon` rules,

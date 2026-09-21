@@ -2,7 +2,7 @@
 
 // Response security headers (brief §32). Applied to every route. CSP keeps
 // `script-src 'unsafe-inline'` for now — Next's hydration bootstrap and the
-// pre-paint ThemeScript are inline; moving to a nonce needs middleware wiring
+// pre-paint DisplayPrefsScript are inline; moving to a nonce needs middleware wiring
 // and is tracked in docs/SECURITY.md. The other directives (frame-ancestors,
 // object-src, base-uri, form-action) already close the main injection vectors.
 const isDev = process.env.NODE_ENV !== "production";

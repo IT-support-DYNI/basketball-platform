@@ -47,7 +47,8 @@ export type Capability =
   | "admin.settings"
   | "guardian.home"
   | "account.security"
-  | "account.data";
+  | "account.data"
+  | "account.display";
 
 const ROLE_CAPABILITIES: Record<string, Capability[]> = {
   PLAYER: [
@@ -62,6 +63,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "messages",
   "account.security",
     "account.data",
+    "account.display",
   ],
   COACH: [
     "coach.home",
@@ -77,6 +79,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "messages",
   "account.security",
     "account.data",
+    "account.display",
   ],
   ADMIN: [
     "admin.home",
@@ -97,8 +100,9 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "admin.settings",
   "account.security",
     "account.data",
+    "account.display",
   ],
-  GUARDIAN: ["guardian.home", "announcements", "messages", "account.security", "account.data"],
+  GUARDIAN: ["guardian.home", "announcements", "messages", "account.security", "account.data", "account.display"],
 };
 
 export function capabilitiesFor(roles: string | string[]): Set<Capability> {
@@ -129,7 +133,8 @@ export type NavIconName =
   | "settings"
   | "shield"
   | "inbox"
-  | "user";
+  | "user"
+  | "display";
 
 export type NavItem = {
   label: string;
@@ -185,6 +190,7 @@ const NAV: NavItem[] = [
   { label: "Profile", href: "/player/profile", capability: "player.profile", icon: "user" },
   { label: "Security", href: "/settings/security", capability: "account.security", icon: "shield" },
   { label: "Your data", href: "/settings/account", capability: "account.data", icon: "user" },
+  { label: "Display", href: "/settings/display", capability: "account.display", icon: "display" },
 ];
 
 export function navFor(roles: string | string[]): NavItem[] {

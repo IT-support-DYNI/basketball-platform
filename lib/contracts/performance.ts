@@ -1,16 +1,5 @@
 import { z } from "zod";
 
-const performanceCategory = z.enum([
-  "SHOOTING",
-  "DEFENSE",
-  "PASSING",
-  "BALL_HANDLING",
-  "FITNESS",
-  "TEAMWORK",
-  "EFFORT",
-  "DISCIPLINE",
-]);
-
 export const createEvaluationSchema = z.object({
   playerId: z.number().int().positive(),
   periodType: z.enum(["WEEKLY", "MONTHLY"]),
@@ -19,13 +8,13 @@ export const createEvaluationSchema = z.object({
   categoryScores: z
     .array(
       z.object({
-        category: performanceCategory,
+        categoryId: z.number().int().positive(),
         score: z.number().int().min(1).max(10),
       })
     )
     .min(1)
     .refine(
-      (scores) => new Set(scores.map((s) => s.category)).size === scores.length,
+      (scores) => new Set(scores.map((s) => s.categoryId)).size === scores.length,
       "Each category can only be scored once per evaluation"
     ),
   /** Monthly evaluations only — see ARCHITECTURE.md §2.2. */
@@ -36,3 +25,14 @@ export const createEvaluationSchema = z.object({
 export const updateEvaluationSchema = createEvaluationSchema
   .omit({ playerId: true, periodType: true })
   .partial();
+
+/** Platform-wide settings > Performance categories (admin-managed). */
+export const createPerformanceCategorySchema = z.object({
+  label: z.string().trim().min(1).max(60),
+});
+
+export const updatePerformanceCategorySchema = z.object({
+  label: z.string().trim().min(1).max(60).optional(),
+  sortOrder: z.number().int().optional(),
+  isActive: z.boolean().optional(),
+});

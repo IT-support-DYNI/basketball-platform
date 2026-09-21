@@ -274,7 +274,14 @@ export default function PrimaryNav({
               })}
             </ul>
 
-            <div className="border-t border-line p-4">
+            <div className="border-t border-line p-4 space-y-2">
+              <Link
+                href="/club"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center justify-center rounded-full border border-line px-4 py-2 text-sm font-medium text-ink-dim transition hover:border-line-strong hover:bg-surface-2 hover:text-ink"
+              >
+                View public site
+              </Link>
               <LogoutButton className="w-full justify-center" />
             </div>
           </Dialog.Content>

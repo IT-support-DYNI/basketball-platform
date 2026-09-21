@@ -11,7 +11,7 @@
    properties (--bg, --accent, --text-1…) never leak onto the rest of the
    app's pages. The actual dark/light STATE still comes from the one place
    the whole app keeps it — `<html data-theme="…">`, written by
-   components/theme/ThemeScript.tsx / ThemeToggle.tsx to localStorage key
+   components/theme/DisplayPrefsScript.tsx / ThemeToggle.tsx to localStorage key
    `dyni-theme` — so this page's look follows the same toggle as everywhere
    else, it just reads that state via a descendant selector instead of
    redeclaring its own toggle. */

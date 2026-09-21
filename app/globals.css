@@ -133,6 +133,46 @@
   --shadow-pop: 0 10px 28px -12px rgba(0, 0, 0, 0.5);
 }
 
+/*
+ * Display & accessibility (Settings > Display). Layered the same way theme
+ * is above: light values are the unconditional default, dark overrides them
+ * under either the OS preference or an explicit data-theme="dark" — see
+ * components/theme/displayPrefs.ts for what sets these attributes.
+ */
+:root[data-contrast="high"] {
+  --ink-dim: 42 39 35;     /* == --ink — no dimming */
+  --ink-faint: 42 39 35;
+  --line: #514C44;
+  --line-strong: #2A2723;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-contrast="high"]:not([data-theme="light"]) {
+    --ink-dim: 241 237 228;
+    --ink-faint: 241 237 228;
+    --line: rgba(241, 237, 228, 0.6);
+    --line-strong: rgba(241, 237, 228, 0.85);
+  }
+}
+:root[data-theme="dark"][data-contrast="high"] {
+  --ink-dim: 241 237 228;
+  --ink-faint: 241 237 228;
+  --line: rgba(241, 237, 228, 0.6);
+  --line-strong: rgba(241, 237, 228, 0.85);
+}
+
+/* Font size steps — scale the root so every rem-based Tailwind size
+ * (text-sm, text-lg, spacing, ...) scales with it. "md" (default) is
+ * unscaled, so it needs no rule. */
+:root[data-font-size="sm"] {
+  font-size: 93.75%;
+}
+:root[data-font-size="lg"] {
+  font-size: 112.5%;
+}
+:root[data-font-size="xl"] {
+  font-size: 125%;
+}
+
 * {
   border-color: var(--line);
 }

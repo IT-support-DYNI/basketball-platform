@@ -30,7 +30,7 @@ Set for every route in `next.config.mjs#headers()`:
 'none'`, `base-uri 'self'`, `form-action 'self'`, `upgrade-insecure-requests`.
 
 Known gap: `script-src` still allows `'unsafe-inline'` (and `'unsafe-eval'` in
-dev). Next's hydration bootstrap and the pre-paint `ThemeScript` are inline. The
+dev). Next's hydration bootstrap and the pre-paint `DisplayPrefsScript` are inline. The
 fix is a per-request nonce set in `middleware.ts` and threaded into the inline
 `<script>`; tracked as a follow-up. The other CSP directives already close the
 main injection vectors in the meantime.

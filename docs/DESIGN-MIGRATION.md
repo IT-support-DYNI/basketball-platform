@@ -13,7 +13,7 @@ DYNI Blazers dark-first design system. Started W1 of the delivery plan.
 - **Fonts** — Archivo (display), Inter (body), Barlow Condensed (data/numerals),
   IBM Plex Mono (labels), wired in `app/layout.tsx`.
 - **Primitives** — `components/ui/` (Button, TextField, Select, Alert, Card,
-  PageHeader) and `components/theme/` (ThemeScript, ThemeToggle).
+  PageHeader) and `components/theme/` (DisplayPrefsScript, ThemeToggle).
 - **Brand** — `components/Brandmark.tsx`, assets in `public/brand/` +
   `public/icons/`.
 
@@ -253,7 +253,7 @@ it replaces §6/§7's public site entirely rather than sitting alongside it.
   Tailwind's own `animate-spin`/`animate-pulse` globals.
 - **Theme toggle reuses the app's existing mechanism** (`dyni-theme`
   localStorage key, `data-theme` on `<html>` — `components/theme/
-  ThemeScript.tsx`) rather than inventing a parallel one; `ThemeToggleButton`
+  DisplayPrefsScript.tsx`) rather than inventing a parallel one; `ThemeToggleButton`
   just supplies this page's own `.toggle` markup over the same underlying
   state.
 - **`app/club/layout.tsx` now renders the shared chrome for every /club/*
