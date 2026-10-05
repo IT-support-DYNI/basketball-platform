@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { getPublicPlayer } from "@/lib/public-site";
+import { safeExternalHref } from "@/lib/safe-url";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const player = await getPublicPlayer(Number(params.id));
@@ -135,7 +136,7 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
                 {player.highlights.map((h) => (
                   <li key={h.id}>
                     <a
-                      href={h.url}
+                      href={safeExternalHref(h.url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{

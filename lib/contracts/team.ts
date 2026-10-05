@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { httpUrl, storageKey } from "./common";
 
 export const createTeamSchema = z.object({
   name: z.string().min(1),
@@ -22,8 +23,8 @@ export const updateTeamSchema = z.object({
 export const createHighlightSchema = z
   .object({
     title: z.string().trim().min(1).max(80),
-    url: z.string().trim().url().max(500).optional(),
-    storageKey: z.string().trim().min(1).max(500).optional(),
+    url: httpUrl.optional(),
+    storageKey: storageKey("highlight-videos").optional(),
   })
   .refine((d) => (d.url ? 1 : 0) + (d.storageKey ? 1 : 0) === 1, {
     message: "Provide either a link or an uploaded video — not both.",
@@ -53,7 +54,7 @@ export const updatePlayerSchema = z.object({
   dateOfBirth: z.string().nullable().optional(),
   // A private-bucket storage key ("player-photos/<uuid>"), not a public URL —
   // see lib/player-profile-view.ts's resolvePhotoUrl for why.
-  photoUrl: z.string().min(1).max(500).optional(),
+  photoUrl: storageKey("player-photos").optional(),
   contactPhone: z.string().max(40).optional(),
   guardianName: z.string().max(120).optional(),
   guardianContact: z.string().max(40).optional(),

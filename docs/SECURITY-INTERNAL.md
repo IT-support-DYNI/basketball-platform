@@ -58,6 +58,24 @@ same fetch-then-authorize shape:
 No fixes were needed. New routes must keep the pattern: `findUnique` →
 authorize against a field on the row (owner id, `teamId`), then act.
 
+**October 2026 audit (`docs/AUDIT-2026-10.md`) — the W8 sweep missed read
+routes.** Fixed on `security/audit-fixes`:
+
+| Finding | Fix |
+| --- | --- |
+| `videos/{id}` GET unscoped **and** returned whole `User`/`PlayerProfile` rows (password hash, medical/welfare notes) | `lib/videos.ts#visibleVideoWhere` + `videoAssignmentSelect` (names only) |
+| Client-supplied storage keys signed by the server | `storageKey(folder)` in `lib/contracts/common.ts` — `<folder>/<uuid>` only |
+| `javascript:` links in highlights / linked videos | `httpUrl` on write, `lib/safe-url.ts#safeExternalHref` on render |
+| `players/{id}` returned any player's email; team roster gave teammates' DOB/email | gated by `SELF` / `canViewPlayerContactDetails` |
+| Logout left the `AuthSession` live | `events.signOut` in `lib/auth.ts` revokes it |
+| Voluntary password change needed no current password | required unless `mustChangePassword`; other devices revoked |
+| Event moved to another team; attendance for off-team players; CSV formula injection; cron fail-open | destination-team check, roster filter, `'` prefix, fail closed in production |
+
+Rules learned: **never `include: { user: true }`** (or any whole-row include) in
+a response — `select` the fields the screen needs. Any stored string that ends
+up in a signed URL or an `href` is validated by a contract helper, never
+`z.string()`.
+
 ## Rate limiting
 
 - **Sign-in** — DB-backed (`LoginAttempt` + `lib/login-throttle.ts`): 5 failures
@@ -70,6 +88,10 @@ authorize against a field on the row (owner id, `teamId`), then act.
   tokens; registration is idempotent per email + gated by an admin approval
   before it grants any access). A general limiter (same `LoginAttempt`-style
   table, or Upstash if the budget opens up) is a fast follow if needed.
+  **The October 2026 audit raised this to "should fix before launch"**: the
+  anonymous safeguarding form fans out to every admin (in-app + push + email),
+  and forgot-password sends mail on every call — both are flood vectors.
+  Deferred from `security/audit-fixes` only because it needs a migration.
 
 ## Account data — access & erasure (brief §32–33)
 

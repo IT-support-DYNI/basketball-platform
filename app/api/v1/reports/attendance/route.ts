@@ -83,5 +83,7 @@ export const GET = route(async (req: NextRequest) => {
 });
 
 function csv(v: string): string {
-  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+  // Neutralise spreadsheet formulas (same rule as roster/export's csvCell).
+  const s = /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }

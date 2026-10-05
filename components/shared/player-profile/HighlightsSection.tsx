@@ -2,6 +2,7 @@
 
 import { FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { safeExternalHref } from "@/lib/safe-url";
 
 type Highlight = { id: number; title: string; url: string; uploaded?: boolean };
 
@@ -150,7 +151,7 @@ export default function HighlightsSection({
                   </span>
                 ) : (
                   <a
-                    href={h.url}
+                    href={safeExternalHref(h.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink hover:text-flame-on-bg"

@@ -51,9 +51,13 @@ export const GET = route<{ id: string }>(async (req: NextRequest, { params, requ
     leftAt: m.leftAt,
     player: {
       id: m.player.id,
-      user: m.player.user,
+      // Email and date of birth are staff-only: a teammate (often a minor)
+      // gets name, shirt, position and photo, not another child's DOB.
+      user: canSeeContact
+        ? m.player.user
+        : { id: m.player.user.id, name: m.player.user.name, isActive: m.player.user.isActive },
       photoUrl: m.player.photoUrl,
-      dateOfBirth: m.player.dateOfBirth,
+      dateOfBirth: canSeeContact ? m.player.dateOfBirth : undefined,
       contactPhone: canSeeContact ? m.player.contactPhone : undefined,
       guardianName: canSeeContact ? m.player.guardianName : undefined,
       guardianContact: canSeeContact ? m.player.guardianContact : undefined,

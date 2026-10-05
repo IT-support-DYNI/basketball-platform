@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { route } from "@/lib/api";
 import { requireAuth, requireRole } from "@/lib/authorization";
 import { getPlaybackUrl } from "@/lib/storage";
-import { visibleVideoWhere } from "@/lib/videos";
+import { videoAssignmentSelect, visibleVideoWhere } from "@/lib/videos";
 import { prisma } from "@/lib/prisma";
 
 export const GET = route<{ id: string }>(async (_req, { params }) => {
@@ -13,7 +13,7 @@ export const GET = route<{ id: string }>(async (_req, { params }) => {
 
   const video = await prisma.video.findFirst({
     where: { id: Number(params.id), ...visibleVideoWhere(session) },
-    include: { assignments: { include: { team: true, player: { include: { user: true } } } } },
+    include: { assignments: { select: videoAssignmentSelect } },
   });
 
   if (!video) return NextResponse.json({ error: "Not found" }, { status: 404 });
