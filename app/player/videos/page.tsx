@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlaybackUrl } from "@/lib/storage";
+import { safeExternalHref } from "@/lib/safe-url";
 
 export default async function PlayerVideosPage() {
   const session = await getServerSession(authOptions);
@@ -44,7 +45,7 @@ export default async function PlayerVideosPage() {
             </div>
             {a.video.description && <p className="mt-1 text-sm text-slate-500">{a.video.description}</p>}
             <p className="mt-2 text-xs font-semibold text-court-700">{a.video.category.replace(/_/g, " ")}</p>
-            <a href={a.playbackUrl} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-semibold text-court-700 hover:text-court-800">
+            <a href={safeExternalHref(a.playbackUrl)} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-semibold text-court-700 hover:text-court-800">
               Watch →
             </a>
           </div>

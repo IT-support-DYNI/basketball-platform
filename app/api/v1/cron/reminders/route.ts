@@ -11,12 +11,18 @@ export const dynamic = "force-dynamic";
 /**
  * The daily cron job (Vercel Cron — see vercel.json). Runs the RSVP nudges and
  * the unread-notification digest. Vercel sends `Authorization: Bearer
- * $CRON_SECRET` automatically when that env var is set; if no secret is
- * configured (local dev) it runs unguarded.
+ * $CRON_SECRET` automatically when that env var is set. Without a secret it
+ * runs unguarded in local dev only; a production deploy that's missing the
+ * env var refuses rather than letting anyone trigger mass notifications.
  */
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
+  // Checked separately so a missing secret can never compare equal to the
+  // literal header "Bearer undefined".
+  const unauthorized = secret
+    ? req.headers.get("authorization") !== `Bearer ${secret}`
+    : process.env.NODE_ENV === "production";
+  if (unauthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

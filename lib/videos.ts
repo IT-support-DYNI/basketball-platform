@@ -34,3 +34,17 @@ export function visibleVideoWhere(session: Session): Prisma.VideoWhereInput {
     },
   };
 }
+
+/**
+ * The only assignment fields a video response ever needs: who it's assigned
+ * to, by name. Never `include: { user: true }` here — that serialises the
+ * whole User row (password hash, calendar token) and the whole PlayerProfile
+ * (medical/welfare notes) to anyone allowed to see the video.
+ */
+export const videoAssignmentSelect = {
+  id: true,
+  teamId: true,
+  playerId: true,
+  team: { select: { id: true, name: true } },
+  player: { select: { id: true, user: { select: { name: true } } } },
+} satisfies Prisma.VideoAssignmentSelect;

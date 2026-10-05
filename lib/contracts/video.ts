@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { httpUrl, storageKey } from "./common";
 
 const videoCategory = z.enum([
   "SHOOTING",
@@ -26,9 +27,9 @@ export const createVideoSchema = z
     title: z.string().min(1),
     description: z.string().optional(),
     category: videoCategory,
-    key: z.string().min(1).optional(),
-    externalUrl: z.string().trim().url().max(500).optional(),
-    thumbnailKey: z.string().min(1).optional(),
+    key: storageKey("videos").optional(),
+    externalUrl: httpUrl.optional(),
+    thumbnailKey: storageKey("video-thumbnails").optional(),
   })
   .refine((d) => (d.key ? 1 : 0) + (d.externalUrl ? 1 : 0) === 1, {
     message: "Provide either an uploaded video or a link — not both.",

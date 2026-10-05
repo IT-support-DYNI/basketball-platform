@@ -3,8 +3,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlaybackUrl } from "@/lib/storage";
+import { videoAssignmentSelect } from "@/lib/videos";
 import UploadVideoForm from "@/app/coach/videos/_components/UploadVideoForm";
 import AssignVideoForm from "@/app/coach/videos/_components/AssignVideoForm";
+import { safeExternalHref } from "@/lib/safe-url";
 
 export default async function CoachVideosPage() {
   const session = await getServerSession(authOptions);
@@ -14,7 +16,7 @@ export default async function CoachVideosPage() {
     prisma.video.findMany({
       where: { uploadedByUserId: Number(session!.user.id) },
       orderBy: { createdAt: "desc" },
-      include: { assignments: { include: { team: true, player: { include: { user: true } } } } },
+      include: { assignments: { select: videoAssignmentSelect } },
     }),
     prisma.team.findMany({ where: { id: { in: teamIds } }, select: { id: true, name: true } }),
   ]);
@@ -57,7 +59,7 @@ export default async function CoachVideosPage() {
               />
             ) : (
               <a
-                href={v.playbackUrl}
+                href={safeExternalHref(v.playbackUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-3 flex aspect-video w-full items-center justify-center rounded-control border border-line bg-slate-50 text-sm font-semibold text-court-700 hover:bg-slate-100"

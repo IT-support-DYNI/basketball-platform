@@ -49,6 +49,12 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params }) 
   if (!canEdit) throw new ForbiddenError("You don't have access to this event.");
 
   const body = updateEventSchema.parse(await req.json());
+  // Moving an event is an edit on the destination too: a coach can't push an
+  // event onto a team they don't run, and only an admin makes it club-wide.
+  if (body.teamId !== undefined && body.teamId !== existing.teamId) {
+    const canMove = body.teamId == null ? session.user.role === "ADMIN" : a.can("update", "Event", { teamId: body.teamId });
+    if (!canMove) throw new ForbiddenError("You can't move this event to that team.");
+  }
   // `?scope=series` applies the change to this and every later occurrence of the
   // same recurrence. Per-occurrence fields (start/end datetimes) are never bulk
   // applied — each occurrence keeps its own slot.

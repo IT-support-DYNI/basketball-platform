@@ -11,8 +11,12 @@ import Alert from "@/components/ui/Alert";
 
 export default function SetPasswordPage() {
   const router = useRouter();
-  const { update } = useSession();
+  const { data, update } = useSession();
+  // Forced change after a temporary password: no current password to ask for.
+  // A voluntary change must prove the current one (the API enforces it too).
+  const forced = data?.user.mustChangePassword ?? true;
 
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
@@ -32,7 +36,7 @@ export default function SetPasswordPage() {
       const res = await fetch("/api/auth/set-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newPassword }),
+        body: JSON.stringify(forced ? { newPassword } : { newPassword, currentPassword }),
       });
 
       if (!res.ok) {
@@ -51,10 +55,24 @@ export default function SetPasswordPage() {
 
   return (
     <AuthShell
-      title="Set your password"
-      subtitle="You signed in with a temporary password. Choose your own before continuing."
+      title={forced ? "Set your password" : "Change your password"}
+      subtitle={
+        forced
+          ? "You signed in with a temporary password. Choose your own before continuing."
+          : "Confirm your current password, then choose a new one. Your other devices will be signed out."
+      }
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {!forced && (
+          <TextField
+            label="Current password"
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+          />
+        )}
         <TextField
           label="New password"
           type="password"
