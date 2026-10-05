@@ -62,6 +62,12 @@ export const updatePlayerSchema = z.object({
   weightKg: z.number().int().min(20).max(200).optional(),
   preferredHand: z.enum(["LEFT", "RIGHT", "AMBIDEXTROUS"]).optional(),
   bio: z.string().max(1000).optional(),
+  /// The player's own one-liner, shown under their name. null/"" clears it.
+  quote: z.string().trim().max(140).nullable().optional(),
+  /// Club history. previousClubs is required when hasPreviousClub is true
+  /// (enforced in the route, where the stored value is known).
+  hasPreviousClub: z.boolean().optional(),
+  previousClubs: z.string().trim().max(300).nullable().optional(),
   address: z.string().max(300).optional(),
   emergencyContactName: z.string().max(120).optional(),
   emergencyContactPhone: z.string().max(40).optional(),
@@ -73,4 +79,5 @@ export const updatePlayerSchema = z.object({
   publicShowBio: z.boolean().optional(),
   publicShowStats: z.boolean().optional(),
   publicShowHighlights: z.boolean().optional(),
+  publicShowQuote: z.boolean().optional(),
 });

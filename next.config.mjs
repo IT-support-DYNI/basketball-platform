@@ -68,6 +68,13 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  async redirects() {
+    return [
+      // Performance (evaluation scores) is coach/admin-only — the player page
+      // was removed; old links and notifications land on the dashboard.
+      { source: "/player/performance", destination: "/player/dashboard", permanent: false },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

@@ -206,7 +206,6 @@ function applyRole(
         can("read", "PlayerProfile", { id: playerId });
         can("update", "PlayerContact", { id: playerId });
         can("read", "Attendance", { playerId });
-        can("read", "Evaluation", { playerId });
         can("read", "Feedback", { playerId });
       }
 
@@ -214,7 +213,9 @@ function applyRole(
 
       // Explicit denials — the record of the game / a coach's assessment is not
       // the player's to change (brief §17).
-      cannot(["create", "update", "delete"], "Evaluation");
+      // Performance evaluations are staff-only — a player has no read access to
+      // their own scores (removed from the player side by club decision).
+      cannot(["read", "create", "update", "delete"], "Evaluation");
       cannot(["record", "verify"], "Attendance");
       cannot(["create", "update", "delete"], "Event");
       cannot(["update", "delete"], "PlayerProfile");

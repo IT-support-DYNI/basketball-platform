@@ -8,7 +8,6 @@ import { eventDayLabel, eventTimeRange } from "@/lib/events";
 import StatTile from "@/components/StatTile";
 import ActionItems from "@/components/shared/dashboard/ActionItems";
 import ProgressBar from "@/app/player/dashboard/_components/ProgressBar";
-import Sparkline from "@/app/player/dashboard/_components/Sparkline";
 import CountUp from "@/components/ui/CountUp";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import DashboardHero from "@/components/shared/dashboard/DashboardHero";
@@ -21,17 +20,15 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export default async function PlayerDashboardPage() {
   const session = await getServerSession(authOptions);
   const [
-    { nextSession, attendance, weeklyEvaluation, monthlyEvaluation, monthlyTrend, latestVideo, latestFeedback, notifications },
+    { nextSession, attendance, latestVideo, latestFeedback, notifications },
     actionItems,
   ] = await Promise.all([getPlayerDashboard(session!), actionItemsFor(session!)]);
 
-  const trendValues = monthlyTrend.map((m) => Number(m.overallScore));
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const facts: string[] = [];
   if (attendance?.percentage != null) facts.push(`${attendance.percentage}% attendance this season`);
   if (nextSession) facts.push(`Next training ${eventDayLabel(nextSession.startAt)}`);
-  if (weeklyEvaluation) facts.push(`Weekly form ${weeklyEvaluation.overallScore}/10`);
   if (unreadCount > 0) facts.push(`${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`);
 
   return (
@@ -48,7 +45,7 @@ export default async function PlayerDashboardPage() {
         <ActionItems items={actionItems} />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         {/* Next Training — orange, the "what's coming up" card */}
         <div className="animate-stagger-rise" style={{ animationDelay: "100ms" }}>
           <StatTile
@@ -85,55 +82,9 @@ export default async function PlayerDashboardPage() {
             href="/player/attendance"
           />
         </div>
-
-        {/* Weekly form — blue, with a self-drawing trend line */}
-        <div className="animate-stagger-rise" style={{ animationDelay: "260ms" }}>
-          <StatTile
-            label="Weekly form"
-            value={weeklyEvaluation ? `${weeklyEvaluation.overallScore}` : "—"}
-            sub={
-              weeklyEvaluation ? (
-                <>
-                  <span>out of 10</span>
-                  {trendValues.length > 1 && <Sparkline values={trendValues} />}
-                </>
-              ) : (
-                "not scored yet"
-              )
-            }
-            accent="info"
-            href="/player/performance"
-          />
-        </div>
       </div>
 
       <div className="animate-stagger-rise grid gap-4 lg:grid-cols-2" style={{ animationDelay: "350ms" }}>
-        <Card as="section">
-          <SectionTitle>Monthly performance</SectionTitle>
-          {monthlyEvaluation ? (
-            <>
-              <p className="mt-2 font-condensed text-3xl font-bold tabular text-flame-on-bg">
-                {Number(monthlyEvaluation.overallScore)}
-                <span className="text-lg text-ink-faint"> / 10</span>
-              </p>
-              {monthlyTrend.length > 1 && (
-                <div className="mt-3 flex items-end gap-1.5" style={{ height: 60 }}>
-                  {monthlyTrend.map((m, i) => (
-                    <div
-                      key={i}
-                      title={`${Number(m.overallScore)}/10`}
-                      className="w-6 rounded-t bg-flame/70"
-                      style={{ height: `${(Number(m.overallScore) / 10) * 100}%` }}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <p className="mt-3 text-sm text-ink-dim">No monthly evaluation yet.</p>
-          )}
-        </Card>
-
         <Card as="section">
           <SectionTitle>New training video</SectionTitle>
           {latestVideo ? (
@@ -148,9 +99,7 @@ export default async function PlayerDashboardPage() {
             <p className="mt-3 text-sm text-ink-dim">No videos assigned yet.</p>
           )}
         </Card>
-      </div>
 
-      <ScrollReveal>
         <Card as="section">
           <SectionTitle>Coach feedback</SectionTitle>
           {latestFeedback ? (
@@ -162,7 +111,7 @@ export default async function PlayerDashboardPage() {
             <p className="mt-3 text-sm text-ink-dim">No feedback yet.</p>
           )}
         </Card>
-      </ScrollReveal>
+      </div>
 
       <ScrollReveal delayMs={80}>
       <Card as="section">

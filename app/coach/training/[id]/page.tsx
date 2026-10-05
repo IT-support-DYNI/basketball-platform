@@ -12,6 +12,8 @@ import StatusBadge from "@/components/StatusBadge";
 import MarkAttendanceForm from "@/app/coach/training/[id]/_components/MarkAttendanceForm";
 import AttendanceCorrections from "@/app/coach/training/[id]/_components/AttendanceCorrections";
 import SessionStatusControls from "@/app/coach/training/[id]/_components/SessionStatusControls";
+import LiveScorePanel from "@/app/coach/training/[id]/_components/LiveScorePanel";
+import { SCORE_EVENT_TYPES } from "@/lib/live-scores";
 
 export default async function CoachEventDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -104,6 +106,21 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
           )}
         </div>
       </div>
+
+      {(SCORE_EVENT_TYPES as readonly string[]).includes(event.type) && event.status !== "CANCELLED" && (
+        <LiveScorePanel
+          eventId={event.id}
+          teamName={event.team?.name ?? "DYNI Blazers"}
+          isPublic={event.visibility === "PUBLIC"}
+          initial={{
+            opponentName: event.opponentName,
+            ourScore: event.ourScore ?? 0,
+            opponentScore: event.opponentScore ?? 0,
+            liveStatus: event.liveStatus ?? "UPCOMING",
+            period: event.period,
+          }}
+        />
+      )}
 
       {event.teamId != null && (
         <section className="mt-8 rounded-card border border-line bg-surface p-5">

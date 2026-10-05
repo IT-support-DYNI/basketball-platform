@@ -320,6 +320,10 @@ async function main() {
     where: { id: players["player1@example.com"].profileId }, // Priya Patel, U16 — a minor, guardian-approved
     data: {
       bio: "Point guard for the U16s. Been playing since I was nine — love the game for how much you have to think, not just run.",
+      quote: "Hard work beats talent when talent doesn't work hard.",
+      publicShowQuote: true,
+      hasPreviousClub: true,
+      previousClubs: "Belfast Star U14 (2023–2025)",
       publicProfileApproved: true,
     },
   });
@@ -334,6 +338,9 @@ async function main() {
     where: { id: players["marcus.t@example.com"].profileId }, // Marcus Thompson, senior — an adult, self-approved
     data: {
       bio: "Senior point guard, team captain. Here to compete and to help the younger players coming up through the club.",
+      quote: "Lead by example, every possession.",
+      publicShowQuote: true,
+      hasPreviousClub: false,
       publicProfileApproved: true,
     },
   });
@@ -589,6 +596,7 @@ async function main() {
       teamId: u16.id,
       type: "MATCH",
       title: "U16 League — vs Northgate Falcons",
+      opponentName: "Northgate Falcons",
       venueId: schoolGym.id,
       startAt: daysFromNow(6, 10),
       endAt: daysFromNow(6, 12),
@@ -605,9 +613,16 @@ async function main() {
       type: "MATCH",
       title: "Seniors League — vs Riverside Hoops",
       venueId: homeCourt.id,
-      startAt: daysFromNow(-9, 19),
-      endAt: daysFromNow(-9, 21),
+      startAt: daysFromNow(-2, 19),
+      endAt: daysFromNow(-2, 21),
       status: "COMPLETED",
+      // A recent public result, so the homepage scoreboard has something to show.
+      visibility: "PUBLIC",
+      opponentName: "Riverside Hoops",
+      ourScore: 78,
+      opponentScore: 71,
+      liveStatus: "FINAL",
+      scoreUpdatedAt: daysFromNow(-2, 21),
       createdByUserId: headCoach.id,
     },
   });

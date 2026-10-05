@@ -113,6 +113,14 @@ enum EventType {
   OTHER
 }
 
+/// Where a match stands, for the live score on the public homepage.
+enum MatchLiveStatus {
+  UPCOMING
+  LIVE
+  HALF_TIME
+  FINAL
+}
+
 enum EventVisibility {
   TEAM
   CLUB
@@ -599,6 +607,20 @@ model PlayerProfile {
   publicShowBio         Boolean @default(false)
   publicShowStats       Boolean @default(false)
   publicShowHighlights  Boolean @default(false)
+  /// Admin-only, like the four above: the player's own quote only reaches the
+  /// public profile once an admin has read it and switched this on.
+  publicShowQuote       Boolean @default(false)
+
+  /// A short line in the player's own words, shown under their name on their
+  /// profile (and on the public site once publicShowQuote is on). CLUB_MEMBER+.
+  quote           String?
+
+  /// Club history — asked at registration. Null = never answered (players
+  /// created before this field existed, or added directly by staff).
+  /// coaches of the player's team + welfare/admin + self/guardian
+  hasPreviousClub Boolean?
+  /// Free text when hasPreviousClub is true: club name(s), and roughly when.
+  previousClubs   String?
 
   /// The team + position the applicant asked for at sign-up. Advisory only —
   /// the admin confirms the team and a coach assigns the jersey at approval,
@@ -943,6 +965,17 @@ model Event {
   dressCode       String?
   visibility      EventVisibility @default(TEAM)
   status          EventStatus     @default(SCHEDULED)
+
+  /* --- Match scoring (type MATCH / TOURNAMENT). Kept on Event rather than a
+     separate table: one live score per fixture is all the club records. The
+     public homepage shows it only when visibility is PUBLIC. --- */
+  opponentName    String?
+  ourScore        Int?
+  opponentScore   Int?
+  liveStatus      MatchLiveStatus?
+  /// Current quarter (1–4); 5+ = overtime. Null before tip-off and after full time.
+  period          Int?
+  scoreUpdatedAt  DateTime?
   recurrenceId    Int?
   recurrence      EventRecurrence? @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
   createdByUserId Int
@@ -960,6 +993,7 @@ model Event {
   @@index([teamId, startAt])
   @@index([startAt])
   @@index([recurrenceId])
+  @@index([liveStatus])
 }
 
 /// A player's (or staff's) RSVP to an event — kept deliberately separate from

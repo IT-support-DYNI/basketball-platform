@@ -148,6 +148,9 @@ export default function PlayerProfileHero({
                 );
               })()}
             </h1>
+            {player.quote && (
+              <p className="mt-3 max-w-xl text-sm italic text-on-flame/90 sm:text-base">&ldquo;{player.quote}&rdquo;</p>
+            )}
             {player.status && player.status !== "ACTIVE" && (
               <span className="mt-2 inline-block w-fit rounded-full bg-black/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-on-flame">
                 {player.status.replace(/_/g, " ")}
@@ -163,7 +166,7 @@ export default function PlayerProfileHero({
         {player.canSeeStats && player.attendancePct != null && (
           <StatCell label="Attendance" value={<CountUp value={player.attendancePct} suffix="%" />} tone={attendanceColor(player.attendancePct)} />
         )}
-        {player.canSeeStats && player.weeklyForm != null && (
+        {player.canSeePerformance && player.weeklyForm != null && (
           <StatCell
             label="Form"
             value={

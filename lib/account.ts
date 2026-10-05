@@ -52,6 +52,9 @@ export function anonymisedPlayerProfileFields(): Prisma.PlayerProfileUpdateInput
     weightKg: null,
     preferredHand: null,
     bio: null,
+    quote: null,
+    hasPreviousClub: null,
+    previousClubs: null,
     dateOfBirth: null,
     contactPhone: null,
     guardianName: null,
@@ -63,6 +66,7 @@ export function anonymisedPlayerProfileFields(): Prisma.PlayerProfileUpdateInput
     medicalNotes: null,
     welfareNotes: null,
     publicProfileApproved: false,
+    publicShowQuote: false,
   };
 }
 

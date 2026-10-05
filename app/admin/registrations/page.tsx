@@ -52,6 +52,14 @@ export default async function AdminRegistrationsPage() {
                         Guardian: {r.guardianName} {r.guardianContact}
                       </p>
                     )}
+                    <p className="text-xs text-ink-faint">
+                      Previous club:{" "}
+                      {r.hasPreviousClub == null
+                        ? "not answered"
+                        : r.hasPreviousClub
+                          ? r.previousClubs || "yes (no name given)"
+                          : "none"}
+                    </p>
                     {r.registrationSubmittedAt && (
                       <p className="mt-1 text-xs text-ink-faint">
                         Submitted {new Date(r.registrationSubmittedAt).toLocaleString()}

@@ -15,7 +15,7 @@ export const CATEGORY_FOR_TYPE: Record<NotificationType, NotificationCategory> =
 export const CATEGORY_LABEL: Record<NotificationCategory, string> = {
   SCHEDULE: "Schedule & RSVPs",
   ANNOUNCEMENTS: "Announcements",
-  PERFORMANCE: "Evaluations & feedback",
+  PERFORMANCE: "Coach feedback",
   VIDEOS: "Training videos",
   REGISTRATION: "Registration updates",
   MESSAGES: "Messages",

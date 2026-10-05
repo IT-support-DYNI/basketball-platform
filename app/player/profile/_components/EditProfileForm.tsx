@@ -12,6 +12,9 @@ type Initial = {
   weightKg: number | null;
   preferredHand: string | null;
   bio: string | null;
+  quote: string | null;
+  hasPreviousClub: boolean | null;
+  previousClubs: string | null;
   emergencyContactName: string | null;
   emergencyContactPhone: string | null;
   emergencyContactRelation: string | null;
@@ -35,6 +38,9 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
     weightKg: initial.weightKg?.toString() ?? "",
     preferredHand: initial.preferredHand ?? "",
     bio: initial.bio ?? "",
+    quote: initial.quote ?? "",
+    hasPreviousClub: initial.hasPreviousClub == null ? "" : initial.hasPreviousClub ? "yes" : "no",
+    previousClubs: initial.previousClubs ?? "",
     emergencyContactName: initial.emergencyContactName ?? "",
     emergencyContactPhone: initial.emergencyContactPhone ?? "",
     emergencyContactRelation: initial.emergencyContactRelation ?? "",
@@ -65,6 +71,13 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
         weightKg: v.weightKg ? Number(v.weightKg) : undefined,
         preferredHand: v.preferredHand || undefined,
         bio: v.bio || undefined,
+        quote: v.quote.trim() || null,
+        ...(v.hasPreviousClub
+          ? {
+              hasPreviousClub: v.hasPreviousClub === "yes",
+              previousClubs: v.hasPreviousClub === "yes" ? v.previousClubs.trim() : null,
+            }
+          : {}),
         emergencyContactName: v.emergencyContactName || undefined,
         emergencyContactPhone: v.emergencyContactPhone || undefined,
         emergencyContactRelation: v.emergencyContactRelation || undefined,
@@ -107,6 +120,48 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
           className={field}
         />
         <p className="text-right text-[11px] text-ink-faint">{v.bio.length}/1000</p>
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">Your quote</legend>
+        <p className="text-xs text-ink-faint">
+          One line in your own words, shown under your name on your profile. It only appears on the public
+          club site once the club has approved it.
+        </p>
+        <label className="block text-xs text-ink-dim">
+          Quote
+          <input
+            value={v.quote}
+            onChange={on("quote")}
+            maxLength={140}
+            placeholder="e.g. Hard work beats talent when talent doesn't work hard."
+            className={field}
+          />
+        </label>
+        <p className="text-right text-[11px] text-ink-faint">{v.quote.length}/140</p>
+      </fieldset>
+
+      <fieldset className="space-y-3">
+        <legend className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">Club history</legend>
+        <p id="club-history-q" className="text-xs text-ink-dim">
+          Have you played for another club before? <span className="text-ink-faint">(required)</span>
+        </p>
+        <div role="radiogroup" aria-labelledby="club-history-q" className="flex flex-wrap gap-4 text-sm text-ink">
+          <label className="flex items-center gap-2">
+            <input type="radio" name="hasPreviousClub" value="yes" checked={v.hasPreviousClub === "yes"} onChange={on("hasPreviousClub")} required className="h-4 w-4 accent-flame" />
+            Yes
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="radio" name="hasPreviousClub" value="no" checked={v.hasPreviousClub === "no"} onChange={on("hasPreviousClub")} required className="h-4 w-4 accent-flame" />
+            No, this is my first club
+          </label>
+        </div>
+        {v.hasPreviousClub === "yes" && (
+          <label className="block text-xs text-ink-dim">
+            Which club, and when? (e.g. Belfast Star U14, 2023–2025)
+            <input value={v.previousClubs} onChange={on("previousClubs")} required minLength={2} maxLength={300} className={field} />
+          </label>
+        )}
       </fieldset>
 
       <fieldset className="space-y-3">

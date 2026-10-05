@@ -32,6 +32,9 @@ export const PLAYER_FIELD_VIEWERS: Record<string, ViewerKind[]> = {
   // can reach an outside recruiter — not something to make public by default
   // just because the upload feature now exists.
   photoUrl: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN", "PUBLIC"],
+  // The player's own quote — same tier as bio, and likewise only public once
+  // an admin switches on publicShowQuote (lib/public-site.ts).
+  quote: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN", "PUBLIC"],
   nationality: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],
   heightCm: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],
   weightKg: ["SELF", "CLUB_MEMBER", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],
@@ -44,6 +47,10 @@ export const PLAYER_FIELD_VIEWERS: Record<string, ViewerKind[]> = {
   emergencyContactName: ["SELF", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],
   emergencyContactPhone: ["SELF", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],
   emergencyContactRelation: ["SELF", "TEAM_COACH", "TEAM_WELFARE", "TEAM_MEDICAL", "ADMIN"],
+
+  // Club history — staff who place or safeguard the player, never teammates.
+  hasPreviousClub: ["SELF", "TEAM_COACH", "TEAM_WELFARE", "ADMIN"],
+  previousClubs: ["SELF", "TEAM_COACH", "TEAM_WELFARE", "ADMIN"],
 
   address: ["SELF", "TEAM_WELFARE", "ADMIN"],
   medicalNotes: ["SELF", "TEAM_MEDICAL", "ADMIN"],

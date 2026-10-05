@@ -91,6 +91,9 @@ export async function submitDraft(token: string) {
   const d = draft.data as DraftData;
 
   const num = (v: unknown) => (v == null || v === "" ? undefined : Number(v));
+  // The form saves the club-history radio as "yes"/"no"; anything else means
+  // it was never answered, which the schema then rejects.
+  const yesNo = (v: unknown) => (v === "yes" ? true : v === "no" ? false : undefined);
 
   let result: unknown;
   if (draft.mode === "self") {
@@ -102,6 +105,8 @@ export async function submitDraft(token: string) {
       position: d.position || undefined,
       dateOfBirth: d.dateOfBirth,
       contactPhone: d.contactPhone || undefined,
+      hasPreviousClub: yesNo(d.hasPreviousClub),
+      previousClubs: (d.previousClubs as string) || undefined,
       consentAccepted: true,
     });
     if (!parsed.success) throw new BadRequestError("Some details are missing — go back and complete every step.");
@@ -118,6 +123,8 @@ export async function submitDraft(token: string) {
       childDateOfBirth: d.childDateOfBirth,
       teamId: num(d.teamId),
       position: d.position || undefined,
+      hasPreviousClub: yesNo(d.hasPreviousClub),
+      previousClubs: (d.previousClubs as string) || undefined,
       consentAccepted: true,
     });
     if (!parsed.success) throw new BadRequestError("Some details are missing — go back and complete every step.");

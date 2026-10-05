@@ -98,9 +98,6 @@ export async function getPlayerDashboard(session: Session) {
     return {
       nextSession: null,
       attendance: null,
-      weeklyEvaluation: null,
-      monthlyEvaluation: null,
-      monthlyTrend: [],
       latestVideo: null,
       latestFeedback: null,
       notifications: [],
@@ -108,7 +105,8 @@ export async function getPlayerDashboard(session: Session) {
   }
 
   const now = new Date();
-  const [nextSession, attendanceRecords, evaluations, latestVideo, latestFeedback, notifications] =
+  // No evaluations here: performance scores are coach/admin-only.
+  const [nextSession, attendanceRecords, latestVideo, latestFeedback, notifications] =
     await Promise.all([
       session.user.teamId
         ? prisma.event.findFirst({
@@ -122,12 +120,6 @@ export async function getPlayerDashboard(session: Session) {
           })
         : null,
       prisma.attendanceRecord.findMany({ where: { playerId } }),
-      prisma.performanceEvaluation.findMany({
-        where: { playerId },
-        include: { categoryScores: true },
-        orderBy: { periodStart: "desc" },
-        take: 12,
-      }),
       prisma.videoAssignment.findFirst({
         where: { OR: [{ playerId }, { teamId: session.user.teamId ?? -1 }] },
         orderBy: { assignedAt: "desc" },
@@ -148,12 +140,6 @@ export async function getPlayerDashboard(session: Session) {
   return {
     nextSession,
     attendance: computeAttendanceStats(attendanceRecords),
-    weeklyEvaluation: evaluations.find((e) => e.periodType === "WEEKLY") ?? null,
-    monthlyEvaluation: evaluations.find((e) => e.periodType === "MONTHLY") ?? null,
-    monthlyTrend: evaluations
-      .filter((e) => e.periodType === "MONTHLY")
-      .reverse()
-      .map((e) => ({ periodStart: e.periodStart, overallScore: e.overallScore })),
     latestVideo: latestVideo?.video ?? null,
     latestFeedback,
     notifications,

@@ -7,8 +7,6 @@ import { requireRole, requirePlayerAccess } from "@/lib/authorization";
 import { playerTeamIdsSelect, playerTeamIds } from "@/lib/roster";
 import { createEvaluationSchema } from "@/lib/contracts/performance";
 import { computeOverallScore } from "@/lib/performance";
-import { notifyUser } from "@/lib/notify";
-import { sendPushToUser } from "@/lib/push";
 import { prisma } from "@/lib/prisma";
 
 /** Coach only, per the PRD permission matrix ("Enter performance evaluations"). */
@@ -22,38 +20,22 @@ export const POST = route(async (req: NextRequest) => {
 
   const overallScore = computeOverallScore(body.categoryScores.map((c) => c.score));
 
-  const evaluation = await prisma.$transaction(async (tx) => {
-    const created = await tx.performanceEvaluation.create({
-      data: {
-        playerId: body.playerId,
-        coachId: session.user.coachProfileId!,
-        periodType: body.periodType,
-        periodStart: new Date(body.periodStart),
-        periodEnd: new Date(body.periodEnd),
-        overallScore,
-        strengths: body.periodType === "MONTHLY" ? body.strengths : undefined,
-        developmentAreas: body.periodType === "MONTHLY" ? body.developmentAreas : undefined,
-        categoryScores: { create: body.categoryScores },
-      },
-      include: { categoryScores: true },
-    });
-
-    await notifyUser(tx, {
-      userId: player.userId,
-      type: "NEW_EVALUATION",
-      title: `New ${body.periodType.toLowerCase()} performance evaluation`,
-      message: `Your coach recorded a new evaluation — overall score ${overallScore}/10.`,
-      linkPath: "/player/performance",
-    });
-
-    return created;
-  });
-
-  // Outside the transaction: a slow/failed push must never block or roll back the DB write.
-  await sendPushToUser(player.userId, {
-    title: `New ${body.periodType.toLowerCase()} performance evaluation`,
-    body: `Overall score ${overallScore}/10.`,
-    url: "/player/performance",
+  // Evaluations are a staff-only record: the player isn't notified and has no
+  // view of them (performance was removed from the player side), so there is
+  // no notification or push here any more.
+  const evaluation = await prisma.performanceEvaluation.create({
+    data: {
+      playerId: body.playerId,
+      coachId: session.user.coachProfileId!,
+      periodType: body.periodType,
+      periodStart: new Date(body.periodStart),
+      periodEnd: new Date(body.periodEnd),
+      overallScore,
+      strengths: body.periodType === "MONTHLY" ? body.strengths : undefined,
+      developmentAreas: body.periodType === "MONTHLY" ? body.developmentAreas : undefined,
+      categoryScores: { create: body.categoryScores },
+    },
+    include: { categoryScores: true },
   });
 
   return NextResponse.json(evaluation, { status: 201 });

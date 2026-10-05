@@ -139,13 +139,17 @@ describe("player — self only", () => {
     expect(p.can("read", "Announcement", { teamId: 2 })).toBe(false);
   });
 
-  it("reads its own profile/stats/feedback, not another player's", () => {
+  it("reads its own profile/feedback, not another player's", () => {
     expect(p.can("read", "PlayerProfile", { id: 30 })).toBe(true);
     expect(p.can("read", "PlayerProfile", { id: 31 })).toBe(false);
-    expect(p.can("read", "Evaluation", { playerId: 30 })).toBe(true);
-    expect(p.can("read", "Evaluation", { playerId: 31 })).toBe(false);
+    expect(p.can("read", "Feedback", { playerId: 31 })).toBe(false);
     expect(p.can("read", "Feedback", { playerId: 30 })).toBe(true);
     expect(p.can("read", "Attendance", { playerId: 31 })).toBe(false);
+  });
+
+  it("cannot read performance evaluations at all — not even its own", () => {
+    expect(p.can("read", "Evaluation", { playerId: 30 })).toBe(false);
+    expect(p.can("read", "Evaluation", { playerId: 31 })).toBe(false);
   });
 
   it("updates only its own contact details", () => {

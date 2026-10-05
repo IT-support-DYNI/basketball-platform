@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { getClubStats, getNextFixture } from "@/lib/public-site";
+import { getPublicScoreboard } from "@/lib/live-scores";
+import LiveScoreboard from "@/app/club/_components/LiveScoreboard";
 import HeroCarousel, { type HeroSlide } from "@/app/club/_components/HeroCarousel";
 import Ticker from "@/app/club/_components/Ticker";
 import RegisterInterestForm from "@/app/club/_components/RegisterInterestForm";
@@ -129,7 +131,7 @@ const SAFE_CARDS = [
 ];
 
 export default async function ClubLandingPage() {
-  const [stats, nextFixture] = await Promise.all([getClubStats(), getNextFixture()]);
+  const [stats, nextFixture, scoreboard] = await Promise.all([getClubStats(), getNextFixture(), getPublicScoreboard()]);
 
   const statTiles = [
     { value: stats.teams, label: "Teams" },
@@ -141,6 +143,10 @@ export default async function ClubLandingPage() {
   return (
     <main id="top">
       <HeroCarousel slides={HERO_SLIDES} stats={statTiles} />
+
+      {/* Live / latest match score — right under the hero so it's the first
+       *  thing a visitor sees on match day. Hides itself when there's nothing to show. */}
+      <LiveScoreboard initial={scoreboard} />
 
       <Ticker facts={TICKER_FACTS} />
 

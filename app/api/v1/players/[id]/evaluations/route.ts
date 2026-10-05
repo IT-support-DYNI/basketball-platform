@@ -3,13 +3,15 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { route } from "@/lib/api";
-import { requireAuth, requirePlayerAccess } from "@/lib/authorization";
+import { requireRole, requirePlayerAccess } from "@/lib/authorization";
 import { playerTeamIdsSelect, playerTeamIds } from "@/lib/roster";
 import { prisma } from "@/lib/prisma";
 
-/** Full weekly + monthly history for a player, oldest-first — what the trend chart on the Performance History screen (PRD §5.5) plots. */
+/** Full weekly + monthly history for a player, oldest-first — what the trend
+ *  chart on the coach/admin Performance screen plots. Staff only: performance
+ *  is not shown to players or guardians. */
 export const GET = route<{ id: string }>(async (_req, { params }) => {
-  const session = requireAuth(await getServerSession(authOptions));
+  const session = requireRole(await getServerSession(authOptions), ["COACH", "ADMIN"]);
   const playerId = Number(params.id);
 
   const player = await prisma.playerProfile.findUnique({ where: { id: playerId }, select: { id: true, ...playerTeamIdsSelect } });

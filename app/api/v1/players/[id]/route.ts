@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-import { route, ok, ForbiddenError, NotFoundError } from "@/lib/api";
+import { route, ok, BadRequestError, ForbiddenError, NotFoundError } from "@/lib/api";
 import { requireAuth, requirePlayerAccess } from "@/lib/authorization";
 import { resolvePlayerViewerScope, serializePlayerProfile, canEditPlayerField } from "@/lib/authz/field-visibility";
 import { idParam } from "@/lib/contracts/common";
@@ -50,7 +50,7 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params, re
 
   const player = await prisma.playerProfile.findUnique({
     where: { id: playerId },
-    select: { id: true, userId: true, ...playerTeamIdsSelect },
+    select: { id: true, userId: true, quote: true, ...playerTeamIdsSelect },
   });
   if (!player) throw new NotFoundError("That player wasn't found.");
   const teamIds = playerTeamIds(player);
@@ -78,6 +78,22 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params, re
   set("weightKg", body.weightKg);
   set("preferredHand", body.preferredHand);
   set("bio", body.bio);
+  if (body.quote !== undefined) {
+    set("quote", body.quote ? body.quote : null);
+    // An admin approved the *wording* that's public. If anyone else changes
+    // it, it comes off the public site until an admin looks at it again.
+    const changed = (body.quote || null) !== (player.quote ?? null);
+    if (changed && session.user.role !== "ADMIN") editable.publicShowQuote = false;
+  }
+  if (body.hasPreviousClub !== undefined) {
+    if (body.hasPreviousClub && !body.previousClubs) {
+      throw new BadRequestError("Name the previous club (or clubs).");
+    }
+    set("hasPreviousClub", body.hasPreviousClub);
+    set("previousClubs", body.hasPreviousClub ? body.previousClubs : null);
+  } else if (body.previousClubs !== undefined) {
+    set("previousClubs", body.previousClubs ? body.previousClubs : null);
+  }
   set("address", body.address);
   set("emergencyContactName", body.emergencyContactName);
   set("emergencyContactPhone", body.emergencyContactPhone);
@@ -96,6 +112,7 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params, re
     if (body.publicShowBio !== undefined) editable.publicShowBio = body.publicShowBio;
     if (body.publicShowStats !== undefined) editable.publicShowStats = body.publicShowStats;
     if (body.publicShowHighlights !== undefined) editable.publicShowHighlights = body.publicShowHighlights;
+    if (body.publicShowQuote !== undefined) editable.publicShowQuote = body.publicShowQuote;
   }
 
   const updated = await prisma.playerProfile.update({ where: { id: playerId }, data: editable });
