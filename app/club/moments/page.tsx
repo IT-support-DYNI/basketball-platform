@@ -8,11 +8,10 @@ export const metadata: Metadata = {
   description: "Photos from DYNI Blazers training sessions — drills, scrimmages and the people who make the club.",
 };
 
-/** Every club photo (lib/club-photos.ts). Portrait shots take a tall tile so
- *  the grid's short rows don't crop faces; every few landscape shots get a
- *  wide tile for rhythm. Each tile opens the full-size image. */
+/** Every club photo (lib/club-photos.ts) in a masonry layout: each photo keeps
+ *  its own aspect ratio (nothing cropped, no heads cut off) and CSS columns
+ *  pack them with no holes. Each tile opens the full-size image. */
 export default function PublicMomentsPage() {
-  let landscapeCount = 0;
   return (
     <main>
       <section className="page-head">
@@ -24,25 +23,18 @@ export default function PublicMomentsPage() {
       </section>
       <section style={{ padding: "var(--section-y) 0" }}>
         <div className="wrap">
-          <div className="gal-grid">
-            {CLUB_PHOTOS.map((p) => {
-              const portrait = p.height > p.width;
-              const wide = !portrait && landscapeCount++ % 3 === 0;
-              return (
-                <figure className={`tile${portrait ? " tall" : ""}${wide ? " wide" : ""}`} key={p.slug}>
-                  <a className="tile-link" href={photoSrc(p.slug, 1600)} target="_blank" rel="noopener">
-                    <span className="photo has-img">
-                      <ClubImg
-                        slug={p.slug}
-                        sizes={wide ? "(max-width: 760px) 100vw, 50vw" : "(max-width: 760px) 50vw, 25vw"}
-                      />
-                    </span>
-                    <span className="sr-only"> (opens full size in a new tab)</span>
-                  </a>
-                  <figcaption>{p.caption}</figcaption>
-                </figure>
-              );
-            })}
+          <div className="masonry">
+            {CLUB_PHOTOS.map((p) => (
+              <figure className="tile" key={p.slug}>
+                <a className="tile-link" href={photoSrc(p.slug, 1600)} target="_blank" rel="noopener">
+                  <span className="photo has-img">
+                    <ClubImg slug={p.slug} sizes="(max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw" />
+                  </span>
+                  <span className="sr-only"> (opens full size in a new tab)</span>
+                </a>
+                <figcaption>{p.caption}</figcaption>
+              </figure>
+            ))}
           </div>
         </div>
       </section>
