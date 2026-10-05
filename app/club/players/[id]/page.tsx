@@ -64,6 +64,7 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
                 .join(" | ")}
             </p>
             <h1 className="profile-banner-name">{player.name}</h1>
+            {player.quote && <p className="profile-banner-quote">&ldquo;{player.quote}&rdquo;</p>}
             {player.publicStatus && (
               <span className={`pill ${player.publicStatus === "Trialist" ? "pill-trial" : "pill-open"}`}>{player.publicStatus}</span>
             )}

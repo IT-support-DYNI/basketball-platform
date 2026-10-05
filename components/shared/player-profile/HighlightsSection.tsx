@@ -76,11 +76,11 @@ export default function HighlightsSection({
             body: file,
           });
         } catch {
-          setError("Upload to storage failed — check the bucket's CORS settings.");
+          setError("Upload failed. Please try again, or contact your site administrator if this keeps happening.");
           return;
         }
         if (!putRes.ok) {
-          setError(`Upload to storage failed (HTTP ${putRes.status}).`);
+          setError("Upload failed. Please try again, or contact your site administrator if this keeps happening.");
           return;
         }
         body = { title, storageKey: urlBody.key };

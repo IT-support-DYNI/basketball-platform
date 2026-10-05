@@ -10,6 +10,7 @@ import AuthShell from "@/components/shared/auth/AuthShell";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { Select } from "@/components/ui/Select";
+import { RadioGroup } from "@/components/ui/RadioGroup";
 import Alert from "@/components/ui/Alert";
 
 interface TeamOption {
@@ -134,6 +135,9 @@ export default function RegisterPage() {
     </Select>
   );
 
+  const clubHistoryLabel =
+    d.hasPreviousClub === "yes" ? d.previousClubs || "Yes" : d.hasPreviousClub === "no" ? "None" : undefined;
+
   const review = useMemo(() => {
     const rows: [string, string | undefined][] =
       mode === "self"
@@ -144,6 +148,7 @@ export default function RegisterPage() {
             ["Phone", d.contactPhone],
             ["Team", teams.find((t) => String(t.id) === d.teamId)?.name],
             ["Position", d.position],
+            ["Previous club", clubHistoryLabel],
           ]
         : [
             ["Guardian", d.guardianName],
@@ -154,9 +159,10 @@ export default function RegisterPage() {
             ["Child email", d.childEmail || "— (no login)"],
             ["Team", teams.find((t) => String(t.id) === d.teamId)?.name],
             ["Position", d.position],
+            ["Previous club", clubHistoryLabel],
           ];
     return rows.filter(([, v]) => v);
-  }, [mode, d, teams]);
+  }, [mode, d, teams, clubHistoryLabel]);
 
   return (
     <AuthShell
@@ -213,11 +219,11 @@ export default function RegisterPage() {
               if (step === 5) return submit();
               const fieldsByStep: Record<number, string[]> =
                 mode === "self"
-                  ? { 1: ["name", "password"], 2: ["dateOfBirth", "contactPhone"], 3: ["teamId", "position"], 4: [] }
+                  ? { 1: ["name", "password"], 2: ["dateOfBirth", "contactPhone"], 3: ["teamId", "position", "hasPreviousClub", "previousClubs"], 4: [] }
                   : {
                       1: ["guardianName", "guardianPassword", "guardianPhone", "relationshipLabel"],
                       2: ["childName", "childDateOfBirth", "childEmail"],
-                      3: ["teamId", "position"],
+                      3: ["teamId", "position", "hasPreviousClub", "previousClubs"],
                       4: [],
                     };
               next(fieldsByStep[step] ?? []);
@@ -254,9 +260,34 @@ export default function RegisterPage() {
             )}
 
             {step === 3 && (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {teamSelect}
-                {positionSelect}
+              <div className="flex flex-col gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {teamSelect}
+                  {positionSelect}
+                </div>
+                <RadioGroup
+                  label={mode === "self" ? "Have you played for another club before?" : "Has your child played for another club before?"}
+                  hint="Required. Coaches use this to place new players and to check transfer or registration rules."
+                  name="hasPreviousClub"
+                  value={d.hasPreviousClub ?? ""}
+                  onValueChange={(v) => setD((p) => ({ ...p, hasPreviousClub: v, ...(v === "no" ? { previousClubs: "" } : {}) }))}
+                  options={[
+                    { value: "yes", label: "Yes" },
+                    { value: "no", label: "No, this is the first club" },
+                  ]}
+                  required
+                />
+                {d.hasPreviousClub === "yes" && (
+                  <TextField
+                    label="Which club, and when?"
+                    hint="e.g. Belfast Star U14, 2023–2025. List every club if more than one."
+                    value={d.previousClubs ?? ""}
+                    onChange={set("previousClubs")}
+                    required
+                    minLength={2}
+                    maxLength={300}
+                  />
+                )}
               </div>
             )}
 

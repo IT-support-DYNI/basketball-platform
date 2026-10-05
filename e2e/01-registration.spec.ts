@@ -32,6 +32,9 @@ test("Journey 1 — an applicant registers, an admin approves, and they get in",
     .locator("option", { hasText: "Blazers Seniors" })
     .getAttribute("value");
   await teamSelect.selectOption(seniorsValue!);
+  // Club history is required: answering "yes" reveals a required club-name field.
+  await page.getByRole("radio", { name: "Yes" }).click();
+  await page.getByLabel("Which club, and when?").fill("Belfast Star U18, 2022–2024");
   await page.getByRole("button", { name: "Continue" }).click();
 
   await page.getByRole("checkbox").check();

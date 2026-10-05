@@ -87,3 +87,16 @@ export type UpdateEventInput = z.infer<typeof updateEventSchema>;
 export type CreateVenueInput = z.infer<typeof createVenueSchema>;
 export type UpdateVenueInput = z.infer<typeof updateVenueSchema>;
 export type RsvpInput = z.infer<typeof rsvpSchema>;
+
+/** Live score update for a MATCH / TOURNAMENT event (coach of the team, or
+ *  admin). Every field is optional so the scoring panel can send one change
+ *  at a time; `null` clears opponentName / period. */
+export const updateScoreSchema = z.object({
+  opponentName: z.string().trim().max(80).nullable().optional(),
+  ourScore: z.number().int().min(0).max(300).optional(),
+  opponentScore: z.number().int().min(0).max(300).optional(),
+  liveStatus: z.enum(["UPCOMING", "LIVE", "HALF_TIME", "FINAL"]).optional(),
+  /// Quarter 1–4; 5+ = overtime.
+  period: z.number().int().min(1).max(10).nullable().optional(),
+});
+export type UpdateScoreInput = z.infer<typeof updateScoreSchema>;

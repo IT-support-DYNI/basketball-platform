@@ -54,9 +54,13 @@ describe("anonymisedPlayerProfileFields", () => {
       "nationality",
       "photoUrl",
       "heightCm",
+      "quote",
+      "hasPreviousClub",
+      "previousClubs",
     ]) {
       expect(f).toHaveProperty(key, null);
     }
     expect(f.publicProfileApproved).toBe(false);
+    expect(f.publicShowQuote).toBe(false);
   });
 });

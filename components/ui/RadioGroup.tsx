@@ -30,12 +30,13 @@ export function RadioGroup({
   required?: boolean;
 }) {
   const groupId = useId();
+  const labelId = `${groupId}-label`;
   const hintId = hint ? `${groupId}-hint` : undefined;
   const errorId = error ? `${groupId}-error` : undefined;
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm font-semibold text-ink">{label}</span>
+      <span id={labelId} className="text-sm font-semibold text-ink">{label}</span>
       {hint && <FieldHint id={hintId}>{hint}</FieldHint>}
       <RadixRadio.Root
         name={name}
@@ -43,6 +44,7 @@ export function RadioGroup({
         defaultValue={defaultValue}
         onValueChange={onValueChange}
         required={required}
+        aria-labelledby={labelId}
         aria-describedby={[hintId, errorId].filter(Boolean).join(" ") || undefined}
         className="flex flex-col gap-2"
       >

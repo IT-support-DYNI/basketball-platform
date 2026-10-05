@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PlayerProfileView } from "@/lib/player-profile-view";
 
-type FlagKey = "profileListed" | "showPhoto" | "showBio" | "showStats" | "showHighlights";
+type FlagKey = "profileListed" | "showPhoto" | "showBio" | "showQuote" | "showStats" | "showHighlights";
 
 interface Row {
   key: FlagKey;
@@ -75,6 +75,13 @@ export default function PublicVisibilityPanel({ player }: { player: PlayerProfil
       label: "Bio",
       sublabel: "The short story on their profile page",
       hasContent: v.hasBio,
+    },
+    {
+      key: "showQuote",
+      patchField: "publicShowQuote",
+      label: "Quote",
+      sublabel: "Their one-liner under their name",
+      hasContent: v.hasQuote,
     },
     {
       key: "showStats",

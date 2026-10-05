@@ -3,14 +3,15 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { route } from "@/lib/api";
-import { requireAuth, requireRole, requirePlayerAccess } from "@/lib/authorization";
+import { requireRole, requirePlayerAccess } from "@/lib/authorization";
 import { playerTeamIdsSelect, playerTeamIds } from "@/lib/roster";
 import { updateEvaluationSchema } from "@/lib/contracts/performance";
 import { computeOverallScore } from "@/lib/performance";
 import { prisma } from "@/lib/prisma";
 
+/** Staff only: performance is not shown to players or guardians. */
 export const GET = route<{ id: string }>(async (_req, { params }) => {
-  const session = requireAuth(await getServerSession(authOptions));
+  const session = requireRole(await getServerSession(authOptions), ["COACH", "ADMIN"]);
 
   const evaluation = await prisma.performanceEvaluation.findUnique({
     where: { id: Number(params.id) },

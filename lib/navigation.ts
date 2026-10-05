@@ -17,7 +17,6 @@ export type Capability =
   | "player.team"
   | "player.schedule"
   | "player.videos"
-  | "player.performance"
   | "player.feedback"
   | "player.profile"
   | "coach.home"
@@ -56,7 +55,6 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "player.team",
     "player.schedule",
     "player.videos",
-    "player.performance",
     "player.feedback",
     "player.profile",
     "announcements",
@@ -174,7 +172,6 @@ const NAV: NavItem[] = [
   { label: "Videos", href: "/player/videos", capability: "player.videos", icon: "video" },
   { label: "Videos", href: "/coach/videos", capability: "coach.videos", icon: "video" },
 
-  { label: "Performance", href: "/player/performance", capability: "player.performance", icon: "chart", primary: true },
   { label: "Performance", href: "/coach/performance", capability: "coach.performance", icon: "chart" },
   { label: "Performance", href: "/admin/performance", capability: "admin.performance", icon: "chart" },
   { label: "Feedback", href: "/player/feedback", capability: "player.feedback", icon: "feedback" },

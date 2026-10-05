@@ -62,7 +62,7 @@ export default function CreateStaffUserForm() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white shadow-court-500/30 transition hover:border-flame"
+        className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-on-flame shadow-court-500/30 transition hover:border-flame"
       >
         + Add Coach or Admin
       </button>
@@ -103,7 +103,7 @@ export default function CreateStaffUserForm() {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+          className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-on-flame disabled:opacity-50"
         >
           {loading ? "Creating..." : "Create account"}
         </button>

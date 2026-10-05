@@ -174,6 +174,9 @@ export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> 
 
 export type PublicPlayerProfile = PublicPlayerCard & {
   jerseyNumber: number | null;
+  /** The player's own quote, shown under their name — only once an admin has
+   *  switched on publicShowQuote for this player. */
+  quote: string | null;
   highlights: { id: number; title: string; url: string; uploaded: boolean }[];
   /// Physicals — the only "season stats" this app actually tracks (no
   /// points/rebounds/assists exist yet). Nationality is deliberately not
@@ -220,6 +223,7 @@ export async function getPublicPlayer(playerId: number): Promise<PublicPlayerPro
     ageGroup: membership?.team.ageGroup ?? null,
     bio: player.publicShowBio ? ((visible as { bio?: string | null }).bio ?? null) : null,
     jerseyNumber: membership?.jerseyNumber ?? null,
+    quote: player.publicShowQuote ? ((visible as { quote?: string | null }).quote ?? null) : null,
     highlights: player.publicShowHighlights
       ? await Promise.all(
           player.highlights.map(async (h) => ({

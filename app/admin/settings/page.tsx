@@ -58,15 +58,6 @@ export default async function AdminSettingsPage() {
           <PerformanceCategoriesManager />
         </div>
       </section>
-
-      <section className="mt-6 rounded-card border border-dashed border-line-strong bg-surface p-6">
-        <p className="text-sm font-semibold text-slate-700">Planned for later</p>
-        <p className="mt-1 text-sm text-slate-500">
-          Multi-club configuration and SMS notifications are post-MVP — see ARCHITECTURE.md §8
-          (Future Features). Email notifications are already live: see each category&apos;s toggle
-          on the <a href="/notifications" className="underline">Notifications</a> page.
-        </p>
-      </section>
     </main>
   );
 }

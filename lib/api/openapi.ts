@@ -39,6 +39,7 @@ const ENDPOINTS: Endpoint[] = [
   { method: "DELETE", path: "/auth/sessions/{id}", summary: "Sign a device out", tag: "Auth", auth: "user" },
   { method: "POST", path: "/auth/sessions/revoke-others", summary: "Sign out every other device", tag: "Auth", auth: "user" },
   { method: "GET", path: "/public/teams", summary: "Teams open for registration", tag: "Public", auth: "none" },
+  { method: "GET", path: "/public/live-scores", summary: "Homepage scoreboard: live or recent public matches", tag: "Public", auth: "none" },
 
   { method: "GET", path: "/teams", summary: "List teams in scope", tag: "Teams", auth: "user" },
   { method: "POST", path: "/teams", summary: "Create a team", tag: "Teams", auth: "admin" },
@@ -106,6 +107,7 @@ const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/events/{id}/rsvp", summary: "Your RSVP + a summary (staff get the breakdown)", tag: "Scheduling", auth: "user" },
   { method: "POST", path: "/events/{id}/rsvp", summary: "Set or change your RSVP", tag: "Scheduling", auth: "user" },
   { method: "DELETE", path: "/events/{id}/rsvp", summary: "Clear your RSVP", tag: "Scheduling", auth: "user" },
+  { method: "PATCH", path: "/events/{id}/score", summary: "Update a match's live score (coach of the team or admin)", tag: "Scheduling", auth: "coach" },
   { method: "GET", path: "/events/{id}/ics", summary: "One event as an .ics file", tag: "Scheduling", auth: "user" },
   { method: "GET", path: "/calendar/token", summary: "Personal calendar subscription URL", tag: "Scheduling", auth: "user" },
   { method: "POST", path: "/calendar/token", summary: "Rotate the subscription token", tag: "Scheduling", auth: "user" },

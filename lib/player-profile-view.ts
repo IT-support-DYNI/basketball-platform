@@ -77,11 +77,12 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
   const currentMembership =
     memberships.find((m) => m.seasonId === season.id) ?? memberships[0] ?? null;
 
-  // Performance numbers are treated the same as the player dashboard already
-  // does — self, the player's own coaches, and admins only. A teammate or the
-  // wider club can see the roster fact-sheet (height, country, bio…) but not
-  // form scores.
+  // Attendance and coach feedback: self, the player's own coaches, and admins.
+  // A teammate or the wider club sees the roster fact-sheet (height, bio…) only.
   const canSeeStats = scope.isSelf || scope.kinds.has("TEAM_COACH") || scope.kinds.has("ADMIN");
+  // Performance (evaluation form scores) is coach/admin-only — removed from
+  // the player side, so the player (and their guardian) never sees it.
+  const canSeePerformance = scope.kinds.has("TEAM_COACH") || scope.kinds.has("ADMIN");
 
   let attendancePct: number | null = null;
   let weeklyForm: number | null = null;
@@ -90,10 +91,12 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
   if (canSeeStats) {
     const [records, evaluation, feedback] = await Promise.all([
       prisma.attendanceRecord.findMany({ where: { playerId }, select: { status: true } }),
-      prisma.performanceEvaluation.findFirst({
-        where: { playerId, periodType: "WEEKLY" },
-        orderBy: { periodStart: "desc" },
-      }),
+      canSeePerformance
+        ? prisma.performanceEvaluation.findFirst({
+            where: { playerId, periodType: "WEEKLY" },
+            orderBy: { periodStart: "desc" },
+          })
+        : null,
       prisma.feedback.findFirst({
         where: { playerId },
         orderBy: { createdAt: "desc" },
@@ -116,6 +119,16 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
     name: user.name,
     photoUrl,
     bio: (visible as { bio?: string | null }).bio ?? null,
+    quote: (visible as { quote?: string | null }).quote ?? null,
+    // Undefined when this viewer can't see club history (field-visibility
+    // strips it); null when the player was never asked.
+    clubHistory:
+      "hasPreviousClub" in visible
+        ? {
+            hasPreviousClub: (visible as { hasPreviousClub?: boolean | null }).hasPreviousClub ?? null,
+            previousClubs: (visible as { previousClubs?: string | null }).previousClubs ?? null,
+          }
+        : undefined,
     nationality: (visible as { nationality?: string | null }).nationality ?? null,
     heightCm: (visible as { heightCm?: number | null }).heightCm ?? null,
     weightKg: (visible as { weightKg?: number | null }).weightKg ?? null,
@@ -127,6 +140,7 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
     status: currentMembership?.status ?? null,
     isSelf: scope.isSelf,
     canSeeStats,
+    canSeePerformance,
     attendancePct,
     weeklyForm,
     attendanceBreakdown,
@@ -142,8 +156,10 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
       showBio: rest.publicShowBio,
       showStats: rest.publicShowStats,
       showHighlights: rest.publicShowHighlights,
+      showQuote: rest.publicShowQuote,
       hasPhoto: !!rest.photoUrl,
       hasBio: !!rest.bio,
+      hasQuote: !!rest.quote,
       hasHighlights: highlights.length > 0,
     },
     canManagePublicVisibility: scope.kinds.has("ADMIN"),

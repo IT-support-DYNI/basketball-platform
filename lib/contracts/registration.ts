@@ -1,5 +1,24 @@
 import { z } from "zod";
 
+/** Club history — asked of every applicant. A yes needs the club name(s). */
+const clubHistoryFields = {
+  hasPreviousClub: z.boolean({
+    required_error: "Tell us whether the player has played for another club before",
+    invalid_type_error: "Tell us whether the player has played for another club before",
+  }),
+  previousClubs: z.string().trim().max(300).optional(),
+};
+
+function requirePreviousClubs(v: { hasPreviousClub: boolean; previousClubs?: string }, ctx: z.RefinementCtx) {
+  if (v.hasPreviousClub && (v.previousClubs ?? "").length < 2) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["previousClubs"],
+      message: "Name the previous club (or clubs)",
+    });
+  }
+}
+
 /** Public self-registration — DYNI Blazers PRD §6, Journey A. */
 export const registerSchema = z.object({
   name: z.string().min(1),
@@ -11,11 +30,12 @@ export const registerSchema = z.object({
   contactPhone: z.string().optional(),
   guardianName: z.string().optional(),
   guardianContact: z.string().optional(),
+  ...clubHistoryFields,
   /// Must be explicitly true — the checkbox is not pre-checked client-side.
   consentAccepted: z.literal(true, {
     errorMap: () => ({ message: "You must accept the club's registration terms to continue" }),
   }),
-});
+}).superRefine(requirePreviousClubs);
 
 /** Guardian-led registration for a minor (brief §25). Creates a GUARDIAN
  *  account that logs in + a child PLAYER account it manages. */
@@ -31,11 +51,12 @@ export const registerGuardianSchema = z.object({
   childDateOfBirth: z.string().min(1, "Your child's date of birth is required"),
   teamId: z.number().int().positive(),
   position: z.enum(["PG", "SG", "SF", "PF", "C"]).optional(),
+  ...clubHistoryFields,
 
   consentAccepted: z.literal(true, {
     errorMap: () => ({ message: "You must accept the club's registration terms to continue" }),
   }),
-});
+}).superRefine(requirePreviousClubs);
 
 /* --- Resumable multi-step registration (server-saved draft) --- */
 

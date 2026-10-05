@@ -77,7 +77,7 @@ export default function MarkAttendanceForm({ eventId, players }: { eventId: numb
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+            className="rounded-full bg-gradient-to-r from-court-500 to-court-700 px-5 py-2.5 text-sm font-bold text-on-flame disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save attendance"}
           </button>

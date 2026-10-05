@@ -71,6 +71,21 @@ export default function PlayerProfileSections({
         </ScrollReveal>
       )}
 
+      {player.clubHistory && (
+        <ScrollReveal delayMs={130}>
+          <section className="rounded-card border border-line bg-surface p-5">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">Club history</p>
+            <p className="mt-2 text-sm text-ink-dim">
+              {player.clubHistory.hasPreviousClub == null
+                ? "Not answered yet."
+                : player.clubHistory.hasPreviousClub
+                  ? `Previously played for: ${player.clubHistory.previousClubs ?? "a club (not named)"}`
+                  : "No previous club — DYNI Blazers is their first."}
+            </p>
+          </section>
+        </ScrollReveal>
+      )}
+
       {player.canSeeStats && b && totalCounted > 0 && (
         <ScrollReveal delayMs={180}>
           <section className="rounded-card border border-line bg-surface p-5 transition duration-200 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-card">
