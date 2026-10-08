@@ -42,7 +42,7 @@ const SECTIONS: { n: string; title: string; body: ReactNode }[] = [
   {
     n: "1",
     title: "Who we are",
-    body: "This site and the membership platform behind it (dyniblazers.co.uk) are run by DYNI Blazers, a basketball club operated by Diverse Youth Northern Ireland, based in Belfast, Northern Ireland.\n\nFor the purposes of UK data protection law, Diverse Youth Northern Ireland is the Data Controller for the personal data described in this notice: the organisation that decides why and how it's used, and who's accountable for it.\n\nData Controller contact: [ name of the person accountable for data protection at the club, and an email address for data requests, to be added by the club ].",
+    body: "This site and the membership platform behind it (dyniblazers.co.uk) are run by DYNI Blazers, a basketball club operated by Diverse Youth Northern Ireland, based in Belfast, Northern Ireland.\n\nFor the purposes of UK data protection law, Diverse Youth Northern Ireland is the Data Controller for the personal data described in this notice: the organisation that decides why and how it's used, and who's accountable for it.\n\nData Controller contact: Isreal E Nogie (info@diverseyouthni.com)",
   },
   {
     n: "2",
@@ -158,7 +158,7 @@ const SECTIONS: { n: string; title: string; body: ReactNode }[] = [
   {
     n: "13",
     title: "Contact us",
-    body: "Questions about this notice, or a request relating to your data: [ club contact email, to be added ].\n\nA safeguarding concern shouldn't wait for a data request. Use the safeguarding report form at dyniblazers.co.uk/club/safeguarding instead, which goes straight to the club's admin team.",
+    body: "Questions about this notice, or a request relating to your data: info@diverseyouthni.com\n\nA safeguarding concern shouldn't wait for a data request. Use the safeguarding report form at dyniblazers.co.uk/club/safeguarding instead, which goes straight to the club's admin team.",
   },
 ];
 
