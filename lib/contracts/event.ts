@@ -70,7 +70,7 @@ export const createVenueSchema = z.object({
   mapLat: z.number().min(-90).max(90).nullable().optional(),
   mapLng: z.number().min(-180).max(180).nullable().optional(),
   notes: z.string().max(2000).optional(),
-  checkInPin: z.string().regex(/^\d{4,8}$/, "4–8 digits").nullable().optional(),
+  checkInPin: z.string().regex(/^\d{4,8}$/, "4 to 8 digits").nullable().optional(),
 });
 
 export const updateVenueSchema = createVenueSchema.partial();

@@ -36,7 +36,7 @@ export default async function CoachMyTeamsPage() {
             <p className="mt-3 text-sm text-slate-500">{team._count.memberships} players</p>
           </Link>
         ))}
-        {teams.length === 0 && <p className="text-sm text-slate-500">No teams assigned to you yet — ask an admin.</p>}
+        {teams.length === 0 && <p className="text-sm text-slate-500">No teams assigned to you yet. Ask an admin.</p>}
       </div>
     </main>
   );

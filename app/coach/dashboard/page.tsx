@@ -54,7 +54,7 @@ export default async function CoachDashboardPage() {
         />
         <StatTile
           label="Team attendance"
-          value={attendanceSummary.percentage != null ? `${attendanceSummary.percentage}%` : "—"}
+          value={attendanceSummary.percentage != null ? `${attendanceSummary.percentage}%` : "No data yet"}
           sub={attendanceSummary.percentage != null ? "this season" : "no data yet"}
           accent="success"
           href="/coach/attendance"

@@ -44,11 +44,11 @@ export async function runRsvpReminders(now: Date = new Date()) {
       if (pending.length > 0) {
         const when = event.rsvpDeadline
           ? `RSVP by ${eventDayLabel(event.rsvpDeadline)}`
-          : `${eventDayLabel(event.startAt)} — let your coach know if you're coming`;
+          : `${eventDayLabel(event.startAt)}. Let your coach know if you're coming`;
         await notifyUsers(tx, pending, {
           type: "TRAINING_CHANGE",
           title: `RSVP needed: ${event.title}`,
-          message: `${event.title} — ${when}.`,
+          message: `${event.title}: ${when}.`,
           linkPath: "/player/training",
         });
       }

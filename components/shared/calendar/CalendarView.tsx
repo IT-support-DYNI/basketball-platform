@@ -310,7 +310,7 @@ function WeekGrid({
                 {list.map((e) => (
                   <Chip key={e.id} e={e} onSelect={onSelect} />
                 ))}
-                {list.length === 0 && <p className="text-[11px] text-ink-faint">—</p>}
+                {list.length === 0 && <p className="text-[11px] text-ink-faint">Nothing on</p>}
               </div>
             </div>
           );
@@ -424,7 +424,7 @@ function EventDialog({
             {!isDeadline && (
               <>
                 {" · "}
-                {start.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}–
+                {start.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}{" to "}
                 {end.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
               </>
             )}

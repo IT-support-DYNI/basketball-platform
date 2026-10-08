@@ -31,7 +31,7 @@ export async function startDraft(
 ): Promise<{ token: string; view: DraftView }> {
   const email = emailRaw.trim().toLowerCase();
   if (await prisma.user.findUnique({ where: { email }, select: { id: true } })) {
-    throw new ConflictError("An account with that email already exists — sign in instead.");
+    throw new ConflictError("An account with that email already exists. Sign in instead.");
   }
 
   const existing = await prisma.registrationDraft.findUnique({ where: { email } });
@@ -109,7 +109,7 @@ export async function submitDraft(token: string) {
       previousClubs: (d.previousClubs as string) || undefined,
       consentAccepted: true,
     });
-    if (!parsed.success) throw new BadRequestError("Some details are missing — go back and complete every step.");
+    if (!parsed.success) throw new BadRequestError("Some details are missing. Go back and complete every step.");
     result = await createSelfRegistration(parsed.data);
   } else {
     const parsed = registerGuardianSchema.safeParse({
@@ -127,7 +127,7 @@ export async function submitDraft(token: string) {
       previousClubs: (d.previousClubs as string) || undefined,
       consentAccepted: true,
     });
-    if (!parsed.success) throw new BadRequestError("Some details are missing — go back and complete every step.");
+    if (!parsed.success) throw new BadRequestError("Some details are missing. Go back and complete every step.");
     result = await createGuardianRegistration(parsed.data);
   }
 

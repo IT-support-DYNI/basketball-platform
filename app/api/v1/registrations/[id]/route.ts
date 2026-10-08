@@ -16,7 +16,7 @@ const DECISION_TO_STATUS = {
 } as const;
 
 const DECISION_MESSAGE = {
-  APPROVE: "Your registration has been approved — welcome to the team!",
+  APPROVE: "Your registration has been approved. Welcome to the team!",
   REJECT: "Your registration was not approved.",
   REQUEST_CHANGES: "Your registration needs a small update before it can be approved.",
 } as const;
@@ -38,7 +38,7 @@ export const PATCH = route<{ id: string }>(async (req, { params, requestId }) =>
   }
   if (body.decision === "APPROVE" && !player.user.emailVerifiedAt) {
     throw new BadRequestError(
-      "This applicant hasn't confirmed their email address yet — they need to click the link before you can approve them.",
+      "This applicant hasn't confirmed their email address yet. They need to click the link before you can approve them.",
     );
   }
 

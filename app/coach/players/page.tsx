@@ -60,8 +60,8 @@ export default async function CoachPlayersPage() {
                     </Link>
                   </td>
                   <td className="px-4 py-2.5 text-ink-dim">{m.team.name}</td>
-                  <td className="px-4 py-2.5 tabular text-ink-dim">{m.jerseyNumber ?? "—"}</td>
-                  <td className="px-4 py-2.5 text-ink-dim">{m.position ?? "—"}</td>
+                  <td className="px-4 py-2.5 tabular text-ink-dim">{m.jerseyNumber ?? "Not set"}</td>
+                  <td className="px-4 py-2.5 text-ink-dim">{m.position ?? "Not set"}</td>
                   <td className="px-4 py-2.5 text-right">
                     <Link
                       href={`/coach/performance?playerId=${m.player.id}`}

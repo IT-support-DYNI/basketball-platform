@@ -76,19 +76,19 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
       <div className="profile-stat-bar">
         <div className="profile-stat">
           <span className="l">Position</span>
-          <span className="v">{player.positionLabel ?? "—"}</span>
+          <span className="v">{player.positionLabel ?? "Not listed"}</span>
         </div>
         <div className="profile-stat">
           <span className="l">Team</span>
-          <span className="v">{player.team ?? "—"}</span>
+          <span className="v">{player.team ?? "Not listed"}</span>
         </div>
         <div className="profile-stat">
           <span className="l">Age group</span>
-          <span className="v">{player.ageGroup ?? "—"}</span>
+          <span className="v">{player.ageGroup ?? "Not listed"}</span>
         </div>
         <div className="profile-stat">
           <span className="l">Status</span>
-          <span className="v">{player.publicStatus ?? "—"}</span>
+          <span className="v">{player.publicStatus ?? "Not listed"}</span>
         </div>
       </div>
 
@@ -100,15 +100,15 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
               <div className="profile-stat-bar" style={{ marginTop: 14, border: "var(--border-hairline)", borderRadius: "var(--radius-sm)" }}>
                 <div className="profile-stat">
                   <span className="l">Height</span>
-                  <span className="v">{player.stats.heightCm ? `${(player.stats.heightCm / 100).toFixed(2)}m` : "—"}</span>
+                  <span className="v">{player.stats.heightCm ? `${(player.stats.heightCm / 100).toFixed(2)}m` : "Not listed"}</span>
                 </div>
                 <div className="profile-stat">
                   <span className="l">Weight</span>
-                  <span className="v">{player.stats.weightKg ? `${player.stats.weightKg}kg` : "—"}</span>
+                  <span className="v">{player.stats.weightKg ? `${player.stats.weightKg}kg` : "Not listed"}</span>
                 </div>
                 <div className="profile-stat">
                   <span className="l">Hand</span>
-                  <span className="v">{player.stats.preferredHand ? player.stats.preferredHand[0] + player.stats.preferredHand.slice(1).toLowerCase() : "—"}</span>
+                  <span className="v">{player.stats.preferredHand ? player.stats.preferredHand[0] + player.stats.preferredHand.slice(1).toLowerCase() : "Not listed"}</span>
                 </div>
               </div>
             </div>

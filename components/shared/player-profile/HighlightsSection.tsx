@@ -135,7 +135,7 @@ export default function HighlightsSection({
 
       {highlights.length === 0 && !adding && (
         <p className="mt-2 text-sm text-ink-dim">
-          {editable ? "Add a highlight — link to where it's hosted, or upload the clip directly." : "No highlights yet."}
+          {editable ? "Add a highlight: link to where it's hosted, or upload the clip directly." : "No highlights yet."}
         </p>
       )}
 
@@ -201,7 +201,7 @@ export default function HighlightsSection({
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={'Title — e.g. "U16 vs Northgate — 24pts"'}
+            placeholder={'Title, e.g. "U16 vs Northgate, 24pts"'}
             required
             maxLength={80}
             className="w-full rounded-control border border-line bg-surface-2 px-3 py-2 text-sm outline-none focus:border-flame-ink"

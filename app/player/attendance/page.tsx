@@ -26,7 +26,7 @@ export default async function PlayerAttendancePage() {
       <p className="mt-1 text-slate-600">Your attendance history and overall percentage.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-4">
-        <StatTile label="Attendance %" value={stats.percentage != null ? `${stats.percentage}%` : "—"} icon="✅" accent="emerald" />
+        <StatTile label="Attendance %" value={stats.percentage != null ? `${stats.percentage}%` : "No data yet"} icon="✅" accent="emerald" />
         <StatTile label="Present" value={stats.present} icon="🟢" accent="orange" />
         <StatTile label="Late" value={stats.late} icon="🟡" accent="amber" />
         <StatTile label="Absent" value={stats.absent} icon="🔴" accent="rose" />

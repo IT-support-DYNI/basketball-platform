@@ -26,7 +26,7 @@ function getClient() {
 
   if (!endpoint || !accessKeyId || !secretAccessKey) {
     throw new Error(
-      "Object storage isn't configured — set STORAGE_ENDPOINT (or R2_ACCOUNT_ID for R2), R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY (see .env.example)."
+      "Object storage isn't configured. Set STORAGE_ENDPOINT (or R2_ACCOUNT_ID for R2), R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY (see .env.example)."
     );
   }
 

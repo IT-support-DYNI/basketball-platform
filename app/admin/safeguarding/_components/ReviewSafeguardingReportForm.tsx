@@ -58,7 +58,7 @@ export default function ReviewSafeguardingReportForm({
         <label htmlFor={notesId} className="text-sm font-semibold text-ink">
           Internal review notes
         </label>
-        <p className="text-xs text-ink-dim">Visible to admins only — never shown to the reporter.</p>
+        <p className="text-xs text-ink-dim">Visible to admins only. Never shown to the reporter.</p>
         <textarea
           id={notesId}
           value={notes}

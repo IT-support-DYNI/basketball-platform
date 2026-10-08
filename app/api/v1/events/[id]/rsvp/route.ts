@@ -101,7 +101,7 @@ export const POST = route<{ id: string }>(async (req: NextRequest, { params }) =
       where: { eventId: event.id, response: "ATTENDING" },
     });
     if (capacityState(event, attending).full) {
-      throw new ConflictError("This event is full — mark yourself Unsure and your coach will follow up.");
+      throw new ConflictError("This event is full. Mark yourself Unsure and your coach will follow up.");
     }
   }
 

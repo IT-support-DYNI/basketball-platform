@@ -15,16 +15,16 @@ import { clubPhoto, type ClubPhotoSlug } from "@/lib/club-photos";
 // Bypasses the root layout's "%s · DYNI Blazers" template for a one-off
 // exact title, rather than doubling up ("… · DYNI Blazers · DYNI Blazers").
 export const metadata: Metadata = {
-  title: { absolute: "DYNI Blazers — A club, not an academy" },
+  title: { absolute: "DYNI Blazers | A club, not an academy" },
   description: "A community basketball club run by Diverse Youth Northern Ireland. Junior to senior, one club.",
 };
 
 const HERO_SLIDES: HeroSlide[] = [
   {
-    label: "Hero 01 — Culture",
+    label: "Hero 01: Culture",
     eyebrow: "A club, not an academy",
     words: ["Everyone", "develops", "here."],
-    lead: "Juniors through seniors on the same floor, to the same standards. No trial-and-cut, no season on the bench — if you turn up, you get coached.",
+    lead: "Juniors through seniors on the same floor, to the same standards. No trial-and-cut, no season on the bench. If you turn up, you get coached.",
     tabTitle: "The culture",
     ctas: [
       { label: "Start registration", href: "/register", primary: true },
@@ -34,7 +34,7 @@ const HERO_SLIDES: HeroSlide[] = [
     photoPosition: "50% 30%",
   },
   {
-    label: "Hero 02 — Teams",
+    label: "Hero 02: Teams",
     eyebrow: "Junior to senior · one club",
     words: ["Every", "squad,", "one", "floor."],
     lead: "From our youngest juniors to the senior squad, everyone trains out of the same hall, with the same coaching staff and the same expectations.",
@@ -46,19 +46,19 @@ const HERO_SLIDES: HeroSlide[] = [
     photo: "squad-with-balls",
   },
   {
-    label: "Hero 03 — Trials",
+    label: "Hero 03: Trials",
     eyebrow: "Open trials",
     words: ["Come", "down", "and", "play."],
-    lead: "Bring trainers and a water bottle — we'll sort the rest. Come down and see if you like us.",
+    lead: "Bring trainers and a water bottle and we'll sort the rest. Come down and see if you like us.",
     tabTitle: "Open trials",
     ctas: [{ label: "Register for trials", href: "/register", primary: true }],
     photo: "one-on-one",
   },
   {
-    label: "Hero 04 — Coaches",
+    label: "Hero 04: Coaches",
     eyebrow: "Our coaches",
     words: ["Real", "coaching,", "every", "session."],
-    lead: "Every coach on our roster is here every week, not just for match day — meet the people who'll actually be running your sessions.",
+    lead: "Every coach on our roster is here every week, not just for match day. Meet the people who'll actually be running your sessions.",
     tabTitle: "Our coaches",
     ctas: [
       { label: "Meet the coaches", href: "/club/coaches" },
@@ -82,7 +82,7 @@ const CULTURE_POINTS = [
   {
     n: "01",
     title: "Everyone develops",
-    body: "Every player gets a development plan and feedback they can actually act on — not a score in a coach's notebook.",
+    body: "Every player gets a development plan and feedback they can actually act on, not a score in a coach's notebook.",
   },
   {
     n: "02",
@@ -134,7 +134,7 @@ const SAFE_CARDS = [
   { title: "Guardian consent", body: "Photos, profiles and video are opt-in per player, and reversible at any time." },
   {
     title: "A named lead, on request",
-    body: "The club has a designated safeguarding lead — ask at registration or via the club's contact details for who to reach and how.",
+    body: "The club has a designated safeguarding lead. Ask at registration or via the club's contact details for who to reach and how.",
   },
   { title: "Open sessions", body: "Parents and guardians are welcome to stay and watch any session, any age group." },
 ];
@@ -220,9 +220,9 @@ export default async function ClubLandingPage() {
                   content: (
                     <div>
                       <p>
-                        We&apos;re run by Diverse Youth Northern Ireland — a community basketball club running
+                        We&apos;re run by Diverse Youth Northern Ireland: a community basketball club running
                         juniors through seniors out of one gym. Some of our players will go on to play at a high
-                        level. Most won&apos;t — and the season should be worth it either way.
+                        level. Most won&apos;t, and the season should be worth it either way.
                       </p>
                       <Link href="/club/about">Read more about the club →</Link>
                     </div>

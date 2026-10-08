@@ -49,5 +49,5 @@ export function storageKey(folder: StorageFolder) {
   return z
     .string()
     .trim()
-    .regex(new RegExp(`^${folder}/${UUID}$`), "That upload reference isn't valid — upload the file again.");
+    .regex(new RegExp(`^${folder}/${UUID}$`), "That upload reference isn't valid. Upload the file again.");
 }

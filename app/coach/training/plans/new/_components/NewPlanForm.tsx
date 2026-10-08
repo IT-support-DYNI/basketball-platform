@@ -78,7 +78,7 @@ export default function NewPlanForm({
         </Select>
       )}
 
-      <TextField label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required minLength={2} placeholder="Tuesday practice — pick-and-roll" />
+      <TextField label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required minLength={2} placeholder="Tuesday practice: pick-and-roll" />
 
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-semibold text-ink">Objectives</span>
@@ -103,7 +103,7 @@ export default function NewPlanForm({
       )}
 
       {teamTemplates.length > 0 && (
-        <Select label="Start from a template" hint="Optional — copies its blocks." value={fromTemplateId} onChange={(e) => setFromTemplateId(e.target.value)}>
+        <Select label="Start from a template" hint="Optional. Copies its blocks." value={fromTemplateId} onChange={(e) => setFromTemplateId(e.target.value)}>
           <option value="">Blank plan</option>
           {teamTemplates.map((t) => (
             <option key={t.id} value={t.id}>{t.title}</option>

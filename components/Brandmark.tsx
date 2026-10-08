@@ -48,7 +48,7 @@ export default function Brandmark({
 
   if (href) {
     return (
-      <Link href={href} className="inline-flex items-center" aria-label="DYNI Blazers — home">
+      <Link href={href} className="inline-flex items-center" aria-label="DYNI Blazers home">
         {inner}
       </Link>
     );

@@ -25,7 +25,7 @@ export default async function AdminPerformancePage() {
   return (
     <main>
       <h1 className="font-display text-3xl text-ink">Performance</h1>
-      <p className="mt-1 text-slate-600">Latest overall score per player, by team (view-only — coaches record evaluations).</p>
+      <p className="mt-1 text-slate-600">Latest overall score per player, by team (view only; coaches record evaluations).</p>
 
       <div className="mt-6 space-y-6">
         {teams.map((team) => (

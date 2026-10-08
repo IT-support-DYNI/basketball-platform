@@ -124,14 +124,14 @@ export const POST = route(async (req: NextRequest) => {
       await notifyUsers(tx, users, {
         type: "TRAINING_CHANGE",
         title: `New ${event.type === "TRAINING" ? "training session" : "event"} scheduled`,
-        message: `${event.title} — ${eventDayLabel(event.startAt)}`,
+        message: `${event.title}: ${eventDayLabel(event.startAt)}`,
         linkPath: "/player/training",
       });
       return users;
     });
     await sendPushToUsers(recipients, {
       title: "New event scheduled",
-      body: `${event.title} — ${eventDayLabel(event.startAt)}`,
+      body: `${event.title}: ${eventDayLabel(event.startAt)}`,
       url: "/player/training",
     }, "SCHEDULE");
   }

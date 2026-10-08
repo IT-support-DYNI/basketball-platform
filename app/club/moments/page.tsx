@@ -5,7 +5,7 @@ import { CLUB_PHOTOS, photoSrc } from "@/lib/club-photos";
 
 export const metadata: Metadata = {
   title: "Moments",
-  description: "Photos from DYNI Blazers training sessions — drills, scrimmages and the people who make the club.",
+  description: "Photos from DYNI Blazers training sessions: drills, scrimmages and the people who make the club.",
 };
 
 /** Every club photo (lib/club-photos.ts) in a masonry layout: each photo keeps
@@ -18,7 +18,7 @@ export default function PublicMomentsPage() {
         <div className="wrap">
           <p className="eyebrow">Blazers moments</p>
           <h1>The team, on and off the court.</h1>
-          <p className="lead">From the club&apos;s training sessions — drills, scrimmages and the people on the floor.</p>
+          <p className="lead">From the club&apos;s training sessions: drills, scrimmages and the people on the floor.</p>
         </div>
       </section>
       <section style={{ padding: "var(--section-y) 0" }}>

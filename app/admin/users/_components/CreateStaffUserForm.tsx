@@ -46,7 +46,7 @@ export default function CreateStaffUserForm() {
     return (
       <Alert tone="success" className="p-5">
         <p className="font-semibold">Account created for {result.email}</p>
-        <p className="mt-1 text-sm">Temporary password (relay this to them — it won't be shown again):</p>
+        <p className="mt-1 text-sm">Temporary password (pass this on to them, as it won't be shown again):</p>
         <code className="mt-2 block rounded-control border border-line bg-surface px-3 py-2 font-mono text-sm text-ink">
           {result.tempPassword}
         </code>

@@ -43,7 +43,7 @@ export const DELETE = route<{ id: string }>(async (_req, { params }) => {
   if (!existing) throw new NotFoundError("That venue wasn't found.");
   assertSameClub(existing.clubId, ctx);
   if (existing._count.events > 0) {
-    throw new ConflictError("This venue is used by one or more events — reassign them first.");
+    throw new ConflictError("This venue is used by one or more events. Reassign them first.");
   }
 
   await prisma.venue.delete({ where: { id: existing.id } });
