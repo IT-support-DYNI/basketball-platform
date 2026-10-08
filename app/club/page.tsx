@@ -30,8 +30,8 @@ const HERO_SLIDES: HeroSlide[] = [
       { label: "Start registration", href: "/register", primary: true },
       { label: "What we're about", href: "#about" },
     ],
-    photo: "smiling-on-the-ball",
-    photoPosition: "50% 30%",
+    photo: "warm-up-line",
+    photoPosition: "50% 45%",
   },
   {
     label: "Hero 02: Teams",
@@ -44,6 +44,7 @@ const HERO_SLIDES: HeroSlide[] = [
       { label: "Full roster", href: "/club/roster" },
     ],
     photo: "squad-with-balls",
+    photoPosition: "50% 35%",
   },
   {
     label: "Hero 03: Trials",
@@ -53,6 +54,7 @@ const HERO_SLIDES: HeroSlide[] = [
     tabTitle: "Open trials",
     ctas: [{ label: "Register for trials", href: "/register", primary: true }],
     photo: "one-on-one",
+    photoPosition: "50% 40%",
   },
   {
     label: "Hero 04: Coaches",
@@ -65,7 +67,7 @@ const HERO_SLIDES: HeroSlide[] = [
       { label: "Safeguarding", href: "/club/safeguarding" },
     ],
     photo: "coach-instructions",
-    photoPosition: "45% 40%",
+    photoPosition: "50% 30%",
   },
 ];
 
