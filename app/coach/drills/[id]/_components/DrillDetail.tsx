@@ -104,7 +104,7 @@ export default function DrillDetail({ drill }: { drill: DrillView }) {
           {DRILL_CATEGORY_LABEL[drill.category as keyof typeof DRILL_CATEGORY_LABEL]} ·{" "}
           {DRILL_DIFFICULTY_LABEL[drill.difficulty as keyof typeof DRILL_DIFFICULTY_LABEL]}
           {drill.durationMinutes ? ` · ${drill.durationMinutes} min` : ""}
-          {drill.minPlayers || drill.maxPlayers ? ` · ${drill.minPlayers ?? "?"}–${drill.maxPlayers ?? "?"} players` : ""}
+          {drill.minPlayers || drill.maxPlayers ? ` · ${drill.minPlayers ?? "?"} to ${drill.maxPlayers ?? "?"} players` : ""}
           {drill.archived ? " · Archived" : ""}
         </p>
         {drill.summary && <p className="mt-2 text-ink-dim">{drill.summary}</p>}
@@ -147,7 +147,7 @@ export default function DrillDetail({ drill }: { drill: DrillView }) {
           <p className="mt-4 text-xs text-ink-faint">Added by {drill.createdByName}</p>
         )}
         {drill.shared && (
-          <p className="mt-1 text-xs text-ink-faint">Part of the shared drill set — edits affect every club.</p>
+          <p className="mt-1 text-xs text-ink-faint">Part of the shared drill set. Edits affect every club.</p>
         )}
       </Card>
 

@@ -51,7 +51,7 @@ export const POST = route<{ id: string }>(async (req: NextRequest, { params }) =
   } else if (body.pin && verifyPin(event.venue?.checkInPin, body.pin)) {
     method = "PIN";
   } else {
-    throw new ForbiddenError("That code has expired or is incorrect — ask your coach for the current one.");
+    throw new ForbiddenError("That code has expired or is incorrect. Ask your coach for the current one.");
   }
 
   const existing = await prisma.attendanceRecord.findUnique({

@@ -331,7 +331,7 @@ export async function editMessage(messageId: number, userId: number, bodyText: s
     throw new ForbiddenError("Messages can only be edited for 15 minutes.");
   }
   const body = bodyText.trim();
-  if (!body) throw new BadRequestError("Message can't be empty — delete it instead.");
+  if (!body) throw new BadRequestError("Message can't be empty. Delete it instead.");
   await prisma.message.update({ where: { id: messageId }, data: { body, editedAt: new Date() } });
 }
 

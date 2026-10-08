@@ -109,7 +109,7 @@ export default function TeamManager({ teamId, isAdmin }: { teamId: number; isAdm
 
       {!viewingActive && (
         <Alert tone="info">
-          You&apos;re viewing a past season — this is read-only. Switch to the active season to make changes.
+          You&apos;re viewing a past season, so this is read-only. Switch to the active season to make changes.
         </Alert>
       )}
 
@@ -217,7 +217,7 @@ function RosterSection({
           {active.map((m) => (
             <li key={m.membershipId} className="flex flex-wrap items-center gap-3 py-3">
               <span className="w-10 font-condensed text-xl font-bold tabular text-flame-on-bg">
-                {m.jerseyNumber ?? "–"}
+                {m.jerseyNumber ?? "None"}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-ink">{m.player.user.name}</p>
@@ -243,7 +243,7 @@ function RosterSection({
                     onChange={(e) => patch(m.membershipId, { position: e.target.value || null })}
                     className="rounded-control border border-line-strong bg-surface px-2 py-1 text-sm text-ink"
                   >
-                    <option value="">–</option>
+                    <option value="">Not set</option>
                     {POSITIONS.map((p) => (
                       <option key={p} value={p}>
                         {p}
@@ -503,7 +503,7 @@ function SquadsSection({
       <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink">Squads</h2>
       {squads.length === 0 ? (
         <p className="mt-2 text-sm text-ink-dim">
-          No squads — the whole team is one roster. Add a squad to split it (e.g. A / B).
+          No squads. The whole team is one roster. Add a squad to split it (e.g. A / B).
         </p>
       ) : (
         <ul className="mt-3 divide-y divide-line">

@@ -27,7 +27,7 @@ export const createHighlightSchema = z
     storageKey: storageKey("highlight-videos").optional(),
   })
   .refine((d) => (d.url ? 1 : 0) + (d.storageKey ? 1 : 0) === 1, {
-    message: "Provide either a link or an uploaded video — not both.",
+    message: "Provide either a link or an uploaded video, not both.",
   });
 
 export const assignCoachSchema = z.object({

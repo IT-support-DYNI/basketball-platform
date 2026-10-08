@@ -57,7 +57,7 @@ export default function RosterFilterGrid({ players }: { players: PublicPlayerCar
 
       {filtered.length === 0 ? (
         <p className="lead">
-          {players.length === 0 ? "No player profiles are public yet — check back soon." : "No players match that filter."}
+          {players.length === 0 ? "No player profiles are public yet. Check back soon." : "No players match that filter."}
         </p>
       ) : (
         <div className="team-grid">
@@ -76,7 +76,7 @@ export default function RosterFilterGrid({ players }: { players: PublicPlayerCar
               )}
               <div className="team-top">
                 <span className={`team-code${p.publicStatus === "Trialist" ? " trial" : ""}`}>
-                  {p.jerseyNumber != null ? `#${p.jerseyNumber}` : "—"}
+                  {p.jerseyNumber != null ? `#${p.jerseyNumber}` : "No number"}
                 </span>
                 {p.publicStatus && (
                   <span className={`pill ${p.publicStatus === "Trialist" ? "pill-trial" : "pill-open"}`}>

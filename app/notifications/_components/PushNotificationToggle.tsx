@@ -63,7 +63,7 @@ export default function PushNotificationToggle() {
 
       setStatus("subscribed");
     } catch {
-      setError("Couldn't enable notifications — try again.");
+      setError("Couldn't enable notifications. Try again.");
     } finally {
       setLoading(false);
     }
@@ -98,7 +98,7 @@ export default function PushNotificationToggle() {
   if (status === "denied") {
     return (
       <p className="mb-4 text-xs text-slate-500">
-        Notifications are blocked for this site in your browser settings — enable them there to turn this on.
+        Notifications are blocked for this site in your browser settings. Enable them there to turn this on.
       </p>
     );
   }
@@ -115,7 +115,7 @@ export default function PushNotificationToggle() {
             : "bg-gradient-to-r from-court-500 to-court-700 text-on-flame shadow-court-500/30 hover:border-flame"
         }`}
       >
-        {loading ? "Working..." : status === "subscribed" ? "Push notifications on — turn off" : "Enable push notifications"}
+        {loading ? "Working..." : status === "subscribed" ? "Push notifications on (turn off)" : "Enable push notifications"}
       </button>
       {error && <span className="text-xs text-danger">{error}</span>}
     </div>

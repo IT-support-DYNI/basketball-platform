@@ -21,7 +21,7 @@ export const POST = route(async (req: NextRequest) => {
   const items = await consentStatusFor(playerProfileId);
   const currentIds = new Set(items.map((i) => i.version.id));
   if (body.versionIds.some((id) => !currentIds.has(id))) {
-    throw new BadRequestError("One or more documents are out of date — reload and try again.");
+    throw new BadRequestError("One or more documents are out of date. Reload and try again.");
   }
 
   await prisma.$transaction(

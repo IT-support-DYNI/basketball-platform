@@ -41,7 +41,7 @@ export default async function AdminRegistrationsPage() {
                     </div>
                     <p className="text-sm text-ink-dim">{r.user.email}</p>
                     <p className="mt-1 text-sm text-ink-dim">
-                      Applied to <span className="font-medium text-ink">{r.registrationTeam?.name ?? "—"}</span>
+                      Applied to <span className="font-medium text-ink">{r.registrationTeam?.name ?? "No team"}</span>
                       {r.registrationPosition && ` · ${r.registrationPosition}`}
                     </p>
                     {r.dateOfBirth && (

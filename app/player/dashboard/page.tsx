@@ -65,7 +65,7 @@ export default async function PlayerDashboardPage() {
               attendance?.percentage != null ? (
                 <CountUp value={attendance.percentage} suffix="%" />
               ) : (
-                "—"
+                "No data yet"
               )
             }
             sub={
@@ -105,7 +105,7 @@ export default async function PlayerDashboardPage() {
           {latestFeedback ? (
             <>
               <p className="mt-2 italic text-ink">&ldquo;{latestFeedback.message}&rdquo;</p>
-              <p className="mt-1 text-xs text-ink-faint">— {latestFeedback.coach.user.name}</p>
+              <p className="mt-1 text-xs text-ink-faint">From {latestFeedback.coach.user.name}</p>
             </>
           ) : (
             <p className="mt-3 text-sm text-ink-dim">No feedback yet.</p>

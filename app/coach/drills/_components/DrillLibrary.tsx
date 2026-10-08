@@ -128,7 +128,7 @@ export default function DrillLibrary({ drills }: { drills: DrillListItem[] }) {
                       {DRILL_DIFFICULTY_LABEL[d.difficulty as keyof typeof DRILL_DIFFICULTY_LABEL]}
                       {d.durationMinutes ? ` · ${d.durationMinutes} min` : ""}
                       {d.minPlayers || d.maxPlayers
-                        ? ` · ${d.minPlayers ?? "?"}–${d.maxPlayers ?? "?"} players`
+                        ? ` · ${d.minPlayers ?? "?"} to ${d.maxPlayers ?? "?"} players`
                         : ""}
                     </p>
                   </Link>

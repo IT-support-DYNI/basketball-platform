@@ -37,7 +37,7 @@ export function eventDayLabel(d: Date | string): string {
 export function eventTimeRange(start: Date | string, end: Date | string): string {
   const fmt = (d: Date | string) =>
     new Date(d).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-  return `${fmt(start)} – ${fmt(end)}`;
+  return `${fmt(start)} to ${fmt(end)}`;
 }
 
 /**

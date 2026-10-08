@@ -65,7 +65,7 @@ export default function LiveScorePanel({
       if (body.liveStatus === "FINAL" || before.liveStatus === "FINAL") router.refresh();
     } catch {
       setScore(before);
-      setError("Couldn't reach the server — check your connection and tap again.");
+      setError("Couldn't reach the server. Check your connection and tap again.");
     } finally {
       setBusy(false);
     }
@@ -198,7 +198,7 @@ export default function LiveScorePanel({
             variant="destructive"
             disabled={busy}
             onClick={() => {
-              if (window.confirm(`End the match at ${score.ourScore}–${score.opponentScore}? This marks it as the final result.`)) {
+              if (window.confirm(`End the match at ${score.ourScore}-${score.opponentScore}? This marks it as the final result.`)) {
                 save({ liveStatus: "FINAL" }, { liveStatus: "FINAL", period: null });
               }
             }}

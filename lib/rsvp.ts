@@ -24,7 +24,7 @@ export function rsvpWindowState(event: RsvpEvent, now: Date = new Date()): { ope
   if (event.status === "CANCELLED") return { open: false, reason: "This event was cancelled." };
   if (event.endAt < now) return { open: false, reason: "This event has already taken place." };
   if (event.rsvpDeadline && event.rsvpDeadline < now) {
-    return { open: false, reason: "The RSVP deadline has passed — contact your coach." };
+    return { open: false, reason: "The RSVP deadline has passed. Contact your coach." };
   }
   return { open: true };
 }

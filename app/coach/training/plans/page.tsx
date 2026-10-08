@@ -27,7 +27,7 @@ export default async function TrainingPlansPage() {
       <PageHeader
         eyebrow="Coach"
         title="Session plans"
-        lead="Structured plans for each training session — blocks, drills and a running time."
+        lead="Structured plans for each training session: blocks, drills and a running time."
         actions={<ButtonLink href="/coach/training/plans/new">New plan</ButtonLink>}
       />
 

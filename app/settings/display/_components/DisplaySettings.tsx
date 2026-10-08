@@ -70,14 +70,14 @@ export default function DisplaySettings() {
         <div className="border-t border-line pt-6">
           <Checkbox
             label="High contrast"
-            description="A solid black-and-white theme with thicker borders and no dimmed text — combines with your light/dark choice above."
+            description="A solid black-and-white theme with thicker borders and no dimmed text. Works together with your light/dark choice above."
             checked={prefs.highContrast}
             onCheckedChange={(checked) => save({ highContrast: checked })}
           />
         </div>
 
         <p className="text-xs text-ink-faint">
-          {saving ? "Saving…" : "Saved to your account — these follow you to any device you sign in on."}
+          {saving ? "Saving…" : "Saved to your account. These follow you to any device you sign in on."}
         </p>
       </div>
     </Card>

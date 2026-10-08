@@ -127,7 +127,7 @@ export default function PublicVisibilityPanel({ player }: { player: PlayerProfil
       <p className="mt-2 text-sm text-ink-dim">
         {canManage
           ? "This profile is private by default. Each row below is a separate decision, and for junior players every one of them also needs a guardian's approval before it goes live."
-          : "Only an admin can publish something here — nothing you add or upload goes public on its own."}
+          : "Only an admin can publish something here. Nothing you add or upload goes public on its own."}
       </p>
 
       <div className="mt-4 flex flex-col gap-2">

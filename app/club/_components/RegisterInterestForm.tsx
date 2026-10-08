@@ -49,7 +49,7 @@ export default function RegisterInterestForm() {
         Start registration
       </button>
       <small>
-        This takes you straight to registration — it only takes a few minutes, and every application is reviewed by
+        This takes you straight to registration. It only takes a few minutes, and every application is reviewed by
         the club before anyone gets full access.
       </small>
     </form>

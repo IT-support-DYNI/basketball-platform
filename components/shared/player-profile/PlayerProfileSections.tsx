@@ -80,7 +80,7 @@ export default function PlayerProfileSections({
                 ? "Not answered yet."
                 : player.clubHistory.hasPreviousClub
                   ? `Previously played for: ${player.clubHistory.previousClubs ?? "a club (not named)"}`
-                  : "No previous club — DYNI Blazers is their first."}
+                  : "No previous club. DYNI Blazers is their first."}
             </p>
           </section>
         </ScrollReveal>
@@ -112,7 +112,7 @@ export default function PlayerProfileSections({
             <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">Latest coach feedback</p>
             <p className="mt-2 italic text-ink">&ldquo;{player.latestFeedback.message}&rdquo;</p>
             <p className="mt-1.5 text-xs text-ink-faint">
-              — {player.latestFeedback.coachName} · {timeAgo(player.latestFeedback.createdAt)}
+              From {player.latestFeedback.coachName} · {timeAgo(player.latestFeedback.createdAt)}
             </p>
           </section>
         </ScrollReveal>

@@ -59,7 +59,7 @@ export async function runNotificationDigest(now: Date = new Date()) {
 
     await sendMail({
       to: user.email,
-      subject: `You have ${unread.length} unread notification${unread.length === 1 ? "" : "s"} — DYNI Blazers`,
+      subject: `DYNI Blazers: you have ${unread.length} unread notification${unread.length === 1 ? "" : "s"}`,
       text: [
         `Hi ${user.name},`,
         "",

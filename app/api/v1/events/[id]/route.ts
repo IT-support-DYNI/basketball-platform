@@ -102,7 +102,7 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params }) 
         title: cancelled ? "Event cancelled" : "Event updated",
         message: cancelled
           ? `${updated.title} was cancelled.`
-          : `${updated.title} — ${eventDayLabel(updated.startAt)}`,
+          : `${updated.title}: ${eventDayLabel(updated.startAt)}`,
         linkPath: "/player/training",
         dedupeKey: `event:${updated.id}`,
       });

@@ -32,7 +32,7 @@ export const createVideoSchema = z
     thumbnailKey: storageKey("video-thumbnails").optional(),
   })
   .refine((d) => (d.key ? 1 : 0) + (d.externalUrl ? 1 : 0) === 1, {
-    message: "Provide either an uploaded video or a link — not both.",
+    message: "Provide either an uploaded video or a link, not both.",
   });
 
 export const assignVideoSchema = z

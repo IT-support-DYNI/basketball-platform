@@ -26,7 +26,7 @@ type Audit = {
 
 const STATUSES = ["PRESENT", "LATE", "ABSENT", "EXCUSED"] as const;
 const time = (s: string | null) =>
-  s ? new Date(s).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : "—";
+  s ? new Date(s).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : "Not recorded";
 
 export default function AttendanceCorrections({ records }: { records: Rec[] }) {
   const router = useRouter();

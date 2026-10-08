@@ -262,7 +262,7 @@ export default function MessagesClient({
 
               <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
                 {view.messages.length === 0 && (
-                  <p className="text-center text-sm text-ink-faint">No messages yet — say hello.</p>
+                  <p className="text-center text-sm text-ink-faint">No messages yet. Say hello.</p>
                 )}
                 {view.messages.map((m) => {
                   const mine = m.authorUserId === meUserId;

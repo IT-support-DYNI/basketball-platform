@@ -128,7 +128,7 @@ export default function CreateSessionForm({
         <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className={field} />
         <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className={field} />
         <select value={venueId} onChange={(e) => setVenueId(e.target.value)} className={field}>
-          <option value="">No venue — free text</option>
+          <option value="">No venue (type a location)</option>
           {venues.map((v) => (
             <option key={v.id} value={v.id}>{v.name}</option>
           ))}

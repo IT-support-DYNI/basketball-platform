@@ -156,7 +156,7 @@ export default function RegisterPage() {
             ["Relationship", d.relationshipLabel],
             ["Child", d.childName],
             ["Child DOB", d.childDateOfBirth],
-            ["Child email", d.childEmail || "— (no login)"],
+            ["Child email", d.childEmail || "(no login)"],
             ["Team", teams.find((t) => String(t.id) === d.teamId)?.name],
             ["Position", d.position],
             ["Previous club", clubHistoryLabel],
@@ -168,7 +168,7 @@ export default function RegisterPage() {
     <AuthShell
       width="lg"
       title="Register to join"
-      subtitle="Your progress is saved as you go — you can leave and come back to finish."
+      subtitle="Your progress is saved as you go, so you can leave and come back to finish."
       footer={
         <>
           Already have an account?{" "}
@@ -255,7 +255,7 @@ export default function RegisterPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <TextField label="Child's full name" value={d.childName ?? ""} onChange={set("childName")} required />
                 <TextField label="Child's date of birth" type="date" value={d.childDateOfBirth ?? ""} onChange={set("childDateOfBirth")} required />
-                <TextField label="Child's email" hint="Optional — leave blank if they won't have a login" type="email" value={d.childEmail ?? ""} onChange={set("childEmail")} autoComplete="off" />
+                <TextField label="Child's email" hint="Optional. Leave blank if they won't have a login" type="email" value={d.childEmail ?? ""} onChange={set("childEmail")} autoComplete="off" />
               </div>
             )}
 
@@ -280,7 +280,7 @@ export default function RegisterPage() {
                 {d.hasPreviousClub === "yes" && (
                   <TextField
                     label="Which club, and when?"
-                    hint="e.g. Belfast Star U14, 2023–2025. List every club if more than one."
+                    hint="e.g. Belfast Star U14, 2023 to 2025. List every club if more than one."
                     value={d.previousClubs ?? ""}
                     onChange={set("previousClubs")}
                     required

@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     template: "%s · DYNI Blazers",
   },
   description:
-    "DYNI Blazers club platform — registration, schedule, attendance, communication and player development for members and staff.",
+    "DYNI Blazers club platform: registration, schedule, attendance, communication and player development for members and staff.",
   manifest: "/manifest.webmanifest",
   applicationName: "DYNI Blazers",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "DYNI Blazers" },
