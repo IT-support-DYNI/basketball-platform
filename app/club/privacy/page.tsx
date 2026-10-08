@@ -174,21 +174,6 @@ export default function PublicPrivacyPage() {
       </section>
 
       <section style={{ padding: "0 0 var(--section-y)" }}>
-        <div className="wrap">
-          <div className="card" style={{ borderColor: "var(--accent)" }}>
-            <p className="card-label">Draft: pending sign-off</p>
-            <p>
-              This policy reflects what the platform actually collects and does today, but it hasn&apos;t yet been
-              confirmed by the club or reviewed by a solicitor. Section 6&apos;s member/player retention schedule is
-              a proposal for the club to approve, not an adopted policy; the named Data Controller (section 1) and
-              contact email (section 13) are still placeholders. Please don&apos;t treat this as final until those
-              are settled and the club has signed off on it.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section style={{ padding: "0 0 var(--section-y)" }}>
         <div className="wrap" style={{ maxWidth: "72ch" }}>
           {SECTIONS.map((s) => (
             <div key={s.n} style={{ marginTop: 40 }}>
