@@ -107,21 +107,26 @@ html[data-theme=dark] .toggle .sun{display:none}
 .hero-watermark{position:absolute;right:-9%;top:50%;width:min(60vw,720px);aspect-ratio:1;transform:translateY(-50%);opacity:.07;z-index:2;pointer-events:none;animation:dyni-spin 120s linear infinite;color:var(--text-3)}
 @keyframes dyni-spin{to{transform:translateY(-50%) rotate(360deg)}}
 .slides{position:relative;flex:1;display:grid;min-height:min(78vh,680px)}
-.slide{grid-area:1/1;opacity:0;visibility:hidden;transition:opacity var(--dur-slow) var(--ease-inout);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:center}
+.slide{position:relative;grid-area:1/1;opacity:0;visibility:hidden;transition:opacity var(--dur-slow) var(--ease-inout);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:center}
 .slide.on{opacity:1;visibility:visible;z-index:1}
 .slide-copy{position:relative;z-index:4;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:clamp(32px,5vw,72px) clamp(24px,4.5vw,64px)}
 .slide-photo{position:relative;align-self:stretch;margin:clamp(24px,4vw,56px) clamp(24px,4.5vw,64px) clamp(24px,4vw,56px) 0;border-radius:var(--radius-lg);overflow:hidden}
 .slide-photo .photo{position:absolute;inset:0;background:var(--surface-alt);background-image:repeating-linear-gradient(135deg,var(--surface) 0 1px,transparent 1px 11px);border:1px dashed var(--border)}
 .slide-photo .photo::after{color:var(--text-3)}
-/* A real photo bleeds to the right edge and fades into the page on its left,
-   top and bottom edges, so it reads as part of the hero rather than a card.
-   A mask (not a dark overlay) so it blends into either theme's background. */
-.slide-photo.has-photo{margin:0;border-radius:0;z-index:3;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 42%),linear-gradient(180deg,transparent 0,#000 16%,#000 84%,transparent 100%);
-  -webkit-mask-composite:source-in;
-  mask-image:linear-gradient(90deg,transparent 0,#000 42%),linear-gradient(180deg,transparent 0,#000 16%,#000 84%,transparent 100%);
-  mask-composite:intersect}
+/* A real photo fills the whole hero behind the copy. A scrim in the page's own
+   background colour (so it works in light and dark themes) keeps the headline
+   readable on the left and fades the photo into the tab strip below. */
+.slide-photo.has-photo{position:absolute;inset:0;margin:0;border-radius:0;z-index:0;display:block}
 .slide-photo.has-photo .photo{border:none;background:none}
+.slide-photo.has-photo::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--bg) 94%,transparent) 0%,color-mix(in srgb,var(--bg) 78%,transparent) 36%,color-mix(in srgb,var(--bg) 22%,transparent) 68%,color-mix(in srgb,var(--bg) 6%,transparent) 100%),
+    linear-gradient(0deg,color-mix(in srgb,var(--bg) 88%,transparent) 0%,transparent 32%)}
+.slide:has(.has-photo) .hero-stat{background:color-mix(in srgb,var(--surface) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.hero:has(.has-photo) .hero-watermark{display:none}
+@media (max-width:860px){
+  .slide-photo.has-photo{display:block}
+  .slide-photo.has-photo::after{background:linear-gradient(0deg,color-mix(in srgb,var(--bg) 96%,transparent) 0%,color-mix(in srgb,var(--bg) 80%,transparent) 55%,color-mix(in srgb,var(--bg) 45%,transparent) 100%)}
+}
 .hero h1{font-size:clamp(2.75rem,5.4vw,4.75rem);color:var(--text-1);max-width:15ch}
 .hero h1 .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 .1em .05em;margin:0 -.1em}
 .hero h1 .w>span{display:inline-block;transform:translateY(105%);transition:transform var(--dur-slow) var(--ease-out)}
