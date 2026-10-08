@@ -174,7 +174,7 @@ export default function HeroCarousel({
                 </div>
               )}
             </div>
-            <div className="slide-photo">
+            <div className={`slide-photo${slide.photo ? " has-photo" : ""}`}>
               {slide.photo ? (
                 <div className="photo has-img">
                   <ClubImg slug={slide.photo} sizes="(max-width: 860px) 0px, 45vw" priority={i === 0} position={slide.photoPosition} />
