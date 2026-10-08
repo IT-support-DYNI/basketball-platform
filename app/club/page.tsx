@@ -9,6 +9,8 @@ import Ticker from "@/app/club/_components/Ticker";
 import RegisterInterestForm from "@/app/club/_components/RegisterInterestForm";
 import RevealBlock from "@/app/club/_components/RevealBlock";
 import StoryTabs from "@/app/club/_components/StoryTabs";
+import ClubImg from "@/app/club/_components/ClubImg";
+import { clubPhoto, type ClubPhotoSlug } from "@/lib/club-photos";
 
 // Bypasses the root layout's "%s · DYNI Blazers" template for a one-off
 // exact title, rather than doubling up ("… · DYNI Blazers · DYNI Blazers").
@@ -28,6 +30,8 @@ const HERO_SLIDES: HeroSlide[] = [
       { label: "Start registration", href: "/register", primary: true },
       { label: "What we're about", href: "#about" },
     ],
+    photo: "smiling-on-the-ball",
+    photoPosition: "50% 30%",
   },
   {
     label: "Hero 02 — Teams",
@@ -39,6 +43,7 @@ const HERO_SLIDES: HeroSlide[] = [
       { label: "All teams", href: "/club/teams" },
       { label: "Full roster", href: "/club/roster" },
     ],
+    photo: "squad-with-balls",
   },
   {
     label: "Hero 03 — Trials",
@@ -47,6 +52,7 @@ const HERO_SLIDES: HeroSlide[] = [
     lead: "Bring trainers and a water bottle — we'll sort the rest. Come down and see if you like us.",
     tabTitle: "Open trials",
     ctas: [{ label: "Register for trials", href: "/register", primary: true }],
+    photo: "one-on-one",
   },
   {
     label: "Hero 04 — Coaches",
@@ -58,6 +64,8 @@ const HERO_SLIDES: HeroSlide[] = [
       { label: "Meet the coaches", href: "/club/coaches" },
       { label: "Safeguarding", href: "/club/safeguarding" },
     ],
+    photo: "coach-instructions",
+    photoPosition: "45% 40%",
   },
 ];
 
@@ -110,14 +118,15 @@ const AUDIENCE_CARDS = [
   },
 ];
 
-const MOMENTS = [
-  { caption: "Match day", big: true },
-  { caption: "Training session" },
-  { caption: "Juniors on the floor" },
-  { caption: "Free-throw drill" },
-  { caption: "Open trials" },
-  { caption: "Senior squad" },
-  { caption: "Club moment", wide: true },
+/** The landing's gallery preview — the full set lives on /club/moments. */
+const MOMENTS: { slug: ClubPhotoSlug; big?: boolean; wide?: boolean }[] = [
+  { slug: "drive-to-the-rim", big: true },
+  { slug: "contested-shot" },
+  { slug: "dribble-past-defender" },
+  { slug: "shot-from-range" },
+  { slug: "attacking-the-gap" },
+  { slug: "scrimmage-under-basket" },
+  { slug: "nothing-but-net", wide: true },
 ];
 
 const SAFE_CARDS = [
@@ -152,7 +161,9 @@ export default async function ClubLandingPage() {
 
       <section className="culture culture-dark" id="about">
         <div className="wrap culture-in">
-          <RevealBlock className="photo"></RevealBlock>
+          <RevealBlock className="photo has-img">
+            <ClubImg slug="warm-up-line" sizes="(max-width: 900px) 100vw, 50vw" />
+          </RevealBlock>
           <RevealBlock delayMs={80}>
             <p className="eyebrow">Our culture</p>
             <h2>A club, not an academy</h2>
@@ -272,13 +283,15 @@ export default async function ClubLandingPage() {
           <div className="gal-grid">
             {MOMENTS.map((m, i) => (
               <RevealBlock
-                key={m.caption}
+                key={m.slug}
                 as="figure"
                 delayMs={i * 60}
                 className={`tile${m.big ? " big" : ""}${m.wide ? " wide" : ""}`}
               >
-                <div className="photo"></div>
-                <figcaption>{m.caption}</figcaption>
+                <div className="photo has-img">
+                  <ClubImg slug={m.slug} sizes={m.big || m.wide ? "(max-width: 760px) 100vw, 50vw" : "(max-width: 760px) 50vw, 25vw"} />
+                </div>
+                <figcaption>{clubPhoto(m.slug).caption}</figcaption>
               </RevealBlock>
             ))}
           </div>
@@ -310,7 +323,9 @@ export default async function ClubLandingPage() {
       <section className="safe" id="safeguarding">
         <div className="wrap">
           <RevealBlock as="div" className="safe-top">
-            <div className="photo"></div>
+            <div className="photo has-img">
+              <ClubImg slug="players-and-staff" sizes="(max-width: 820px) 100vw, 50vw" />
+            </div>
             <div className="safe-top-copy">
               <p className="eyebrow">Safeguarding</p>
               <h3>Every coach vetted. Every session planned.</h3>
