@@ -32,7 +32,7 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
       <div className="profile-banner">
         {player.jerseyNumber != null && <span className="profile-banner-jersey">{player.jerseyNumber}</span>}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="profile-banner-crest" src="/brand/dyni-blazers-crest.png" alt="" />
+        <img className="profile-banner-crest" src="/brand/dyni-crest-256.png" alt="" width={256} height={256} />
         <div className="profile-banner-body">
           <div className="profile-banner-photo">
             {player.photoUrl ? (
