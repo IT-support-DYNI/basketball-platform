@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { planForCaller } from "@/lib/training-plans";
 import { ApiError } from "@/lib/api/errors";
-import type { CourtDiagram } from "@/lib/training";
+import { toPlanReadBlock } from "@/lib/training";
 import PageHeader from "@/components/ui/PageHeader";
 import PlanReadView from "@/components/shared/calendar/PlanReadView";
 
@@ -39,14 +39,7 @@ export default async function PlayerPlanPage({ params }: { params: { id: string 
           plan={{
             title: plan.title,
             objectives: plan.objectives,
-            blocks: plan.blocks.map((b) => ({
-              category: b.category,
-              title: b.title,
-              durationMinutes: b.durationMinutes,
-              notes: b.notes,
-              drillName: b.drill?.name ?? null,
-              courtDiagram: b.courtDiagram as CourtDiagram | null,
-            })),
+            blocks: plan.blocks.map((b) => toPlanReadBlock(b, { playbookBase: "/player/playbook" })),
           }}
         />
       </div>

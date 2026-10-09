@@ -1,25 +1,21 @@
+import Link from "next/link";
+
 import {
   TRAINING_BLOCK_CATEGORY_LABEL,
   planDurationMinutes,
-  type CourtDiagram as CourtDiagramValue,
+  type PlanReadBlock,
 } from "@/lib/training";
 import CourtDiagram from "@/app/coach/drills/_components/CourtDiagram";
 
 export type PlanReadData = {
   title: string;
   objectives: string | null;
-  blocks: {
-    category: string;
-    title: string | null;
-    durationMinutes: number | null;
-    notes: string | null;
-    drillName: string | null;
-    courtDiagram: CourtDiagramValue | null;
-  }[];
+  blocks: PlanReadBlock[];
 };
 
-/** Read-only rendering of a session plan — shown to players in the calendar
- *  dialog, and reused anywhere a plan needs to be displayed without editing. */
+/** Read-only rendering of a session plan: shown to players in the calendar
+ *  dialog and on their plan page. Each block shows its own diagram, or the
+ *  linked play's or drill's when it has none (lib/training.ts#effectiveDiagram). */
 export default function PlanReadView({ plan }: { plan: PlanReadData }) {
   const total = planDurationMinutes(plan.blocks);
   return (
@@ -43,6 +39,18 @@ export default function PlanReadView({ plan }: { plan: PlanReadData }) {
               </span>
             )}
             {b.drillName && <p className="mt-0.5 text-xs text-ink-dim">Drill: {b.drillName}</p>}
+            {b.playName && (
+              <p className="mt-0.5 text-xs text-ink-dim">
+                Play:{" "}
+                {b.playHref ? (
+                  <Link href={b.playHref} className="font-semibold text-flame-on-bg hover:underline">
+                    {b.playName}
+                  </Link>
+                ) : (
+                  b.playName
+                )}
+              </p>
+            )}
             {b.notes && <p className="mt-1 whitespace-pre-wrap text-xs text-ink-dim">{b.notes}</p>}
             {b.courtDiagram && <CourtDiagram value={b.courtDiagram} className="mt-2 max-w-xs" />}
           </li>

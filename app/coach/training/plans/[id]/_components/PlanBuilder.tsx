@@ -16,8 +16,10 @@ import {
   DRILL_CATEGORY_LABEL,
   planDurationMinutes,
   EMPTY_DIAGRAM,
+  diagramHasContent,
   type CourtDiagram as CourtDiagramValue,
 } from "@/lib/training";
+import { PLAY_TYPE_LABEL, groupByType } from "@/lib/playbook";
 import CourtDiagram from "@/app/coach/drills/_components/CourtDiagram";
 
 type Block = {
@@ -26,6 +28,7 @@ type Block = {
   durationMinutes: string;
   notes: string;
   drillId: number | null;
+  playId: number | null;
   courtDiagram: CourtDiagramValue | null;
 };
 
@@ -49,11 +52,20 @@ export type PlanView = {
     notes: string | null;
     drillId: number | null;
     drillName: string | null;
+    playId: number | null;
     courtDiagram: CourtDiagramValue | null;
   }[];
 };
 
-type DrillOption = { id: number; name: string; category: string; durationMinutes: number | null };
+type DrillOption = {
+  id: number;
+  name: string;
+  category: string;
+  durationMinutes: number | null;
+  courtDiagram: CourtDiagramValue | null;
+  archived?: boolean;
+};
+type PlayOption = { id: number; name: string; type: string; courtDiagram: CourtDiagramValue | null; archived?: boolean };
 type SessionOption = { id: number; title: string; startAt: string };
 
 const field =
@@ -62,10 +74,12 @@ const field =
 export default function PlanBuilder({
   plan,
   drills,
+  plays,
   sessions,
 }: {
   plan: PlanView;
   drills: DrillOption[];
+  plays: PlayOption[];
   sessions: SessionOption[];
 }) {
   const router = useRouter();
@@ -82,7 +96,10 @@ export default function PlanBuilder({
       durationMinutes: b.durationMinutes?.toString() ?? "",
       notes: b.notes ?? "",
       drillId: b.drillId,
-      courtDiagram: b.courtDiagram,
+      playId: b.playId,
+      // Older saves could store an empty diagram; treat it as "none" so the
+      // builder shows the linked one, exactly as players see it.
+      courtDiagram: diagramHasContent(b.courtDiagram) ? b.courtDiagram : null,
     })),
   );
   const [busy, setBusy] = useState(false);
@@ -93,13 +110,16 @@ export default function PlanBuilder({
     for (const d of drills) (m.get(d.category) ?? m.set(d.category, []).get(d.category)!).push(d);
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [drills]);
+  const playsByType = useMemo(() => groupByType(plays), [plays]);
+  const drillById = useMemo(() => new Map(drills.map((d) => [d.id, d])), [drills]);
+  const playById = useMemo(() => new Map(plays.map((p) => [p.id, p])), [plays]);
 
   const totalMin = planDurationMinutes(blocks.map((b) => ({ durationMinutes: Number(b.durationMinutes) || 0 })));
 
   const setBlock = (i: number, patch: Partial<Block>) =>
     setBlocks((bs) => bs.map((b, idx) => (idx === i ? { ...b, ...patch } : b)));
   const addBlock = () =>
-    setBlocks((bs) => [...bs, { category: "SKILL", title: "", durationMinutes: "", notes: "", drillId: null, courtDiagram: null }]);
+    setBlocks((bs) => [...bs, { category: "SKILL", title: "", durationMinutes: "", notes: "", drillId: null, playId: null, courtDiagram: null }]);
   const removeBlock = (i: number) => setBlocks((bs) => bs.filter((_, idx) => idx !== i));
   const move = (i: number, dir: -1 | 1) =>
     setBlocks((bs) => {
@@ -145,7 +165,9 @@ export default function PlanBuilder({
           durationMinutes: b.durationMinutes ? Number(b.durationMinutes) : undefined,
           notes: b.notes.trim() || undefined,
           drillId: b.drillId ?? null,
-          courtDiagram: b.courtDiagram,
+          playId: b.playId ?? null,
+          // An untouched empty diagram isn't worth storing: the linked one shows instead.
+          courtDiagram: diagramHasContent(b.courtDiagram) ? b.courtDiagram : null,
         })),
       },
       "Plan saved",
@@ -254,18 +276,36 @@ export default function PlanBuilder({
                 className={field}
               />
               <label className="flex flex-col gap-1">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">Drill from library</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">From the library</span>
                 <select
-                  value={b.drillId ?? ""}
-                  onChange={(e) => setBlock(i, { drillId: e.target.value ? Number(e.target.value) : null })}
+                  value={b.playId ? `play:${b.playId}` : b.drillId ? `drill:${b.drillId}` : ""}
+                  onChange={(e) => {
+                    const [kind, id] = e.target.value.split(":");
+                    setBlock(i, {
+                      drillId: kind === "drill" ? Number(id) : null,
+                      playId: kind === "play" ? Number(id) : null,
+                    });
+                  }}
                   className={field}
                 >
-                  <option value="">None</option>
+                  <option value="">Nothing linked</option>
+                  {playsByType.map(([type, list]) => (
+                    <optgroup key={`play-${type}`} label={`Plays: ${PLAY_TYPE_LABEL[type]}`}>
+                      {list.map((p) => (
+                        <option key={p.id} value={`play:${p.id}`}>
+                          {p.name}
+                          {p.archived ? " (archived)" : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
                   {drillsByCategory.map(([cat, list]) => (
-                    <optgroup key={cat} label={DRILL_CATEGORY_LABEL[cat as keyof typeof DRILL_CATEGORY_LABEL]}>
+                    <optgroup key={cat} label={`Drills: ${DRILL_CATEGORY_LABEL[cat as keyof typeof DRILL_CATEGORY_LABEL]}`}>
                       {list.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name}{d.durationMinutes ? ` (${d.durationMinutes}m)` : ""}
+                        <option key={d.id} value={`drill:${d.id}`}>
+                          {d.name}
+                          {d.durationMinutes ? ` (${d.durationMinutes}m)` : ""}
+                          {d.archived ? " (archived)" : ""}
                         </option>
                       ))}
                     </optgroup>
@@ -276,36 +316,20 @@ export default function PlanBuilder({
                     Open drill →
                   </Link>
                 )}
+                {b.playId && (
+                  <Link href={`/coach/plays/${b.playId}`} className="text-[11px] font-semibold text-flame-on-bg hover:underline">
+                    Open play →
+                  </Link>
+                )}
               </label>
             </div>
 
-            {b.courtDiagram ? (
-              <div className="mt-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">Court diagram</span>
-                  <button
-                    type="button"
-                    onClick={() => setBlock(i, { courtDiagram: null })}
-                    className="text-[11px] font-semibold text-ink-dim hover:text-danger"
-                  >
-                    Remove diagram
-                  </button>
-                </div>
-                <CourtDiagram
-                  value={b.courtDiagram}
-                  onChange={(d) => setBlock(i, { courtDiagram: d })}
-                  className="mt-1"
-                />
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setBlock(i, { courtDiagram: EMPTY_DIAGRAM })}
-                className="mt-3 rounded-control border border-dashed border-line px-3 py-2 text-[11px] font-semibold text-ink-dim hover:border-line-strong hover:text-ink"
-              >
-                + Add court diagram
-              </button>
-            )}
+            <BlockDiagram
+              block={b}
+              linked={b.playId ? playById.get(b.playId) ?? null : b.drillId ? drillById.get(b.drillId) ?? null : null}
+              linkedKind={b.playId ? "play" : b.drillId ? "drill" : null}
+              onChange={(courtDiagram) => setBlock(i, { courtDiagram })}
+            />
           </div>
         ))}
 
@@ -380,5 +404,69 @@ export default function PlanBuilder({
         </Link>
       </div>
     </div>
+  );
+}
+
+/**
+ * The diagram part of a block. A block with nothing drawn of its own shows the
+ * linked play's or drill's diagram (what players see too); "Customise for this
+ * session" copies it onto the block to edit, and "Use the play's diagram"
+ * drops the block's own copy again.
+ */
+function BlockDiagram({
+  block,
+  linked,
+  linkedKind,
+  onChange,
+}: {
+  block: Block;
+  linked: { name: string; courtDiagram: CourtDiagramValue | null } | null;
+  linkedKind: "play" | "drill" | null;
+  onChange: (d: CourtDiagramValue | null) => void;
+}) {
+  const own = block.courtDiagram;
+  const linkedDiagram = linked && diagramHasContent(linked.courtDiagram) ? linked.courtDiagram : null;
+  const action = "text-[11px] font-semibold text-ink-dim hover:text-ink";
+
+  if (own) {
+    return (
+      <div className="mt-3">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
+            {linkedDiagram ? "Court diagram, customised for this session" : "Court diagram"}
+          </span>
+          <button type="button" onClick={() => onChange(null)} className={cn(action, !linkedDiagram && "hover:text-danger")}>
+            {linkedDiagram ? `Use the ${linkedKind} diagram instead` : "Remove diagram"}
+          </button>
+        </div>
+        <CourtDiagram value={own} onChange={(d) => onChange(d)} className="mt-1" />
+      </div>
+    );
+  }
+
+  if (linked && linkedDiagram) {
+    return (
+      <div className="mt-3">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
+            Court diagram from the {linkedKind} &ldquo;{linked.name}&rdquo;
+          </span>
+          <button type="button" onClick={() => onChange(structuredClone(linkedDiagram))} className={action}>
+            Customise for this session
+          </button>
+        </div>
+        <CourtDiagram value={linkedDiagram} className="mt-1 max-w-md" />
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(EMPTY_DIAGRAM)}
+      className="mt-3 rounded-control border border-dashed border-line px-3 py-2 text-[11px] font-semibold text-ink-dim hover:border-line-strong hover:text-ink"
+    >
+      + Add court diagram
+    </button>
   );
 }
