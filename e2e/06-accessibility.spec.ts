@@ -26,6 +26,7 @@ test.describe("accessibility — no WCAG 2.1 A/AA violations", () => {
     await login(page, "player1@example.com");
     await scan(page, "/player/dashboard");
     await scan(page, "/player/training");
+    await scan(page, "/player/playbook");
     await scan(page, "/announcements");
     await scan(page, "/messages");
     await scan(page, "/settings/account");
@@ -38,8 +39,16 @@ test.describe("accessibility — no WCAG 2.1 A/AA violations", () => {
     await scan(page, "/coach/dashboard");
     await scan(page, "/coach/drills");
     await scan(page, "/coach/drills/new");
+    await scan(page, "/coach/plays");
+    await scan(page, "/coach/plays/new");
     await scan(page, "/coach/training/plans");
     await scan(page, "/coach/training/plans/new");
+  });
+
+  test("guardian surfaces", async ({ page }) => {
+    await login(page, "guardian@example.com");
+    await scan(page, "/guardian");
+    await scan(page, "/guardian/playbook");
   });
 
   test("admin surfaces", async ({ page }) => {

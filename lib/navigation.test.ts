@@ -36,6 +36,15 @@ describe("navigation", () => {
     }
   });
 
+  it("coaches get Plays; players and guardians get their own Playbook", () => {
+    expect(navFor("COACH").map((i) => i.href)).toContain("/coach/plays");
+    expect(navFor("PLAYER").map((i) => i.href)).toContain("/player/playbook");
+    expect(navFor("GUARDIAN").map((i) => i.href)).toContain("/guardian/playbook");
+    for (const role of ["PLAYER", "GUARDIAN"]) {
+      expect(navFor(role).map((i) => i.href)).not.toContain("/coach/plays");
+    }
+  });
+
   it("merges and de-duplicates for a user holding two roles", () => {
     const items = navFor(["COACH", "ADMIN"]);
     const hrefs = items.map((i) => i.href);
