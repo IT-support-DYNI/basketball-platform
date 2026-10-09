@@ -130,4 +130,22 @@ diagram drawn with the same editor as drills.
   404. Archiving a play hides it from every playbook; restoring brings it back.
 - **Data:** `Play` and `PlayAssignment` (migration `20261009120000_playbook`).
 
-Not yet: linking plays into session plan blocks, multi-step animation, full court.
+### Plays and drills inside session plans
+
+A plan block can link **a drill or a play** from the library (one picker,
+"From the library"; not both). The diagram a block shows is, in order:
+
+1. the block's own diagram, if something is drawn on it;
+2. otherwise the linked play's diagram;
+3. otherwise the linked drill's diagram (`lib/training.ts#effectiveDiagram`).
+
+So picking a drill or play brings its diagram with it; "Customise for this
+session" copies it onto the block to change, and "Use the drill/play diagram
+instead" drops the copy. Players see the same diagram in the calendar dialog and
+on the plan page, plus the drill's or play's name; a play name links to their
+playbook when the play is assigned to their team (`inTeamPlaybook`, computed per
+plan so players never see which other teams have it). Block links are checked
+against the club on save (`assertBlockLinks`). Creating a plan from a template
+keeps each block's own diagram and its linked drill or play.
+
+Not yet: multi-step animation, full court.

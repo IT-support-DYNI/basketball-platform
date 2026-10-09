@@ -88,6 +88,70 @@ export function describeDiagram(d: CourtDiagram | null | undefined): string {
   return `Court diagram: ${parts.join(", ")}.`;
 }
 
+/* ── Session plan blocks: which diagram to show ───────────────────────── */
+
+export type DiagramSource = "block" | "play" | "drill";
+
+/**
+ * A block shows its own diagram when it has one; otherwise the linked play's,
+ * otherwise the linked drill's. So a coach who picks a drill or play from the
+ * library gets its diagram for free, and only draws on the block to change it
+ * for that session.
+ */
+export function effectiveDiagram(b: {
+  courtDiagram: unknown;
+  play?: { courtDiagram?: unknown } | null;
+  drill?: { courtDiagram?: unknown } | null;
+}): { diagram: CourtDiagram | null; source: DiagramSource | null } {
+  const own = b.courtDiagram as CourtDiagram | null;
+  if (diagramHasContent(own)) return { diagram: own, source: "block" };
+  const play = (b.play?.courtDiagram ?? null) as CourtDiagram | null;
+  if (diagramHasContent(play)) return { diagram: play, source: "play" };
+  const drill = (b.drill?.courtDiagram ?? null) as CourtDiagram | null;
+  if (diagramHasContent(drill)) return { diagram: drill, source: "drill" };
+  return { diagram: null, source: null };
+}
+
+export type PlanReadBlock = {
+  category: string;
+  title: string | null;
+  durationMinutes: number | null;
+  notes: string | null;
+  drillName: string | null;
+  playName: string | null;
+  /** Where a player can open the play in their playbook, when it's on their team. */
+  playHref: string | null;
+  courtDiagram: CourtDiagram | null;
+  diagramSource: DiagramSource | null;
+};
+
+/** The read-only shape of one block, from a block as `planForCaller` returns it. */
+export function toPlanReadBlock(
+  b: {
+    category: string;
+    title: string | null;
+    durationMinutes: number | null;
+    notes: string | null;
+    courtDiagram: unknown;
+    drill?: { name: string; courtDiagram?: unknown } | null;
+    play?: { id: number; name: string; courtDiagram?: unknown; inTeamPlaybook?: boolean } | null;
+  },
+  opts: { playbookBase?: string } = {},
+): PlanReadBlock {
+  const { diagram, source } = effectiveDiagram(b);
+  return {
+    category: b.category,
+    title: b.title,
+    durationMinutes: b.durationMinutes,
+    notes: b.notes,
+    drillName: b.drill?.name ?? null,
+    playName: b.play?.name ?? null,
+    playHref: b.play && b.play.inTeamPlaybook && opts.playbookBase ? `${opts.playbookBase}/${b.play.id}` : null,
+    courtDiagram: diagram,
+    diagramSource: source,
+  };
+}
+
 export {
   DRILL_CATEGORIES,
   DRILL_DIFFICULTIES,

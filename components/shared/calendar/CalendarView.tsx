@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { cn } from "@/lib/cn";
 import { EVENT_TYPE_LABEL } from "@/lib/events";
-import type { CourtDiagram as CourtDiagramValue } from "@/lib/training";
+import { toPlanReadBlock, type PlanReadBlock } from "@/lib/training";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { useToast } from "@/components/ui/toast";
 import RsvpControl from "./RsvpControl";
@@ -33,7 +33,7 @@ const PLANNABLE = new Set(["TRAINING", "MATCH", "FITNESS_TEST", "TEAM_MEETING"])
 type PlanReadDetail = {
   title: string;
   objectives: string | null;
-  blocks: { category: string; title: string | null; durationMinutes: number | null; notes: string | null; drillName: string | null; courtDiagram: CourtDiagramValue | null }[];
+  blocks: PlanReadBlock[];
 };
 
 const ACCENT: Record<string, string> = {
@@ -389,14 +389,9 @@ function EventDialog({
         setPlanDetail({
           title: d.title,
           objectives: d.objectives ?? null,
-          blocks: (d.blocks ?? []).map((b: { category: string; title: string | null; durationMinutes: number | null; notes: string | null; drill: { name: string } | null; courtDiagram: CourtDiagramValue | null }) => ({
-            category: b.category,
-            title: b.title,
-            durationMinutes: b.durationMinutes,
-            notes: b.notes,
-            drillName: b.drill?.name ?? null,
-            courtDiagram: b.courtDiagram ?? null,
-          })),
+          blocks: (d.blocks ?? []).map((b: Parameters<typeof toPlanReadBlock>[0]) =>
+            toPlanReadBlock(b, { playbookBase: "/player/playbook" }),
+          ),
         });
       })
       .catch(() => {});

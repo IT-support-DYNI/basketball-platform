@@ -96,7 +96,12 @@ export const trainingBlockSchema = z.object({
   durationMinutes: z.number().int().min(1).max(180).optional(),
   notes: z.string().trim().max(2000).optional(),
   drillId: z.number().int().positive().nullable().optional(),
+  /** A play from the library this block practises. A block links a drill or a play, not both. */
+  playId: z.number().int().positive().nullable().optional(),
   courtDiagram: courtDiagramSchema.nullable().optional(),
+}).refine((b) => !(b.drillId && b.playId), {
+  message: "A block can link a drill or a play, not both.",
+  path: ["playId"],
 });
 
 export const createTrainingPlanSchema = z.object({

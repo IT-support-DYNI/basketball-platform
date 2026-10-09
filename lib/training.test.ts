@@ -13,8 +13,10 @@ import {
   diagramHasContent,
   describeDiagram,
   EMPTY_DIAGRAM,
+  effectiveDiagram,
+  toPlanReadBlock,
 } from "./training";
-import { courtDiagramSchema } from "./contracts/training";
+import { courtDiagramSchema, trainingBlockSchema } from "./contracts/training";
 
 describe("training labels", () => {
   it("labels every drill category and difficulty", () => {
@@ -63,5 +65,45 @@ describe("court diagram", () => {
     expect(describeDiagram(null)).toBe("No court diagram.");
     expect(describeDiagram(sample)).toContain("1 player");
     expect(describeDiagram(sample)).toContain("1 movement arrow");
+  });
+});
+
+describe("linked diagrams on plan blocks", () => {
+  const drawn = { markers: [{ id: "p", kind: "player" as const, x: 0.5, y: 0.5 }], arrows: [] };
+  const empty = { markers: [], arrows: [] };
+  const block = {
+    category: "TACTICAL",
+    title: null,
+    durationMinutes: 10,
+    notes: null,
+  };
+
+  it("prefers the block's own diagram, then the play's, then the drill's", () => {
+    expect(effectiveDiagram({ courtDiagram: drawn, play: { courtDiagram: drawn }, drill: { courtDiagram: drawn } }).source).toBe("block");
+    expect(effectiveDiagram({ courtDiagram: empty, play: { courtDiagram: drawn }, drill: { courtDiagram: drawn } }).source).toBe("play");
+    expect(effectiveDiagram({ courtDiagram: null, play: null, drill: { courtDiagram: drawn } }).source).toBe("drill");
+    expect(effectiveDiagram({ courtDiagram: null, drill: { courtDiagram: null } })).toEqual({ diagram: null, source: null });
+  });
+
+  it("shows the linked drill's diagram to players and names the drill", () => {
+    const r = toPlanReadBlock({ ...block, courtDiagram: null, drill: { name: "Closeout & mirror", courtDiagram: drawn } });
+    expect(r.drillName).toBe("Closeout & mirror");
+    expect(r.courtDiagram).toEqual(drawn);
+    expect(r.diagramSource).toBe("drill");
+  });
+
+  it("links a play only when it's in the team's playbook", () => {
+    const play = { id: 7, name: "Horns", courtDiagram: drawn };
+    expect(toPlanReadBlock({ ...block, courtDiagram: null, play: { ...play, inTeamPlaybook: true } }, { playbookBase: "/player/playbook" }).playHref).toBe(
+      "/player/playbook/7",
+    );
+    expect(toPlanReadBlock({ ...block, courtDiagram: null, play: { ...play, inTeamPlaybook: false } }, { playbookBase: "/player/playbook" }).playHref).toBeNull();
+  });
+
+  it("a block can link a drill or a play, not both", () => {
+    const base = { category: "TACTICAL" as const };
+    expect(trainingBlockSchema.safeParse({ ...base, drillId: 1 }).success).toBe(true);
+    expect(trainingBlockSchema.safeParse({ ...base, playId: 1 }).success).toBe(true);
+    expect(trainingBlockSchema.safeParse({ ...base, drillId: 1, playId: 2 }).success).toBe(false);
   });
 });

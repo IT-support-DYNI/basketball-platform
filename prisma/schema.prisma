@@ -1399,6 +1399,10 @@ model TrainingBlock {
   notes           String?
   drillId         Int?
   drill           Drill?                @relation(fields: [drillId], references: [id], onDelete: SetNull)
+  /// A play from the library this block practises (instead of a drill). When
+  /// the block has no diagram of its own, the play's (or drill's) is shown.
+  playId          Int?
+  play            Play?                 @relation(fields: [playId], references: [id], onDelete: SetNull)
   /// An ad-hoc court diagram for this block — same shape as Drill.courtDiagram
   /// (see CourtDiagram component), but drawn directly for this block rather
   /// than pulled from a saved library drill. Lets a coach sketch a match
@@ -1437,6 +1441,7 @@ model Play {
   updatedAt       DateTime  @updatedAt
 
   assignments PlayAssignment[]
+  blocks      TrainingBlock[]
 
   @@index([clubId, type])
 }
