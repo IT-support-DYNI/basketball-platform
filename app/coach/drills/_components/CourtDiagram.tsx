@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 import {
@@ -12,6 +12,17 @@ import {
   EMPTY_DIAGRAM,
   type CourtDiagram,
 } from "@/lib/training";
+import {
+  MAX_DIAGRAM_STEPS,
+  addStepAfter,
+  diagramFrames,
+  easeInOut,
+  fromFrames,
+  interpolateMarkers,
+  removeStep,
+  replaceStep,
+  type DiagramFrame,
+} from "@/lib/diagram-steps";
 
 /* viewBox + playable inset (6px margin round a 500×470 half-court, basket top) */
 const VB_W = 500;
@@ -24,12 +35,21 @@ const Y = (n: number) => M + n * IN_H;
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 const rid = () => Math.random().toString(36).slice(2, 9);
 
+/** How long the markers take to slide to the next step, and the pause on each step while playing. */
+const STEP_MS = 900;
+const HOLD_MS = 700;
+
 type Tool = "select" | (typeof MARKER_KINDS)[number] | (typeof ARROW_KINDS)[number];
 const isMarkerTool = (t: Tool): t is (typeof MARKER_KINDS)[number] =>
   (MARKER_KINDS as readonly string[]).includes(t);
 const isArrowTool = (t: Tool): t is (typeof ARROW_KINDS)[number] =>
   (ARROW_KINDS as readonly string[]).includes(t);
 
+/**
+ * The court diagram: an editor when given `onChange`, read-only otherwise.
+ * A diagram can have several steps (lib/diagram-steps.ts); the editor works on
+ * one step at a time, and both modes can play the steps as an animation.
+ */
 export default function CourtDiagram({
   value,
   onChange,
@@ -40,7 +60,12 @@ export default function CourtDiagram({
   className?: string;
 }) {
   const editable = !!onChange;
-  const d = value ?? EMPTY_DIAGRAM;
+  const frames = diagramFrames(value ?? EMPTY_DIAGRAM);
+  const [stepRaw, setStep] = useState(0);
+  const step = Math.min(stepRaw, frames.length - 1);
+  const d = frames[step];
+  const multi = frames.length > 1;
+
   const svgRef = useRef<SVGSVGElement | null>(null);
   const uid = useId().replace(/[:]/g, "");
 
@@ -49,24 +74,122 @@ export default function CourtDiagram({
   const [pending, setPending] = useState<{ x: number; y: number } | null>(null);
   const drag = useRef<string | null>(null);
 
+  /* ---- animation between steps ---- */
+  const [anim, setAnim] = useState<{ from: number; to: number; t: number } | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const raf = useRef<number | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const playingRef = useRef(false);
+
+  const stopAnimation = useCallback(() => {
+    if (raf.current != null) cancelAnimationFrame(raf.current);
+    if (timer.current != null) clearTimeout(timer.current);
+    raf.current = null;
+    timer.current = null;
+    playingRef.current = false;
+    setPlaying(false);
+    setAnim(null);
+  }, []);
+  useEffect(() => stopAnimation, [stopAnimation]);
+
+  const reducedMotion = () =>
+    typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  /** Slide the markers from step `from` to step `to`, then call `done`.
+   *  With reduced motion it jumps straight there. */
+  function animate(from: number, to: number, done?: () => void) {
+    if (reducedMotion()) {
+      setStep(to);
+      done?.();
+      return;
+    }
+    const start = performance.now();
+    const tick = () => {
+      const t = Math.min(1, (performance.now() - start) / STEP_MS);
+      setAnim({ from, to, t });
+      if (t < 1) {
+        nextFrame(tick);
+      } else {
+        raf.current = null;
+        setAnim(null);
+        setStep(to);
+        done?.();
+      }
+    };
+    nextFrame(tick);
+  }
+
+  /** The next animation frame, or a short timer if frames stall (a background
+   *  tab, some embedded web views), so Play can never hang on "Stop". */
+  function nextFrame(cb: () => void) {
+    let fired = false;
+    const run = () => {
+      if (fired) return;
+      fired = true;
+      if (timer.current != null) clearTimeout(timer.current);
+      cb();
+    };
+    raf.current = requestAnimationFrame(run);
+    timer.current = setTimeout(run, 50);
+  }
+
+  function next() {
+    if (anim || step >= frames.length - 1) return;
+    animate(step, step + 1);
+  }
+  function prev() {
+    if (anim) return;
+    setStep(Math.max(0, step - 1));
+  }
+  function play() {
+    if (playing) {
+      stopAnimation();
+      return;
+    }
+    setPending(null);
+    setSelected(null);
+    playingRef.current = true;
+    setPlaying(true);
+    const run = (from: number) => {
+      if (!playingRef.current) return;
+      if (from >= frames.length - 1) {
+        playingRef.current = false;
+        setPlaying(false);
+        return;
+      }
+      animate(from, from + 1, () => {
+        timer.current = setTimeout(() => run(from + 1), HOLD_MS);
+      });
+    };
+    setStep(0);
+    timer.current = setTimeout(() => run(0), HOLD_MS);
+  }
+
+  /* ---- editing the current step ---- */
+  const busy = anim != null || playing;
+
   function pointFromEvent(e: { clientX: number; clientY: number }) {
     const r = svgRef.current!.getBoundingClientRect();
     return { x: clamp01((e.clientX - r.left) / r.width), y: clamp01((e.clientY - r.top) / r.height) };
   }
 
-  function commit(next: CourtDiagram) {
-    onChange?.(next);
+  function commitFrames(nextFrames: DiagramFrame[]) {
+    onChange?.(fromFrames(nextFrames));
+  }
+  function commit(patch: Partial<DiagramFrame>) {
+    commitFrames(replaceStep(frames, step, { ...d, ...patch }));
   }
 
   function onSurfaceClick(e: React.MouseEvent) {
-    if (!editable) return;
+    if (!editable || busy) return;
     const p = pointFromEvent(e);
     if (isMarkerTool(tool)) {
-      commit({ ...d, markers: [...d.markers, { id: rid(), kind: tool, x: p.x, y: p.y, ...(tool === "player" ? { label: String(d.markers.filter((m) => m.kind === "player").length + 1) } : {}) }] });
+      const label = tool === "player" ? { label: String(d.markers.filter((m) => m.kind === "player").length + 1) } : {};
+      commit({ markers: [...d.markers, { id: rid(), kind: tool, x: p.x, y: p.y, ...label }] });
     } else if (isArrowTool(tool)) {
       if (!pending) setPending(p);
       else {
-        commit({ ...d, arrows: [...d.arrows, { id: rid(), kind: tool, from: pending, to: p }] });
+        commit({ arrows: [...d.arrows, { id: rid(), kind: tool, from: pending, to: p }] });
         setPending(null);
       }
     } else {
@@ -75,7 +198,7 @@ export default function CourtDiagram({
   }
 
   function onMarkerPointerDown(e: React.PointerEvent, id: string) {
-    if (!editable) return;
+    if (!editable || busy) return;
     e.stopPropagation();
     setSelected(id);
     if (tool === "select") {
@@ -86,7 +209,7 @@ export default function CourtDiagram({
   function onSurfacePointerMove(e: React.PointerEvent) {
     if (!editable || !drag.current) return;
     const p = pointFromEvent(e);
-    commit({ ...d, markers: d.markers.map((m) => (m.id === drag.current ? { ...m, x: p.x, y: p.y } : m)) });
+    commit({ markers: d.markers.map((m) => (m.id === drag.current ? { ...m, x: p.x, y: p.y } : m)) });
   }
   function onSurfacePointerUp() {
     drag.current = null;
@@ -102,10 +225,31 @@ export default function CourtDiagram({
   }
   function setLabel(label: string) {
     if (!selected) return;
-    commit({ ...d, markers: d.markers.map((m) => (m.id === selected ? { ...m, label: label.slice(0, 3) } : m)) });
+    commit({ markers: d.markers.map((m) => (m.id === selected ? { ...m, label: label.slice(0, 3) } : m)) });
+  }
+
+  function goToStep(i: number) {
+    stopAnimation();
+    setSelected(null);
+    setPending(null);
+    setStep(i);
+  }
+  function addStep() {
+    const nextFrames = addStepAfter(frames, step);
+    if (nextFrames === frames) return;
+    commitFrames(nextFrames);
+    goToStep(step + 1);
+  }
+  function deleteStep() {
+    if (!multi) return;
+    commitFrames(removeStep(frames, step));
+    goToStep(Math.max(0, step - 1));
   }
 
   const selectedMarker = d.markers.find((m) => m.id === selected) ?? null;
+  const shownMarkers = anim ? interpolateMarkers(frames[anim.from], frames[anim.to], easeInOut(anim.t)) : d.markers;
+  const shownArrows = anim ? [] : d.arrows;
+  const stepLabel = multi ? `Step ${step + 1} of ${frames.length}.` : "";
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
@@ -139,8 +283,11 @@ export default function CourtDiagram({
             />
           )}
           <ToolButton onClick={removeSelected} disabled={!selected}>Delete selected</ToolButton>
-          <ToolButton onClick={() => { commit({ markers: [], arrows: [] }); setSelected(null); setPending(null); }} disabled={d.markers.length === 0 && d.arrows.length === 0}>
-            Clear
+          <ToolButton
+            onClick={() => { commit({ markers: [], arrows: [] }); setSelected(null); setPending(null); }}
+            disabled={d.markers.length === 0 && d.arrows.length === 0}
+          >
+            {multi ? "Clear this step" : "Clear"}
           </ToolButton>
         </div>
       )}
@@ -150,10 +297,10 @@ export default function CourtDiagram({
         viewBox={`0 0 ${VB_W} ${VB_H}`}
         className={cn(
           "w-full max-w-md rounded-card border border-line bg-surface-2",
-          editable && tool !== "select" && "cursor-crosshair",
+          editable && tool !== "select" && !busy && "cursor-crosshair",
         )}
         role="img"
-        aria-label={editable ? `Court diagram editor. ${describeDiagram(d)}` : describeDiagram(d)}
+        aria-label={[editable ? "Court diagram editor." : "", stepLabel, describeDiagram(d)].filter(Boolean).join(" ")}
         onClick={onSurfaceClick}
         onPointerMove={onSurfacePointerMove}
         onPointerUp={onSurfacePointerUp}
@@ -166,11 +313,11 @@ export default function CourtDiagram({
 
         <CourtMarkings />
 
-        {/* arrows */}
-        {d.arrows.map((a) => {
+        {/* arrows: what happens next from this step (hidden while sliding) */}
+        {shownArrows.map((a) => {
           const dashed = a.kind === "pass" ? "6 5" : a.kind === "dribble" ? "2 4" : undefined;
           return (
-            <g key={a.id} className="text-ink-dim" onClick={(e) => { e.stopPropagation(); if (editable) setSelected(a.id); }}>
+            <g key={a.id} className="text-ink-dim" onClick={(e) => { e.stopPropagation(); if (editable && !busy) setSelected(a.id); }}>
               <line
                 x1={X(a.from.x)} y1={Y(a.from.y)} x2={X(a.to.x)} y2={Y(a.to.y)}
                 stroke="currentColor"
@@ -193,10 +340,34 @@ export default function CourtDiagram({
         {pending && <circle cx={X(pending.x)} cy={Y(pending.y)} r={4} className="fill-flame" />}
 
         {/* markers */}
-        {d.markers.map((m) => (
+        {/* balls last, so one held by a player is drawn on top of them */}
+        {[...shownMarkers.filter((m) => m.kind !== "ball"), ...shownMarkers.filter((m) => m.kind === "ball")].map((m) => (
           <Marker key={m.id} m={m} selected={selected === m.id} onPointerDown={(e) => onMarkerPointerDown(e, m.id)} />
         ))}
       </svg>
+
+      {(editable || multi) && (
+        <StepControls
+          editable={editable}
+          step={step}
+          count={frames.length}
+          caption={d.caption ?? ""}
+          playing={playing}
+          busy={busy}
+          onStep={goToStep}
+          onPrev={prev}
+          onNext={next}
+          onPlay={play}
+          onAdd={addStep}
+          onRemove={deleteStep}
+          onCaption={(caption) => commit({ caption: caption || undefined })}
+        />
+      )}
+
+      {/* Announces the step to screen-reader users when it changes. */}
+      <p className="sr-only" aria-live="polite">
+        {multi && !anim ? `${stepLabel} ${d.caption ?? ""}` : ""}
+      </p>
 
       {editable && (
         <p className="text-xs text-ink-faint">
@@ -206,8 +377,83 @@ export default function CourtDiagram({
               ? pending
                 ? "Now tap where the arrow ends."
                 : "Tap where the arrow starts."
-              : `Tap the court to drop a ${MARKER_LABEL[tool as keyof typeof MARKER_LABEL].toLowerCase()}.`}
+              : `Tap the court to drop a ${MARKER_LABEL[tool as keyof typeof MARKER_LABEL].toLowerCase()}.`}{" "}
+          For a play, draw this step&apos;s movement, then add a step: players start at the ends of their arrows.
         </p>
+      )}
+    </div>
+  );
+}
+
+function StepControls({
+  editable,
+  step,
+  count,
+  caption,
+  playing,
+  busy,
+  onStep,
+  onPrev,
+  onNext,
+  onPlay,
+  onAdd,
+  onRemove,
+  onCaption,
+}: {
+  editable: boolean;
+  step: number;
+  count: number;
+  caption: string;
+  playing: boolean;
+  busy: boolean;
+  onStep: (i: number) => void;
+  onPrev: () => void;
+  onNext: () => void;
+  onPlay: () => void;
+  onAdd: () => void;
+  onRemove: () => void;
+  onCaption: (c: string) => void;
+}) {
+  const multi = count > 1;
+  return (
+    <div className="flex max-w-md flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Play steps">
+        {editable ? (
+          <>
+            {Array.from({ length: count }, (_, i) => (
+              <ToolButton key={i} active={i === step} onClick={() => onStep(i)} label={`Step ${i + 1}`}>
+                {i + 1}
+              </ToolButton>
+            ))}
+            <ToolButton onClick={onAdd} disabled={count >= MAX_DIAGRAM_STEPS || busy}>+ Add step</ToolButton>
+            {multi && <ToolButton onClick={onRemove} disabled={busy}>Remove step {step + 1}</ToolButton>}
+          </>
+        ) : (
+          <>
+            <ToolButton onClick={onPrev} disabled={step === 0 || busy} label="Previous step">←</ToolButton>
+            <span className="px-1 font-mono text-[11px] uppercase tracking-wide text-ink-faint">
+              Step {step + 1} of {count}
+            </span>
+            <ToolButton onClick={onNext} disabled={step >= count - 1 || busy} label="Next step">→</ToolButton>
+          </>
+        )}
+        {multi && (
+          <ToolButton onClick={onPlay} active={playing}>
+            {playing ? "Stop" : "▶ Play"}
+          </ToolButton>
+        )}
+      </div>
+      {editable ? (
+        <input
+          value={caption}
+          onChange={(e) => onCaption(e.target.value)}
+          maxLength={200}
+          placeholder={multi ? "What happens in this step?" : "Optional: describe the set-up"}
+          aria-label={`Step ${step + 1} description`}
+          className="rounded-control border border-line bg-surface-2 px-2.5 py-1.5 text-sm text-ink"
+        />
+      ) : (
+        caption && <p className="text-sm text-ink-dim">{caption}</p>
       )}
     </div>
   );
@@ -218,17 +464,21 @@ function ToolButton({
   active,
   disabled,
   onClick,
+  label,
 }: {
   children: React.ReactNode;
   active?: boolean;
   disabled?: boolean;
   onClick: () => void;
+  /** Accessible name when the visible text is a symbol or a bare number. */
+  label?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-label={label}
       aria-pressed={active}
       className={cn(
         "rounded-full border px-2.5 py-1 text-xs font-semibold transition disabled:opacity-40",

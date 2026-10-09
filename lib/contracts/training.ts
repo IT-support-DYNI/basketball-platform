@@ -31,7 +31,8 @@ export const MARKER_KINDS = ["player", "opponent", "cone", "ball", "coach"] as c
 export const ARROW_KINDS = ["move", "pass", "dribble", "screen"] as const;
 const norm = z.number().min(0).max(1);
 
-export const courtDiagramSchema = z.object({
+/** One step of a diagram: where everyone is, and what happens next (arrows). */
+const diagramFrame = {
   markers: z
     .array(
       z.object({
@@ -53,7 +54,22 @@ export const courtDiagramSchema = z.object({
       }),
     )
     .max(30),
+  /** What happens in this step, shown under the court. */
+  caption: z.string().trim().max(200).optional(),
+};
+
+export const MAX_DIAGRAM_STEPS = 12;
+
+/**
+ * The top-level markers/arrows are step 1, so every diagram saved before steps
+ * existed is still a valid one-step diagram. `steps` holds step 2 onwards; a
+ * marker keeps its id across steps, which is what the animation follows.
+ */
+export const courtDiagramSchema = z.object({
+  ...diagramFrame,
+  steps: z.array(z.object(diagramFrame)).max(MAX_DIAGRAM_STEPS - 1).optional(),
 });
+export type DiagramFrame = z.infer<z.ZodObject<typeof diagramFrame>>;
 export type CourtDiagram = z.infer<typeof courtDiagramSchema>;
 
 export const createDrillSchema = z.object({
