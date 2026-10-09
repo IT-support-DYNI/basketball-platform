@@ -9,7 +9,7 @@ import {
 
 describe("notification categories", () => {
   it("maps every notification type to a category", () => {
-    const types = ["TRAINING_CHANGE", "NEW_VIDEO", "NEW_EVALUATION", "NEW_FEEDBACK", "ANNOUNCEMENT", "REGISTRATION_UPDATE"] as const;
+    const types = ["TRAINING_CHANGE", "NEW_VIDEO", "NEW_EVALUATION", "NEW_FEEDBACK", "ANNOUNCEMENT", "REGISTRATION_UPDATE", "NEW_PLAY"] as const;
     for (const t of types) {
       expect(NOTIFICATION_CATEGORIES).toContain(CATEGORY_FOR_TYPE[t]);
     }

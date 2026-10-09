@@ -109,3 +109,25 @@ No migration — fills the `Drill.courtDiagram` jsonb column.
   the "Closeout & mirror" drill ships with a diagram.
 
 ## W9 complete — training plans + drill library.
+
+## Plays and the team playbook
+
+A **play** is something the team needs to learn (offence, defence, inbounds,
+press break, special situations): a name, a type, notes for players, and a court
+diagram drawn with the same editor as drills.
+
+- **Library:** `/coach/plays`. One shared library per club, like drills. Any
+  coach can read every play, create plays, and make a copy of someone else's.
+  Only the author (or an admin) edits or archives a play (`lib/authz/ability.ts`).
+- **Assigning:** on a play's page a coach ticks the teams they coach;
+  `PUT /api/v1/plays/:id/assignments { teamIds }` sets that set. Teams the caller
+  doesn't coach are refused and other coaches' assignments are left alone
+  (`lib/playbook.ts#planAssignmentChange`). Players and guardians on newly added
+  teams get a `NEW_PLAY` notification (category "Team playbook", push on).
+- **Playbook:** `/player/playbook` and `/guardian/playbook`. A player sees plays
+  assigned to their current team; a guardian sees plays on any team their linked
+  children are actively on (`lib/plays.ts#playbookTeamIds`). Anything else is a
+  404. Archiving a play hides it from every playbook; restoring brings it back.
+- **Data:** `Play` and `PlayAssignment` (migration `20261009120000_playbook`).
+
+Not yet: linking plays into session plan blocks, multi-step animation, full court.

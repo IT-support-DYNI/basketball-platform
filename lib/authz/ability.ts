@@ -43,6 +43,7 @@ export type Subject =
   | "Announcement"
   | "Video"
   | "Drill"
+  | "Play"
   | "TrainingPlan"
   | "Evaluation"
   | "Feedback"
@@ -102,6 +103,13 @@ function applyRole(
       // (or an admin) deletes.
       can(["read", "create", "update"], "Drill");
       can("delete", "Drill", { createdByUserId: userId });
+
+      // The play library is shared the same way, but a play is something a
+      // coach hands to their team, so only its author edits or archives it.
+      // Which teams see it is a Team-access check (lib/plays.ts), and players
+      // and guardians read plays through their team's assignments, not here.
+      can(["read", "create"], "Play");
+      can(["update", "delete"], "Play", { createdByUserId: userId });
 
       const teamId = scope.teamId;
       if (teamId == null) {

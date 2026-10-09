@@ -19,6 +19,7 @@ export type Capability =
   | "player.videos"
   | "player.feedback"
   | "player.profile"
+  | "player.playbook"
   | "coach.home"
   | "coach.team"
   | "coach.players"
@@ -28,6 +29,7 @@ export type Capability =
   | "coach.performance"
   | "coach.drills"
   | "coach.plans"
+  | "coach.plays"
   | "announcements"
   | "messages"
   | "admin.home"
@@ -45,6 +47,7 @@ export type Capability =
   | "admin.audit"
   | "admin.settings"
   | "guardian.home"
+  | "guardian.playbook"
   | "account.security"
   | "account.data"
   | "account.display";
@@ -54,6 +57,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "player.home",
     "player.team",
     "player.schedule",
+    "player.playbook",
     "player.videos",
     "player.feedback",
     "player.profile",
@@ -72,6 +76,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "coach.videos",
     "coach.performance",
     "coach.plans",
+    "coach.plays",
     "coach.drills",
     "announcements",
     "messages",
@@ -100,7 +105,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "account.data",
     "account.display",
   ],
-  GUARDIAN: ["guardian.home", "announcements", "messages", "account.security", "account.data", "account.display"],
+  GUARDIAN: ["guardian.home", "guardian.playbook", "announcements", "messages", "account.security", "account.data", "account.display"],
 };
 
 export function capabilitiesFor(roles: string | string[]): Set<Capability> {
@@ -123,6 +128,7 @@ export type NavIconName =
   | "video"
   | "users"
   | "whistle"
+  | "playbook"
   | "megaphone"
   | "chat"
   | "clipboard"
@@ -165,6 +171,9 @@ const NAV: NavItem[] = [
   { label: "Training", href: "/admin/training", capability: "admin.training", icon: "calendar" },
   { label: "Session plans", href: "/coach/training/plans", capability: "coach.plans", icon: "clipboard" },
   { label: "Drills", href: "/coach/drills", capability: "coach.drills", icon: "whistle" },
+  { label: "Plays", href: "/coach/plays", capability: "coach.plays", icon: "playbook" },
+  { label: "Playbook", href: "/player/playbook", capability: "player.playbook", icon: "playbook" },
+  { label: "Playbook", href: "/guardian/playbook", capability: "guardian.playbook", icon: "playbook" },
 
   { label: "Attendance", href: "/coach/attendance", capability: "coach.attendance", icon: "attendance", primary: true },
   { label: "Attendance", href: "/admin/attendance", capability: "admin.attendance", icon: "attendance" },
