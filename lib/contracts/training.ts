@@ -28,7 +28,7 @@ const shortLines = z.array(z.string().trim().min(1).max(200)).max(20);
  * the top). The shape is owned by components/training/CourtDiagram.
  */
 export const MARKER_KINDS = ["player", "opponent", "cone", "ball", "coach"] as const;
-export const ARROW_KINDS = ["move", "pass", "dribble", "screen"] as const;
+export const ARROW_KINDS = ["move", "cut", "pass", "dribble", "screen", "handoff", "shot"] as const;
 const norm = z.number().min(0).max(1);
 
 /** One step of a diagram: where everyone is, and what happens next (arrows). */
@@ -51,6 +51,8 @@ const diagramFrame = {
         kind: z.enum(ARROW_KINDS),
         from: z.object({ x: norm, y: norm }),
         to: z.object({ x: norm, y: norm }),
+        /** Bend: 0 or absent is straight; -1 to 1 curves it to one side or the other. */
+        curve: z.number().min(-1).max(1).optional(),
       }),
     )
     .max(30),

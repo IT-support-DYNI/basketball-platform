@@ -67,9 +67,12 @@ export const MARKER_LABEL: Record<(typeof MARKER_KINDS)[number], string> = {
 
 export const ARROW_LABEL: Record<(typeof ARROW_KINDS)[number], string> = {
   move: "Movement",
+  cut: "Cut",
   pass: "Pass",
   dribble: "Dribble",
   screen: "Screen",
+  handoff: "Handoff",
+  shot: "Shot",
 };
 
 /** Is there anything drawn, in any step? */

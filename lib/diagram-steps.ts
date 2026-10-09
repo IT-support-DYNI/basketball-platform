@@ -48,9 +48,10 @@ function nearest(markers: Marker[], at: { x: number; y: number }, kinds: Marker[
 }
 
 /**
- * Where everyone ends up after a step's arrows play out: a player with a move
- * or screen arrow starting on them goes to its end; a dribble takes the player
- * and the ball; a pass takes the ball. Markers no arrow touches stay put. Each
+ * Where everyone ends up after a step's arrows play out: a player with a move,
+ * cut or screen arrow starting on them goes to its end; a dribble takes the
+ * player and the ball; a pass, handoff or shot takes only the ball. A curved
+ * arrow ends in the same place as a straight one. Markers no arrow touches stay put. Each
  * marker moves at most once, so two arrows can't fight over one player.
  */
 export function advanceAlongArrows(frame: DiagramFrame): Marker[] {
@@ -66,7 +67,8 @@ export function advanceAlongArrows(frame: DiagramFrame): Marker[] {
   };
 
   for (const a of frame.arrows) {
-    if (a.kind === "pass") claim(nearest(frame.markers, a.from, ["ball"], taken), a.to);
+    // Pass, handoff and shot move the ball; the player stays where they are.
+    if (a.kind === "pass" || a.kind === "handoff" || a.kind === "shot") claim(nearest(frame.markers, a.from, ["ball"], taken), a.to);
     else if (a.kind === "dribble") {
       claim(nearest(frame.markers, a.from, people, taken), a.to);
       claim(nearest(frame.markers, a.from, ["ball"], taken), a.to);

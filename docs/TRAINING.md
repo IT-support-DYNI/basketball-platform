@@ -167,3 +167,14 @@ valid one-step diagram; no migration (`lib/contracts/training.ts`).
   next and hide while players move. With reduced motion it jumps between steps.
   Frames fall back to a timer if the browser pauses animation frames.
 
+## Arrow types and curves
+
+Seven arrow tools, in standard play-diagram notation (`ArrowShape` in the
+diagram component): **movement** plain line, **cut** the same line in the
+accent colour, **pass** dashed, **dribble** dotted, **screen** ends in a bar
+across the line, **handoff** two ticks across its middle, **shot** a thin line
+ending in a ring. Any arrow can bend: select it and use "Bend" (stored as
+`curve`, -1 to 1; absent means straight, so older diagrams are unchanged).
+Curves are quadratic Beziers (`lib/diagram-arrows.ts`). For "+ Add step", a cut
+moves the player like movement does; handoff and shot move the ball like a pass.
+
