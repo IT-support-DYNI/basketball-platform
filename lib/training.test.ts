@@ -15,6 +15,7 @@ import {
   EMPTY_DIAGRAM,
   effectiveDiagram,
   toPlanReadBlock,
+  playerVisibility,
 } from "./training";
 import { courtDiagramSchema, trainingBlockSchema } from "./contracts/training";
 
@@ -105,5 +106,17 @@ describe("linked diagrams on plan blocks", () => {
     expect(trainingBlockSchema.safeParse({ ...base, drillId: 1 }).success).toBe(true);
     expect(trainingBlockSchema.safeParse({ ...base, playId: 1 }).success).toBe(true);
     expect(trainingBlockSchema.safeParse({ ...base, drillId: 1, playId: 2 }).success).toBe(false);
+  });
+});
+
+describe("playerVisibility", () => {
+  it("players see a published plan linked to a session, and nothing else", () => {
+    expect(playerVisibility({ isTemplate: false, status: "PUBLISHED", eventId: 5 })).toEqual({ visible: true, reason: null });
+    expect(playerVisibility({ isTemplate: false, status: "DRAFT", eventId: 5 }).visible).toBe(false);
+    expect(playerVisibility({ isTemplate: false, status: "COMPLETED", eventId: 5 }).visible).toBe(false);
+    expect(playerVisibility({ isTemplate: true, status: "PUBLISHED", eventId: null }).visible).toBe(false);
+    const unlinked = playerVisibility({ isTemplate: false, status: "PUBLISHED", eventId: null });
+    expect(unlinked.visible).toBe(false);
+    expect(unlinked.reason).toMatch(/linked to a session/);
   });
 });

@@ -88,6 +88,32 @@ export function describeDiagram(d: CourtDiagram | null | undefined): string {
   return `Court diagram: ${parts.join(", ")}.`;
 }
 
+/* ── Session plans: can players see it? ───────────────────────────────── */
+
+/**
+ * Whether the team's players can see a plan, and if not, what the coach needs
+ * to do. Mirrors the real gates: players may only read PUBLISHED plans
+ * (lib/authz/ability.ts), and they reach a plan only from its session in the
+ * calendar, so it also needs a linked session.
+ */
+export function playerVisibility(plan: {
+  isTemplate: boolean;
+  status: string;
+  eventId: number | null;
+}): { visible: boolean; reason: string | null } {
+  if (plan.isTemplate) return { visible: false, reason: "Templates are only for coaches." };
+  if (plan.status === "DRAFT") {
+    return { visible: false, reason: "It's a draft. Publish it to the team when it's ready." };
+  }
+  if (plan.status === "COMPLETED") {
+    return { visible: false, reason: "It's marked completed, so it's no longer shown to players." };
+  }
+  if (plan.eventId == null) {
+    return { visible: false, reason: "It isn't linked to a session. Link it so players can open it from the schedule." };
+  }
+  return { visible: true, reason: null };
+}
+
 /* ── Session plan blocks: which diagram to show ───────────────────────── */
 
 export type DiagramSource = "block" | "play" | "drill";

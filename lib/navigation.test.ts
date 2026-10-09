@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { navFor, primaryNavFor, capabilitiesFor } from "./navigation";
+import { navFor, primaryNavFor, capabilitiesFor, activeNavHref } from "./navigation";
 
 describe("navigation", () => {
   it("gives a player their own menu, no admin items", () => {
@@ -25,24 +25,34 @@ describe("navigation", () => {
     }
   });
 
-  it("the drill library + session plans are coach tools, not for players or guardians", () => {
-    const coach = navFor("COACH").map((i) => i.href);
-    expect(coach).toContain("/coach/drills");
-    expect(coach).toContain("/coach/training/plans");
+  it("coaches get one Coaching hub (plans, drills, plays) and a Schedule; not players or guardians", () => {
+    const coach = navFor("COACH");
+    const hub = coach.find((i) => i.label === "Coaching");
+    expect(hub?.href).toBe("/coach/training/plans");
+    expect(hub?.matches).toEqual(["/coach/drills", "/coach/plays"]);
+    expect(coach.find((i) => i.href === "/coach/training")?.label).toBe("Schedule");
+    expect(coach.map((i) => i.label)).not.toContain("Training");
     for (const role of ["PLAYER", "GUARDIAN"]) {
       const hrefs = navFor(role).map((i) => i.href);
-      expect(hrefs).not.toContain("/coach/drills");
-      expect(hrefs).not.toContain("/coach/training/plans");
+      expect(hrefs.some((h) => h.startsWith("/coach/"))).toBe(false);
     }
   });
 
-  it("coaches get Plays; players and guardians get their own Playbook", () => {
-    expect(navFor("COACH").map((i) => i.href)).toContain("/coach/plays");
+  it("players and guardians get their own Playbook", () => {
     expect(navFor("PLAYER").map((i) => i.href)).toContain("/player/playbook");
     expect(navFor("GUARDIAN").map((i) => i.href)).toContain("/guardian/playbook");
-    for (const role of ["PLAYER", "GUARDIAN"]) {
-      expect(navFor(role).map((i) => i.href)).not.toContain("/coach/plays");
-    }
+  });
+
+  it("marks exactly one item active: the longest matching path", () => {
+    const coach = navFor("COACH");
+    expect(activeNavHref("/coach/training", coach)).toBe("/coach/training");
+    expect(activeNavHref("/coach/training/42", coach)).toBe("/coach/training");
+    expect(activeNavHref("/coach/training/plans", coach)).toBe("/coach/training/plans");
+    expect(activeNavHref("/coach/training/plans/7", coach)).toBe("/coach/training/plans");
+    expect(activeNavHref("/coach/drills/3", coach)).toBe("/coach/training/plans");
+    expect(activeNavHref("/coach/plays/new", coach)).toBe("/coach/training/plans");
+    expect(activeNavHref("/coach/drillsx", coach)).toBeUndefined();
+    expect(activeNavHref("/elsewhere", coach)).toBeUndefined();
   });
 
   it("merges and de-duplicates for a user holding two roles", () => {

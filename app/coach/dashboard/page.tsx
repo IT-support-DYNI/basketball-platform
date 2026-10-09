@@ -116,7 +116,8 @@ export default async function CoachDashboardPage() {
       <Card as="section">
         <SectionTitle>Quick actions</SectionTitle>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Link href="/coach/training" className={quickLink}>Create training</Link>
+          <Link href="/coach/training" className={quickLink}>Schedule a session</Link>
+          <Link href="/coach/training/plans/new" className={quickLink}>Plan a session</Link>
           <Link href="/coach/attendance" className={quickLink}>Mark attendance</Link>
           <Link href="/coach/players" className={quickLink}>Add player</Link>
           <Link href="/coach/videos" className={quickLink}>Upload video</Link>

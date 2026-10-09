@@ -17,6 +17,7 @@ import {
   planDurationMinutes,
   EMPTY_DIAGRAM,
   diagramHasContent,
+  playerVisibility,
   type CourtDiagram as CourtDiagramValue,
 } from "@/lib/training";
 import { PLAY_TYPE_LABEL, groupByType } from "@/lib/playbook";
@@ -114,6 +115,7 @@ export default function PlanBuilder({
   const drillById = useMemo(() => new Map(drills.map((d) => [d.id, d])), [drills]);
   const playById = useMemo(() => new Map(plays.map((p) => [p.id, p])), [plays]);
 
+  const visibility = playerVisibility(plan);
   const totalMin = planDurationMinutes(blocks.map((b) => ({ durationMinutes: Number(b.durationMinutes) || 0 })));
 
   const setBlock = (i: number, patch: Partial<Block>) =>
@@ -185,6 +187,12 @@ export default function PlanBuilder({
   return (
     <div className="flex flex-col gap-6">
       {error && <Alert tone="danger">{error}</Alert>}
+      {!plan.isTemplate && !visibility.visible && (
+        <Alert tone="warning">Players can&apos;t see this plan yet. {visibility.reason}</Alert>
+      )}
+      {!plan.isTemplate && visibility.visible && (
+        <p className="text-sm text-success">Players on {plan.teamName} can see this plan from their schedule.</p>
+      )}
 
       {/* header */}
       <div className="rounded-card border border-line bg-surface p-5">
