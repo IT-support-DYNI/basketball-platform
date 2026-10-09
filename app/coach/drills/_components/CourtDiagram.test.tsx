@@ -73,3 +73,23 @@ describe("CourtDiagram steps", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+describe("CourtDiagram arrows", () => {
+  it("a coach selects an arrow and bends it", () => {
+    render(<Editor initial={{ markers: [], arrows: [{ id: "a", kind: "cut", from: { x: 0.2, y: 0.8 }, to: { x: 0.5, y: 0.2 } }] }} />);
+    const arrow = document.querySelector("svg g.text-flame-on-bg") as Element;
+    expect(arrow).not.toBeNull();
+    fireEvent.click(arrow);
+    const bend = screen.getByLabelText("Bend the selected arrow");
+    fireEvent.change(bend, { target: { value: "0.5" } });
+    expect(document.querySelector("svg g.text-flame-on-bg path")!.getAttribute("d")).toMatch(/ Q /);
+  });
+
+  it("offers every arrow tool", () => {
+    render(<Editor initial={{ markers: [], arrows: [] }} />);
+    for (const name of ["Movement →", "Cut →", "Pass →", "Dribble →", "Screen →", "Handoff →", "Shot →"]) {
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    }
+  });
+});
+

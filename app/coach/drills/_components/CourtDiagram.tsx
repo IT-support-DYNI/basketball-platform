@@ -23,6 +23,7 @@ import {
   replaceStep,
   type DiagramFrame,
 } from "@/lib/diagram-steps";
+import { angleAt, arrowPath, pointAt } from "@/lib/diagram-arrows";
 
 /* viewBox + playable inset (6px margin round a 500×470 half-court, basket top) */
 const VB_W = 500;
@@ -223,6 +224,10 @@ export default function CourtDiagram({
     });
     setSelected(null);
   }
+  function setCurve(curve: number) {
+    if (!selected) return;
+    commit({ arrows: d.arrows.map((a) => (a.id === selected ? { ...a, curve: curve || undefined } : a)) });
+  }
   function setLabel(label: string) {
     if (!selected) return;
     commit({ markers: d.markers.map((m) => (m.id === selected ? { ...m, label: label.slice(0, 3) } : m)) });
@@ -247,6 +252,7 @@ export default function CourtDiagram({
   }
 
   const selectedMarker = d.markers.find((m) => m.id === selected) ?? null;
+  const selectedArrow = d.arrows.find((a) => a.id === selected) ?? null;
   const shownMarkers = anim ? interpolateMarkers(frames[anim.from], frames[anim.to], easeInOut(anim.t)) : d.markers;
   const shownArrows = anim ? [] : d.arrows;
   const stepLabel = multi ? `Step ${step + 1} of ${frames.length}.` : "";
@@ -282,6 +288,21 @@ export default function CourtDiagram({
               className="w-12 rounded-control border border-line bg-surface-2 px-2 py-1 text-center text-xs text-ink"
             />
           )}
+          {selectedArrow && (
+            <label className="flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-xs font-semibold text-ink-dim">
+              Bend
+              <input
+                type="range"
+                min={-1}
+                max={1}
+                step={0.25}
+                value={selectedArrow.curve ?? 0}
+                onChange={(e) => setCurve(Number(e.target.value))}
+                aria-label="Bend the selected arrow"
+                className="w-24 accent-flame"
+              />
+            </label>
+          )}
           <ToolButton onClick={removeSelected} disabled={!selected}>Delete selected</ToolButton>
           <ToolButton
             onClick={() => { commit({ markers: [], arrows: [] }); setSelected(null); setPending(null); }}
@@ -314,27 +335,15 @@ export default function CourtDiagram({
         <CourtMarkings />
 
         {/* arrows: what happens next from this step (hidden while sliding) */}
-        {shownArrows.map((a) => {
-          const dashed = a.kind === "pass" ? "6 5" : a.kind === "dribble" ? "2 4" : undefined;
-          return (
-            <g key={a.id} className="text-ink-dim" onClick={(e) => { e.stopPropagation(); if (editable && !busy) setSelected(a.id); }}>
-              <line
-                x1={X(a.from.x)} y1={Y(a.from.y)} x2={X(a.to.x)} y2={Y(a.to.y)}
-                stroke="currentColor"
-                strokeWidth={selected === a.id ? 3.5 : 2}
-                strokeDasharray={dashed}
-                markerEnd={a.kind === "screen" ? undefined : `url(#${uid}-head)`}
-              />
-              {a.kind === "screen" && (
-                <line
-                  x1={X(a.to.x) - 10} y1={Y(a.to.y)} x2={X(a.to.x) + 10} y2={Y(a.to.y)}
-                  stroke="currentColor" strokeWidth={3}
-                  transform={`rotate(${(Math.atan2(a.to.y - a.from.y, a.to.x - a.from.x) * 180) / Math.PI} ${X(a.to.x)} ${Y(a.to.y)})`}
-                />
-              )}
-            </g>
-          );
-        })}
+        {shownArrows.map((a) => (
+          <ArrowShape
+            key={a.id}
+            a={a}
+            head={`url(#${uid}-head)`}
+            selected={selected === a.id}
+            onSelect={() => { if (editable && !busy) setSelected(a.id); }}
+          />
+        ))}
 
         {/* pending arrow start */}
         {pending && <circle cx={X(pending.x)} cy={Y(pending.y)} r={4} className="fill-flame" />}
@@ -372,7 +381,7 @@ export default function CourtDiagram({
       {editable && (
         <p className="text-xs text-ink-faint">
           {tool === "select"
-            ? "Tap a tool, then tap the court to place it. Drag a marker to move it. Arrows need two taps."
+            ? "Tap a tool, then tap the court to place it. Drag a marker to move it. Arrows need two taps; tap an arrow to bend it."
             : isArrowTool(tool)
               ? pending
                 ? "Now tap where the arrow ends."
@@ -456,6 +465,70 @@ function StepControls({
         caption && <p className="text-sm text-ink-dim">{caption}</p>
       )}
     </div>
+  );
+}
+
+/**
+ * One arrow, drawn in standard play-diagram notation:
+ * movement is a plain line, a cut is the same line in the accent colour, a
+ * pass is dashed, a dribble dotted, a screen ends in a bar, a handoff carries
+ * two ticks across its middle, and a shot ends in a ring instead of a head.
+ */
+function ArrowShape({
+  a,
+  head,
+  selected,
+  onSelect,
+}: {
+  a: CourtDiagram["arrows"][number];
+  head: string;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const from = { x: X(a.from.x), y: Y(a.from.y) };
+  const to = { x: X(a.to.x), y: Y(a.to.y) };
+  const curve = a.curve ?? 0;
+  const dash = a.kind === "pass" ? "6 5" : a.kind === "dribble" ? "2 4" : undefined;
+  const hasHead = a.kind !== "screen" && a.kind !== "shot";
+  // A shot is a thin solid line ending in a ring, so it can't be mistaken for a dotted dribble.
+  const width = (a.kind === "cut" ? 2.75 : a.kind === "shot" ? 1.25 : 2) + (selected ? 1.5 : 0);
+  const endAngle = angleAt(from, to, curve, 1);
+  const mid = pointAt(from, to, curve, 0.5);
+  const midAngle = angleAt(from, to, curve, 0.5);
+
+  return (
+    <g
+      className={a.kind === "cut" ? "text-flame-on-bg" : "text-ink-dim"}
+      onClick={(e) => { e.stopPropagation(); onSelect(); }}
+    >
+      {/* a wider invisible stroke makes thin arrows easy to tap */}
+      <path d={arrowPath(from, to, curve)} stroke="transparent" strokeWidth={14} fill="none" />
+      <path
+        d={arrowPath(from, to, curve)}
+        stroke="currentColor"
+        strokeWidth={width}
+        strokeDasharray={dash}
+        strokeLinecap="round"
+        fill="none"
+        markerEnd={hasHead ? head : undefined}
+      />
+      {a.kind === "screen" && (
+        <line
+          x1={to.x} y1={to.y - 10} x2={to.x} y2={to.y + 10}
+          stroke="currentColor" strokeWidth={3}
+          transform={`rotate(${endAngle} ${to.x} ${to.y})`}
+        />
+      )}
+      {a.kind === "handoff" && (
+        <g transform={`rotate(${midAngle} ${mid.x} ${mid.y})`} stroke="currentColor" strokeWidth={2.5}>
+          <line x1={mid.x - 3} y1={mid.y - 8} x2={mid.x - 3} y2={mid.y + 8} />
+          <line x1={mid.x + 3} y1={mid.y - 8} x2={mid.x + 3} y2={mid.y + 8} />
+        </g>
+      )}
+      {a.kind === "shot" && (
+        <circle cx={to.x} cy={to.y} r={7} stroke="currentColor" strokeWidth={2} fill="none" />
+      )}
+    </g>
   );
 }
 
