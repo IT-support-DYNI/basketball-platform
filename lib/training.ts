@@ -72,9 +72,10 @@ export const ARROW_LABEL: Record<(typeof ARROW_KINDS)[number], string> = {
   screen: "Screen",
 };
 
-/** Is there anything drawn? */
+/** Is there anything drawn, in any step? */
 export function diagramHasContent(d: CourtDiagram | null | undefined): boolean {
-  return !!d && (d.markers.length > 0 || d.arrows.length > 0);
+  if (!d) return false;
+  return [d, ...(d.steps ?? [])].some((f) => f.markers.length > 0 || f.arrows.length > 0);
 }
 
 /** A short plain-text summary of a diagram — used in the read view and by
@@ -85,7 +86,8 @@ export function describeDiagram(d: CourtDiagram | null | undefined): string {
   for (const m of d!.markers) counts.set(m.kind, (counts.get(m.kind) ?? 0) + 1);
   const parts = [...counts].map(([k, n]) => `${n} ${MARKER_LABEL[k as keyof typeof MARKER_LABEL].toLowerCase()}${n === 1 ? "" : "s"}`);
   if (d!.arrows.length) parts.push(`${d!.arrows.length} movement arrow${d!.arrows.length === 1 ? "" : "s"}`);
-  return `Court diagram: ${parts.join(", ")}.`;
+  const steps = 1 + (d!.steps?.length ?? 0);
+  return `Court diagram: ${parts.join(", ") || "empty first step"}.${steps > 1 ? ` ${steps} steps.` : ""}`;
 }
 
 /* ── Session plan blocks: which diagram to show ───────────────────────── */

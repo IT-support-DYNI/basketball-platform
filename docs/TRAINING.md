@@ -149,3 +149,21 @@ against the club on save (`assertBlockLinks`). Creating a plan from a template
 keeps each block's own diagram and its linked drill or play.
 
 Not yet: multi-step animation, full court.
+
+## Multi-step diagrams (plays)
+
+Any court diagram (play, drill or plan block) can have up to 12 **steps**. The
+first step is stored at the top level (`markers`, `arrows`, `caption`) and steps
+2 onwards in `steps`, so every diagram saved before steps existed is still a
+valid one-step diagram; no migration (`lib/contracts/training.ts`).
+
+- **Editor:** step buttons 1, 2, 3; "+ Add step" copies the current step with
+  everyone moved along that step's arrows (move/screen move the player,
+  dribble moves player and ball, pass moves the ball;
+  `lib/diagram-steps.ts#advanceAlongArrows`), so the coach only adjusts what's
+  different. Each step has a short description.
+- **Viewer:** previous/next and Play. Markers keep their id across steps, which
+  is what the animation slides (`interpolateMarkers`); arrows show what happens
+  next and hide while players move. With reduced motion it jumps between steps.
+  Frames fall back to a timer if the browser pauses animation frames.
+
