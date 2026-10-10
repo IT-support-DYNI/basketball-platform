@@ -178,3 +178,15 @@ ending in a ring. Any arrow can bend: select it and use "Bend" (stored as
 Curves are quadratic Beziers (`lib/diagram-arrows.ts`). For "+ Add step", a cut
 moves the player like movement does; handoff and shot move the ball like a pass.
 
+## Starting sets (templates)
+
+"Start from a set" above the diagram tools drops a whole formation onto the
+current step (`lib/diagram-templates.ts`): offence 5 Out, 4 Out 1 In, Horns,
+1-4 High, 1-4 Low, Box (players 1 to 5, ball with 1), and defence 2-3, 3-2 and
+1-3-1 zones. An offence set replaces only the players and ball; a zone replaces
+only the defenders; cones, the coach and arrows stay. So Horns then 2-3 Zone
+gives an offence against a zone. The coach is asked before anything they placed
+is replaced. Every marker gets a fresh id, so steps still animate correctly.
+Perimeter spots are outside the drawn 3-point line; elbows sit on the corners of
+the free-throw line.
+

@@ -93,3 +93,15 @@ describe("CourtDiagram arrows", () => {
   });
 });
 
+describe("CourtDiagram templates", () => {
+  it("a coach starts from Horns, then adds a 2-3 zone", () => {
+    render(<Editor initial={{ markers: [], arrows: [] }} />);
+    const menu = screen.getByLabelText("Start from a set");
+    fireEvent.change(menu, { target: { value: "horns" } });
+    expect(screen.getByRole("img")).toHaveAttribute("aria-label", expect.stringMatching(/5 players, 1 ball/));
+    fireEvent.change(menu, { target: { value: "2-3-zone" } });
+    expect(screen.getByRole("img")).toHaveAttribute("aria-label", expect.stringMatching(/5 players.*5 defenders/));
+    expect((menu as HTMLSelectElement).value).toBe("");
+  });
+});
+
