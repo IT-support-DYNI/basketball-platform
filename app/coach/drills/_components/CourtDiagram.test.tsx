@@ -105,3 +105,22 @@ describe("CourtDiagram templates", () => {
   });
 });
 
+describe("CourtDiagram full court", () => {
+  it("a coach switches to full court and back", () => {
+    render(<Editor initial={{ markers: [{ id: "p1", kind: "player", x: 0.5, y: 0.6, label: "1" }], arrows: [] }} />);
+    expect(screen.getByRole("button", { name: "Half court" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Full court" }));
+    const svg = screen.getByRole("img");
+    expect(svg).toHaveAttribute("aria-label", expect.stringMatching(/Full court/));
+    expect(svg.getAttribute("viewBox")).toBe("0 0 500 928");
+    fireEvent.click(screen.getByRole("button", { name: "Half court" }));
+    expect(screen.getByRole("img").getAttribute("viewBox")).toBe("0 0 500 470");
+  });
+
+  it("keeps the full court while editing on it", () => {
+    render(<Editor initial={{ court: "full", markers: [], arrows: [] }} />);
+    fireEvent.click(screen.getByRole("button", { name: "+ Add step" }));
+    expect(screen.getByRole("img").getAttribute("viewBox")).toBe("0 0 500 928");
+  });
+});
+

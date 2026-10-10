@@ -190,3 +190,13 @@ is replaced. Every marker gets a fresh id, so steps still animate correctly.
 Perimeter spots are outside the drawn 3-point line; elbows sit on the corners of
 the free-throw line.
 
+## Half and full court
+
+"Half court" / "Full court" in the diagram tools. A full court is vertical: the
+usual half court on top, mirrored below, for press breaks, transition and
+full-court drills. Stored as `court: "full"` on the diagram (absent means half,
+so older diagrams are unchanged). Coordinates are 0 to 1 over whichever court is
+shown; switching half to full moves everything into the top half (nothing lost),
+and full to half keeps the top half and asks before removing anything in the far
+half (`lib/diagram-court.ts`). Starting sets on a full court go in the top half.
+

@@ -48,15 +48,15 @@ const BALL_OFFSET = 0.03;
  * with ids already in the diagram (ids are what step animation follows).
  * Offence sets include the ball with player 1.
  */
-export function templateMarkers(t: DiagramTemplate, newId: () => string): DiagramFrame["markers"] {
-  const markers: DiagramFrame["markers"] = t.spots.map(([label, x, y]) =>
+export function templateMarkers(t: DiagramTemplate, newId: () => string, yScale = 1): DiagramFrame["markers"] {
+  const markers: DiagramFrame["markers"] = t.spots.map(([label, x, yHalf]) => ({ label, x, y: yHalf * yScale })).map(({ label, x, y }) =>
     t.group === "Offence"
       ? { id: newId(), kind: "player" as const, x, y, label }
       : { id: newId(), kind: "opponent" as const, x, y },
   );
   if (t.group === "Offence") {
     const one = markers.find((m) => m.label === "1");
-    if (one) markers.push({ id: newId(), kind: "ball", x: Math.min(1, one.x + BALL_OFFSET), y: Math.min(1, one.y + BALL_OFFSET) });
+    if (one) markers.push({ id: newId(), kind: "ball", x: Math.min(1, one.x + BALL_OFFSET), y: Math.min(1, one.y + BALL_OFFSET * yScale) });
   }
   return markers;
 }
@@ -71,11 +71,11 @@ export function templateById(id: string): DiagramTemplate | undefined {
  * other side, cones, coach, arrows) stays, so "Horns" then "2-3 Zone" gives
  * an offence against a zone.
  */
-export function applyTemplate(frame: DiagramFrame, t: DiagramTemplate, newId: () => string): DiagramFrame {
+export function applyTemplate(frame: DiagramFrame, t: DiagramTemplate, newId: () => string, yScale = 1): DiagramFrame {
   const replaces = t.group === "Offence" ? ["player", "ball"] : ["opponent"];
   return {
     ...frame,
-    markers: [...frame.markers.filter((m) => !replaces.includes(m.kind)), ...templateMarkers(t, newId)],
+    markers: [...frame.markers.filter((m) => !replaces.includes(m.kind)), ...templateMarkers(t, newId, yScale)],
   };
 }
 
