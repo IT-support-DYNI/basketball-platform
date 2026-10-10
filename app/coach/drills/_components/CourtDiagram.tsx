@@ -25,6 +25,7 @@ import {
 } from "@/lib/diagram-steps";
 import { angleAt, arrowPath, pointAt } from "@/lib/diagram-arrows";
 import { DIAGRAM_TEMPLATES, applyTemplate, templateById, templateReplacesSomething } from "@/lib/diagram-templates";
+import { courtOf, templateYScale, toFullCourt, toHalfCourt, type CourtType } from "@/lib/diagram-court";
 
 /* viewBox + playable inset (6px margin round a 500×470 half-court, basket top) */
 const VB_W = 500;
@@ -33,7 +34,12 @@ const M = 6;
 const IN_W = VB_W - 2 * M;
 const IN_H = VB_H - 2 * M;
 const X = (n: number) => M + n * IN_W;
+/** Half-court y; the court markings are always drawn in these units. */
 const Y = (n: number) => M + n * IN_H;
+/** A full court is two half courts, the second mirrored about the half-way line. */
+const FULL_H = 2 * (VB_H - M);
+const Y_FULL = (n: number) => M + n * (FULL_H - 2 * M);
+type YFn = (n: number) => number;
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 const rid = () => Math.random().toString(36).slice(2, 9);
 
@@ -62,6 +68,9 @@ export default function CourtDiagram({
   className?: string;
 }) {
   const editable = !!onChange;
+  const court = courtOf(value);
+  const full = court === "full";
+  const Yc: YFn = full ? Y_FULL : Y;
   const frames = diagramFrames(value ?? EMPTY_DIAGRAM);
   const [stepRaw, setStep] = useState(0);
   const step = Math.min(stepRaw, frames.length - 1);
@@ -176,7 +185,21 @@ export default function CourtDiagram({
   }
 
   function commitFrames(nextFrames: DiagramFrame[]) {
-    onChange?.(fromFrames(nextFrames));
+    onChange?.({ ...fromFrames(nextFrames), ...(full ? { court: "full" as const } : {}) });
+  }
+
+  function setCourt(next: CourtType) {
+    if (next === court || !onChange) return;
+    const current = value ?? EMPTY_DIAGRAM;
+    if (next === "full") {
+      onChange(toFullCourt(current));
+    } else {
+      const { diagram, dropped } = toHalfCourt(current);
+      if (dropped > 0 && !window.confirm(`Switch to half court? ${dropped} item${dropped === 1 ? "" : "s"} in the far half will be removed.`)) return;
+      onChange(diagram);
+    }
+    setSelected(null);
+    setPending(null);
   }
   function commit(patch: Partial<DiagramFrame>) {
     commitFrames(replaceStep(frames, step, { ...d, ...patch }));
@@ -230,7 +253,7 @@ export default function CourtDiagram({
     if (!t) return;
     const what = t.group === "Offence" ? "players and ball" : "defenders";
     if (templateReplacesSomething(d, t) && !window.confirm(`Replace the ${what} on this step with ${t.name}?`)) return;
-    commit(applyTemplate(d, t, rid));
+    commit(applyTemplate(d, t, rid, templateYScale(court)));
     setSelected(null);
     setPending(null);
   }
@@ -304,6 +327,9 @@ export default function CourtDiagram({
             }
           }}
         >
+          <ToolButton active={!full} onClick={() => setCourt("half")}>Half court</ToolButton>
+          <ToolButton active={full} onClick={() => setCourt("full")}>Full court</ToolButton>
+          <span className="mx-1 w-px self-stretch bg-line" aria-hidden />
           <ToolButton active={tool === "select"} onClick={() => { setTool("select"); setPending(null); }}>Move / select</ToolButton>
           {MARKER_KINDS.map((k) => (
             <ToolButton key={k} active={tool === k} onClick={() => { setTool(k); setPending(null); }}>{MARKER_LABEL[k]}</ToolButton>
@@ -348,13 +374,14 @@ export default function CourtDiagram({
 
       <svg
         ref={svgRef}
-        viewBox={`0 0 ${VB_W} ${VB_H}`}
+        viewBox={`0 0 ${VB_W} ${full ? FULL_H : VB_H}`}
         className={cn(
-          "w-full max-w-md rounded-card border border-line bg-surface-2",
+          "w-full rounded-card border border-line bg-surface-2",
+          full ? "max-w-xs" : "max-w-md",
           editable && tool !== "select" && !busy && "cursor-crosshair",
         )}
         role="img"
-        aria-label={[editable ? "Court diagram editor." : "", stepLabel, describeDiagram(d)].filter(Boolean).join(" ")}
+        aria-label={[editable ? "Court diagram editor." : "", full ? "Full court." : "", stepLabel, describeDiagram(d)].filter(Boolean).join(" ")}
         onClick={onSurfaceClick}
         onPointerMove={onSurfacePointerMove}
         onPointerUp={onSurfacePointerUp}
@@ -366,12 +393,18 @@ export default function CourtDiagram({
         </defs>
 
         <CourtMarkings />
+        {full && (
+          <g transform={`translate(0 ${FULL_H}) scale(1 -1)`}>
+            <CourtMarkings />
+          </g>
+        )}
 
         {/* arrows: what happens next from this step (hidden while sliding) */}
         {shownArrows.map((a) => (
           <ArrowShape
             key={a.id}
             a={a}
+            y={Yc}
             head={`url(#${uid}-head)`}
             selected={selected === a.id}
             onSelect={() => { if (editable && !busy) setSelected(a.id); }}
@@ -379,12 +412,12 @@ export default function CourtDiagram({
         ))}
 
         {/* pending arrow start */}
-        {pending && <circle cx={X(pending.x)} cy={Y(pending.y)} r={4} className="fill-flame" />}
+        {pending && <circle cx={X(pending.x)} cy={Yc(pending.y)} r={4} className="fill-flame" />}
 
         {/* markers */}
         {/* balls last, so one held by a player is drawn on top of them */}
         {[...shownMarkers.filter((m) => m.kind !== "ball"), ...shownMarkers.filter((m) => m.kind === "ball")].map((m) => (
-          <Marker key={m.id} m={m} selected={selected === m.id} onPointerDown={(e) => onMarkerPointerDown(e, m.id)} />
+          <Marker key={m.id} m={m} y={Yc} selected={selected === m.id} onPointerDown={(e) => onMarkerPointerDown(e, m.id)} />
         ))}
       </svg>
 
@@ -509,17 +542,19 @@ function StepControls({
  */
 function ArrowShape({
   a,
+  y: Yc,
   head,
   selected,
   onSelect,
 }: {
   a: CourtDiagram["arrows"][number];
+  y: YFn;
   head: string;
   selected: boolean;
   onSelect: () => void;
 }) {
-  const from = { x: X(a.from.x), y: Y(a.from.y) };
-  const to = { x: X(a.to.x), y: Y(a.to.y) };
+  const from = { x: X(a.from.x), y: Yc(a.from.y) };
+  const to = { x: X(a.to.x), y: Yc(a.to.y) };
   const curve = a.curve ?? 0;
   const dash = a.kind === "pass" ? "6 5" : a.kind === "dribble" ? "2 4" : undefined;
   const hasHead = a.kind !== "screen" && a.kind !== "shot";
@@ -598,15 +633,17 @@ function ToolButton({
 
 function Marker({
   m,
+  y: Yc,
   selected,
   onPointerDown,
 }: {
   m: CourtDiagram["markers"][number];
+  y: YFn;
   selected: boolean;
   onPointerDown: (e: React.PointerEvent) => void;
 }) {
   const cx = X(m.x);
-  const cy = Y(m.y);
+  const cy = Yc(m.y);
   const ring = selected ? <circle cx={cx} cy={cy} r={20} className="fill-none stroke-flame" strokeWidth={2} /> : null;
 
   if (m.kind === "opponent") {

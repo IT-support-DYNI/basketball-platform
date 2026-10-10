@@ -70,6 +70,8 @@ export const MAX_DIAGRAM_STEPS = 12;
 export const courtDiagramSchema = z.object({
   ...diagramFrame,
   steps: z.array(z.object(diagramFrame)).max(MAX_DIAGRAM_STEPS - 1).optional(),
+  /** "full" for a vertical full court (lib/diagram-court.ts); absent means half court. */
+  court: z.enum(["half", "full"]).optional(),
 });
 export type DiagramFrame = z.infer<z.ZodObject<typeof diagramFrame>>;
 export type CourtDiagram = z.infer<typeof courtDiagramSchema>;
