@@ -17,11 +17,13 @@ test("Journey 8: a coach draws a play, adds it to U16, and only U16 players and 
   await page.getByLabel("Notes for players").fill("Call HORNS. 4 and 5 up to the elbows, 1 picks a side.");
 
   const svg = page.locator('svg[role="img"]');
-  await svg.scrollIntoViewIfNeeded();
-  const box = (await svg.boundingBox())!;
   const toolbar = page.getByRole("toolbar", { name: "Court diagram tools" });
   await toolbar.getByRole("button", { name: "Player", exact: true }).click();
-  await page.mouse.click(box.x + 0.5 * box.width, box.y + 0.6 * box.height);
+  // Centre the court first: on a short screen its lower half is below the
+  // fold, and a mouse click there lands on nothing.
+  await svg.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  const box = (await svg.boundingBox())!;
+  await page.mouse.click(box.x + 0.5 * box.width, box.y + 0.5 * box.height);
   await expect(svg).toHaveAttribute("aria-label", /1 player/i);
 
   await page.getByRole("button", { name: "Create play" }).click();
@@ -32,7 +34,8 @@ test("Journey 8: a coach draws a play, adds it to U16, and only U16 players and 
   // Coach: put it on U16 only
   await page.getByRole("checkbox", { name: "Blazers U16" }).click();
   await page.getByRole("button", { name: "Save teams" }).click();
-  await expect(page.getByText(/Added to 1 team/)).toBeVisible();
+  // The toast is also announced to screen readers, so the text appears twice.
+  await expect(page.getByText(/Added to 1 team/).first()).toBeVisible();
 
   // U16 player: sees it in the playbook, with the diagram, and was notified
   await logout(page);
