@@ -31,7 +31,12 @@ export function DialogContent({
       <RadixDialog.Overlay className="fixed inset-0 z-50 bg-black/55 data-[state=open]:animate-fade-in motion-reduce:animate-none" />
       <RadixDialog.Content
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2",
+          // Centred with inset-0 + m-auto, not a translate: the fade-in
+          // animation animates `transform` with fill-mode "both", which used
+          // to replace a -translate-1/2 centring and leave every dialog's
+          // top-left corner at the middle of the screen. Height is capped to
+          // the screen and scrolls, so a long dialog is never cut off.
+          "fixed inset-0 z-50 m-auto h-fit max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-md overflow-y-auto",
           "rounded-card border border-line bg-surface p-6 shadow-pop",
           "data-[state=open]:animate-fade-in motion-reduce:animate-none",
           className,
