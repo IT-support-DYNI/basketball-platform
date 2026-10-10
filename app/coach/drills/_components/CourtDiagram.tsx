@@ -24,6 +24,7 @@ import {
   type DiagramFrame,
 } from "@/lib/diagram-steps";
 import { angleAt, arrowPath, pointAt } from "@/lib/diagram-arrows";
+import { DIAGRAM_TEMPLATES, applyTemplate, templateById, templateReplacesSomething } from "@/lib/diagram-templates";
 
 /* viewBox + playable inset (6px margin round a 500×470 half-court, basket top) */
 const VB_W = 500;
@@ -224,6 +225,16 @@ export default function CourtDiagram({
     });
     setSelected(null);
   }
+  function applySet(id: string) {
+    const t = templateById(id);
+    if (!t) return;
+    const what = t.group === "Offence" ? "players and ball" : "defenders";
+    if (templateReplacesSomething(d, t) && !window.confirm(`Replace the ${what} on this step with ${t.name}?`)) return;
+    commit(applyTemplate(d, t, rid));
+    setSelected(null);
+    setPending(null);
+  }
+
   function setCurve(curve: number) {
     if (!selected) return;
     commit({ arrows: d.arrows.map((a) => (a.id === selected ? { ...a, curve: curve || undefined } : a)) });
@@ -259,6 +270,28 @@ export default function CourtDiagram({
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
+      {editable && (
+        <label className="flex max-w-md items-center gap-2 text-xs font-semibold text-ink-dim">
+          Start from a set
+          <select
+            value=""
+            onChange={(e) => applySet(e.target.value)}
+            disabled={busy}
+            className="min-w-0 flex-1 rounded-control border border-line bg-surface-2 px-2 py-1 text-xs text-ink"
+          >
+            <option value="">Choose a formation or zone</option>
+            {(["Offence", "Defence"] as const).map((group) => (
+              <optgroup key={group} label={group === "Offence" ? "Offence (players 1 to 5)" : "Defence (zones)"}>
+                {DIAGRAM_TEMPLATES.filter((t) => t.group === group).map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </label>
+      )}
       {editable && (
         <div
           className="flex flex-wrap gap-1"
