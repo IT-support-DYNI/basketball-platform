@@ -3,8 +3,9 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { listPlans } from "@/lib/training-plans";
-import { planDurationMinutes, TRAINING_PLAN_STATUS_LABEL } from "@/lib/training";
+import { planDurationMinutes, playerVisibility, TRAINING_PLAN_STATUS_LABEL } from "@/lib/training";
 import PageHeader from "@/components/ui/PageHeader";
+import CoachingTabs from "@/components/shared/coaching/CoachingTabs";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/states";
 
@@ -24,8 +25,9 @@ export default async function TrainingPlansPage() {
 
   return (
     <main className="flex flex-col gap-8">
+      <CoachingTabs />
       <PageHeader
-        eyebrow="Coach"
+        eyebrow="Coaching"
         title="Session plans"
         lead="Structured plans for each training session: blocks, drills and a running time."
         actions={<ButtonLink href="/coach/training/plans/new">New plan</ButtonLink>}
@@ -68,8 +70,13 @@ function Group({
                 </p>
               </div>
               {!p.isTemplate && (
-                <span className="flex-none rounded-full border border-line px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-ink-dim">
-                  {TRAINING_PLAN_STATUS_LABEL[p.status as keyof typeof TRAINING_PLAN_STATUS_LABEL]}
+                <span className="flex flex-none flex-col items-end gap-1">
+                  <span className="rounded-full border border-line px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-ink-dim">
+                    {TRAINING_PLAN_STATUS_LABEL[p.status as keyof typeof TRAINING_PLAN_STATUS_LABEL]}
+                  </span>
+                  {p.status === "PUBLISHED" && !playerVisibility(p).visible && (
+                    <span className="text-[11px] font-semibold text-warning">Not linked to a session</span>
+                  )}
                 </span>
               )}
             </Link>

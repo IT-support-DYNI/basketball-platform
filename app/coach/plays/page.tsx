@@ -6,6 +6,7 @@ import { listPlayLibrary } from "@/lib/plays";
 import { PLAY_TYPES, PLAY_TYPE_LABEL, type PlayType } from "@/lib/playbook";
 import type { CourtDiagram } from "@/lib/training";
 import PageHeader from "@/components/ui/PageHeader";
+import CoachingTabs from "@/components/shared/coaching/CoachingTabs";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/states";
 import PlaybookList from "@/components/shared/playbook/PlaybookList";
@@ -29,8 +30,9 @@ export default async function CoachPlaysPage({
 
   return (
     <main className="flex flex-col gap-8">
+      <CoachingTabs />
       <PageHeader
-        eyebrow="Coach"
+        eyebrow="Coaching"
         title="Plays"
         lead="The club's shared play library. Draw a play once, then add it to your team's playbook so players can learn it."
         actions={<ButtonLink href="/coach/plays/new">New play</ButtonLink>}
