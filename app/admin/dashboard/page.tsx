@@ -63,7 +63,7 @@ export default async function AdminDashboardPage() {
             </Link>
           </div>
           {activeTeams.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-dim">No teams yet — create the first one.</p>
+            <p className="mt-3 text-sm text-ink-dim">No teams yet. Create the first one.</p>
           ) : (
             <ul className="mt-3 divide-y divide-line">
               {activeTeams.map((team) => (

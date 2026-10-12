@@ -89,7 +89,7 @@ export default function LiveScoreboard({ initial }: { initial: PublicScoreboard 
                   <span className="scoreboard-team">{m.teamName}</span>
                   <span className="scoreboard-score">
                     {m.ourScore}
-                    <span className="scoreboard-dash">–</span>
+                    <span className="scoreboard-dash">-</span>
                     {m.opponentScore}
                   </span>
                   <span className="scoreboard-team scoreboard-team-away">{opponent}</span>

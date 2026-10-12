@@ -38,14 +38,14 @@ export default function SafeguardingConcernForm() {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        setError(body.error ?? "Something went wrong sending this — please try again.");
+        setError(body.error ?? "Something went wrong sending this. Please try again.");
         setStatus("error");
         return;
       }
       form.reset();
       setStatus("sent");
     } catch {
-      setError("Something went wrong sending this — please try again.");
+      setError("Something went wrong sending this. Please try again.");
       setStatus("error");
     }
   }
@@ -84,7 +84,7 @@ export default function SafeguardingConcernForm() {
       </div>
       <div className="field">
         <label htmlFor="sg-about">Who or what this is about (optional)</label>
-        <input id="sg-about" name="about" type="text" placeholder="A name, a team, a session — whatever's relevant" />
+        <input id="sg-about" name="about" type="text" placeholder="A name, a team, a session: whatever's relevant" />
       </div>
       <div className="field">
         <label htmlFor="sg-description">What happened</label>
@@ -104,7 +104,7 @@ export default function SafeguardingConcernForm() {
         {status === "sending" ? "Sending…" : "Submit report"}
       </button>
       <small>
-        This goes straight to the club&apos;s admin team, not to any coach or player. You can report anonymously — only
+        This goes straight to the club&apos;s admin team, not to any coach or player. You can report anonymously. Only
         the description is required.
       </small>
     </form>

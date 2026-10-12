@@ -16,7 +16,7 @@ export default async function AdminSafeguardingPage() {
       <PageHeader
         eyebrow="Administrator"
         title="Safeguarding reports"
-        lead="Every concern submitted through the club site — reviewed here and nowhere else."
+        lead="Every concern submitted through the club site is reviewed here and nowhere else."
       />
 
       {reports.length === 0 ? (

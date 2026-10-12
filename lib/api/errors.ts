@@ -66,7 +66,7 @@ export class ConflictError extends ApiError {
 }
 
 export class RateLimitError extends ApiError {
-  constructor(message = "Too many requests — slow down and try again shortly.") {
+  constructor(message = "Too many requests. Slow down and try again shortly.") {
     super(429, "RATE_LIMITED", message);
   }
 }

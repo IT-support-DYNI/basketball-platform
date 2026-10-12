@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { route, ok, BadRequestError, ForbiddenError, NotFoundError } from "@/lib/api";
-import { requireAuth, requirePlayerAccess } from "@/lib/authorization";
+import { canViewPlayerContactDetails, requireAuth, requirePlayerAccess } from "@/lib/authorization";
 import { resolvePlayerViewerScope, serializePlayerProfile, canEditPlayerField } from "@/lib/authz/field-visibility";
 import { idParam } from "@/lib/contracts/common";
 import { updatePlayerSchema } from "@/lib/contracts/team";
@@ -35,7 +35,11 @@ export const GET = route<{ id: string }>(async (_req, { params, requestId }) => 
   const { user, memberships, ...profile } = player;
   const visible = serializePlayerProfile(profile, scope);
 
-  return ok({ ...visible, user, memberships }, { requestId });
+  // The login email is contact data: the player (or their guardian), admins
+  // and the player's own staff only — not every signed-in member.
+  const canSeeEmail = scope.kinds.has("SELF") || canViewPlayerContactDetails(session, { id: player.id, teamIds });
+  const { email, ...withoutEmail } = user;
+  return ok({ ...visible, user: canSeeEmail ? { ...withoutEmail, email } : withoutEmail, memberships }, { requestId });
 });
 
 /**

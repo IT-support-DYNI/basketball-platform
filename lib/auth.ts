@@ -208,6 +208,21 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
+  events: {
+    // Signing out only clears the cookie on the client; without this the
+    // AuthSession row stays live and a copied token keeps working until the
+    // JWT expires (up to 7 days). Revoking it makes the jwt callback reject
+    // that token on its next use.
+    async signOut({ token }) {
+      if (typeof token?.sid === "string") {
+        await prisma.authSession.updateMany({
+          where: { tokenId: token.sid, revokedAt: null },
+          data: { revokedAt: new Date() },
+        });
+      }
+    },
+  },
+
   pages: {
     signIn: "/login",
   },

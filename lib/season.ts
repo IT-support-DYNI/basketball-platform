@@ -24,7 +24,7 @@ export const getActiveSeason = cache(async (clubId?: number) => {
   return prisma.season.create({
     data: {
       clubId: club.id,
-      name: `${year}–${year + 1}`,
+      name: `${year}/${String(year + 1).slice(-2)}`,
       startDate: new Date(year, 7, 1), // 1 Aug
       endDate: new Date(year + 1, 6, 31), // 31 Jul
       isActive: true,

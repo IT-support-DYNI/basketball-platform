@@ -28,7 +28,7 @@ export default async function PlayerFeedbackPage() {
           <li key={f.id} className="rounded-card border border-line bg-surface p-5">
             <p className="italic text-slate-700">"{f.message}"</p>
             <p className="mt-2 text-xs text-slate-400">
-              — {f.coach.user.name} · {new Date(f.createdAt).toLocaleDateString()}
+              From {f.coach.user.name} · {new Date(f.createdAt).toLocaleDateString()}
               {f.event ? ` · re: ${f.event.title}` : ""}
             </p>
           </li>

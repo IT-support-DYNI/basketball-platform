@@ -53,6 +53,7 @@ export {
   updatePlayerSchema,
 } from "./team";
 export { createStaffUserSchema, updateUserSchema, setPasswordSchema } from "./user";
+export { createPlaySchema, updatePlaySchema, setPlayAssignmentsSchema, PLAY_TYPES } from "./playbook";
 export { requestUploadSchema, createVideoSchema, assignVideoSchema } from "./video";
 export { submitSafeguardingReportSchema, reviewSafeguardingReportSchema } from "./safeguarding";
 

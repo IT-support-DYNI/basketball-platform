@@ -68,6 +68,7 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  poweredByHeader: false,
   async redirects() {
     return [
       // Performance (evaluation scores) is coach/admin-only — the player page

@@ -62,7 +62,7 @@ describe("GET /api/v1/videos/[id]", () => {
     expect(body).toMatchObject({ id: 1, title: "Defensive slides", playbackUrl: "https://signed/videos/1.mp4" });
     expect(body.assignments).toEqual([
       { id: 10, teamId: 2, playerId: null, team: { id: 2, name: "U16" }, player: null },
-      { id: 11, teamId: null, playerId: 7, team: null, player: { id: 7, user: { id: 77, name: "Other Player" } } },
+      { id: 11, teamId: null, playerId: 7, team: null, player: { id: 7, user: { name: "Other Player" } } },
     ]);
   });
 

@@ -3,13 +3,13 @@ import type { MailMessage } from "./port";
 const CLUB = "DYNI Blazers";
 
 function shell(bodyLines: string[]): string {
-  return [`${CLUB}`, "", ...bodyLines, "", "—", `${CLUB} club platform`].join("\n");
+  return [`${CLUB}`, "", ...bodyLines, "", `${CLUB} club platform`].join("\n");
 }
 
 export function verifyEmailMessage(to: string, name: string, url: string): MailMessage {
   return {
     to,
-    subject: `Confirm your email — ${CLUB}`,
+    subject: `${CLUB}: confirm your email`,
     text: shell([
       `Hi ${name},`,
       "",
@@ -25,7 +25,7 @@ export function verifyEmailMessage(to: string, name: string, url: string): MailM
 export function passwordResetMessage(to: string, name: string, url: string): MailMessage {
   return {
     to,
-    subject: `Reset your password — ${CLUB}`,
+    subject: `${CLUB}: reset your password`,
     text: shell([
       `Hi ${name},`,
       "",
@@ -33,7 +33,7 @@ export function passwordResetMessage(to: string, name: string, url: string): Mai
       "",
       url,
       "",
-      "This link expires in 30 minutes and can only be used once. If it wasn't you, ignore this email — your password hasn't changed.",
+      "This link expires in 30 minutes and can only be used once. If it wasn't you, ignore this email. Your password hasn't changed.",
     ]),
   };
 }
@@ -47,7 +47,7 @@ export function passwordResetMessage(to: string, name: string, url: string): Mai
 export function safeguardingReportSubmittedMessage(to: string, url: string, concernAbout: string | null): MailMessage {
   return {
     to,
-    subject: `New safeguarding report — ${CLUB}`,
+    subject: `${CLUB}: new safeguarding report`,
     text: shell([
       concernAbout ? `A new safeguarding concern was submitted, about ${concernAbout}.` : "A new safeguarding concern was submitted.",
       "",

@@ -71,5 +71,5 @@ export async function eventsForFeedToken(token: string): Promise<{ name: string;
     select: icsSelect,
   });
 
-  return { name: `DYNI Blazers — ${user.name}`, events };
+  return { name: `DYNI Blazers (${user.name})`, events };
 }

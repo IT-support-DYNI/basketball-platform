@@ -94,8 +94,8 @@ function DeleteAccountCard({
     <Card as="section" className="border-danger/30">
       <h2 className="font-display text-sm font-bold uppercase tracking-wide text-danger">Close your account</h2>
       <p className="mt-1 text-sm text-ink-dim">
-        Your personal details are erased. Club records that others rely on — attendance, evaluations,
-        messages you sent — are kept but no longer show your name. This can&rsquo;t be undone.
+        Your personal details are erased. Club records that others rely on (attendance, evaluations,
+        messages you sent) are kept but no longer show your name. This can&rsquo;t be undone.
       </p>
 
       {!open ? (

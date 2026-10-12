@@ -29,14 +29,14 @@ async function activeTeamWithClub(teamId: number) {
 export async function createSelfRegistration(body: RegisterInput): Promise<{ id: number; email: string }> {
   const email = body.email.trim().toLowerCase();
   if (await prisma.user.findUnique({ where: { email } })) {
-    throw new ConflictError("An account with that email already exists — try signing in instead.");
+    throw new ConflictError("An account with that email already exists. Try signing in instead.");
   }
 
   const team = await activeTeamWithClub(body.teamId);
   const threshold = team.club?.minorAgeThreshold ?? 18;
   if (isMinor(new Date(body.dateOfBirth), threshold)) {
     throw new BadRequestError(
-      `Players under ${threshold} can't register themselves — a parent or guardian needs to do it.`,
+      `Players under ${threshold} can't register themselves. A parent or guardian needs to do it.`,
     );
   }
 
@@ -100,7 +100,7 @@ export async function createGuardianRegistration(
   if (clash) {
     throw new ConflictError(
       clash.email === guardianEmail
-        ? "An account with the guardian's email already exists — sign in and add your child from there."
+        ? "An account with the guardian's email already exists. Sign in and add your child from there."
         : "An account with your child's email already exists.",
     );
   }

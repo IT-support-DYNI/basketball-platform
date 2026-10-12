@@ -66,12 +66,14 @@ const plexMono = localFont({
 });
 
 export const metadata: Metadata = {
+  // Absolute URLs for icons, Open Graph images and canonicals.
+  metadataBase: new URL("https://dyniblazers.co.uk"),
   title: {
     default: "DYNI Blazers",
     template: "%s · DYNI Blazers",
   },
   description:
-    "DYNI Blazers club platform — registration, schedule, attendance, communication and player development for members and staff.",
+    "DYNI Blazers club platform: registration, schedule, attendance, communication and player development for members and staff.",
   manifest: "/manifest.webmanifest",
   applicationName: "DYNI Blazers",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "DYNI Blazers" },

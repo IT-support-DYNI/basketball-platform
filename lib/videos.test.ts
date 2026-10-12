@@ -78,7 +78,7 @@ describe("videoAssignmentSelect", () => {
       teamId: true,
       playerId: true,
       team: { select: { id: true, name: true } },
-      player: { select: { id: true, user: { select: { id: true, name: true } } } },
+      player: { select: { id: true, user: { select: { name: true } } } },
     });
   });
 });

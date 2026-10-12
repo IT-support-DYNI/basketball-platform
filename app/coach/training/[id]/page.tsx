@@ -140,10 +140,10 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
                   {rsvpGroups[k].map((r, i) => (
                     <li key={i}>
                       {r.user.name}
-                      {r.note ? <span className="text-slate-400"> — {r.note}</span> : null}
+                      {r.note ? <span className="text-slate-400"> ({r.note})</span> : null}
                     </li>
                   ))}
-                  {rsvpGroups[k].length === 0 && <li className="text-slate-400">—</li>}
+                  {rsvpGroups[k].length === 0 && <li className="text-slate-400">None</li>}
                 </ul>
               </div>
             ))}

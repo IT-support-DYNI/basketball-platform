@@ -42,7 +42,7 @@ export default function LandingNav() {
       <div className="nav-in">
         <Link className="brand" href="/club">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/dyni-blazers-crest.png" alt="DYNI Blazers" />
+          <img src="/brand/dyni-crest-256.png" alt="DYNI Blazers" width={256} height={256} />
           <span className="wordmark">
             DYNI <span>Blazers</span>
           </span>

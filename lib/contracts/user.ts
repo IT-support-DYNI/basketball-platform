@@ -18,4 +18,6 @@ export const updateUserSchema = z.object({
 
 export const setPasswordSchema = z.object({
   newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  /** Required unless the account is on a temporary password (forced change). */
+  currentPassword: z.string().optional(),
 });

@@ -44,7 +44,7 @@ export default async function CoachPerformancePage() {
                 <td className="px-4 py-3 text-slate-600">
                   {p.evaluations[0] ? `${p.evaluations[0].periodType} · ${new Date(p.evaluations[0].periodStart).toLocaleDateString()}` : "None yet"}
                 </td>
-                <td className="px-4 py-3 text-slate-600">{p.evaluations[0] ? Number(p.evaluations[0].overallScore) : "—"}</td>
+                <td className="px-4 py-3 text-slate-600">{p.evaluations[0] ? Number(p.evaluations[0].overallScore) : "Not scored"}</td>
               </tr>
             ))}
             {players.length === 0 && (

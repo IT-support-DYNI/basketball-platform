@@ -109,3 +109,94 @@ No migration — fills the `Drill.courtDiagram` jsonb column.
   the "Closeout & mirror" drill ships with a diagram.
 
 ## W9 complete — training plans + drill library.
+
+## Plays and the team playbook
+
+A **play** is something the team needs to learn (offence, defence, inbounds,
+press break, special situations): a name, a type, notes for players, and a court
+diagram drawn with the same editor as drills.
+
+- **Library:** `/coach/plays`. One shared library per club, like drills. Any
+  coach can read every play, create plays, and make a copy of someone else's.
+  Only the author (or an admin) edits or archives a play (`lib/authz/ability.ts`).
+- **Assigning:** on a play's page a coach ticks the teams they coach;
+  `PUT /api/v1/plays/:id/assignments { teamIds }` sets that set. Teams the caller
+  doesn't coach are refused and other coaches' assignments are left alone
+  (`lib/playbook.ts#planAssignmentChange`). Players and guardians on newly added
+  teams get a `NEW_PLAY` notification (category "Team playbook", push on).
+- **Playbook:** `/player/playbook` and `/guardian/playbook`. A player sees plays
+  assigned to their current team; a guardian sees plays on any team their linked
+  children are actively on (`lib/plays.ts#playbookTeamIds`). Anything else is a
+  404. Archiving a play hides it from every playbook; restoring brings it back.
+- **Data:** `Play` and `PlayAssignment` (migration `20261009120000_playbook`).
+
+### Plays and drills inside session plans
+
+A plan block can link **a drill or a play** from the library (one picker,
+"From the library"; not both). The diagram a block shows is, in order:
+
+1. the block's own diagram, if something is drawn on it;
+2. otherwise the linked play's diagram;
+3. otherwise the linked drill's diagram (`lib/training.ts#effectiveDiagram`).
+
+So picking a drill or play brings its diagram with it; "Customise for this
+session" copies it onto the block to change, and "Use the drill/play diagram
+instead" drops the copy. Players see the same diagram in the calendar dialog and
+on the plan page, plus the drill's or play's name; a play name links to their
+playbook when the play is assigned to their team (`inTeamPlaybook`, computed per
+plan so players never see which other teams have it). Block links are checked
+against the club on save (`assertBlockLinks`). Creating a plan from a template
+keeps each block's own diagram and its linked drill or play.
+
+Not yet: multi-step animation, full court.
+
+## Multi-step diagrams (plays)
+
+Any court diagram (play, drill or plan block) can have up to 12 **steps**. The
+first step is stored at the top level (`markers`, `arrows`, `caption`) and steps
+2 onwards in `steps`, so every diagram saved before steps existed is still a
+valid one-step diagram; no migration (`lib/contracts/training.ts`).
+
+- **Editor:** step buttons 1, 2, 3; "+ Add step" copies the current step with
+  everyone moved along that step's arrows (move/screen move the player,
+  dribble moves player and ball, pass moves the ball;
+  `lib/diagram-steps.ts#advanceAlongArrows`), so the coach only adjusts what's
+  different. Each step has a short description.
+- **Viewer:** previous/next and Play. Markers keep their id across steps, which
+  is what the animation slides (`interpolateMarkers`); arrows show what happens
+  next and hide while players move. With reduced motion it jumps between steps.
+  Frames fall back to a timer if the browser pauses animation frames.
+
+## Arrow types and curves
+
+Seven arrow tools, in standard play-diagram notation (`ArrowShape` in the
+diagram component): **movement** plain line, **cut** the same line in the
+accent colour, **pass** dashed, **dribble** dotted, **screen** ends in a bar
+across the line, **handoff** two ticks across its middle, **shot** a thin line
+ending in a ring. Any arrow can bend: select it and use "Bend" (stored as
+`curve`, -1 to 1; absent means straight, so older diagrams are unchanged).
+Curves are quadratic Beziers (`lib/diagram-arrows.ts`). For "+ Add step", a cut
+moves the player like movement does; handoff and shot move the ball like a pass.
+
+## Starting sets (templates)
+
+"Start from a set" above the diagram tools drops a whole formation onto the
+current step (`lib/diagram-templates.ts`): offence 5 Out, 4 Out 1 In, Horns,
+1-4 High, 1-4 Low, Box (players 1 to 5, ball with 1), and defence 2-3, 3-2 and
+1-3-1 zones. An offence set replaces only the players and ball; a zone replaces
+only the defenders; cones, the coach and arrows stay. So Horns then 2-3 Zone
+gives an offence against a zone. The coach is asked before anything they placed
+is replaced. Every marker gets a fresh id, so steps still animate correctly.
+Perimeter spots are outside the drawn 3-point line; elbows sit on the corners of
+the free-throw line.
+
+## Half and full court
+
+"Half court" / "Full court" in the diagram tools. A full court is vertical: the
+usual half court on top, mirrored below, for press breaks, transition and
+full-court drills. Stored as `court: "full"` on the diagram (absent means half,
+so older diagrams are unchanged). Coordinates are 0 to 1 over whichever court is
+shown; switching half to full moves everything into the top half (nothing lost),
+and full to half keeps the top half and asks before removing anything in the far
+half (`lib/diagram-court.ts`). Starting sets on a full court go in the top half.
+

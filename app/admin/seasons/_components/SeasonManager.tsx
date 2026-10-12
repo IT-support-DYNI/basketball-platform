@@ -97,7 +97,7 @@ export default function SeasonManager({ initial }: { initial: Season[] }) {
         {creating && (
           <div className="mt-3 rounded-card border border-line bg-surface-2 p-4">
             <div className="grid gap-3 sm:grid-cols-3">
-              <TextField label="Name" placeholder="2026–2027" value={name} onChange={(e) => setName(e.target.value)} />
+              <TextField label="Name" placeholder="2026/27" value={name} onChange={(e) => setName(e.target.value)} />
               <TextField label="Starts" type="date" value={start} onChange={(e) => setStart(e.target.value)} />
               <TextField label="Ends" type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
             </div>

@@ -133,13 +133,13 @@ function MfaCard({
 
       {status.recommended && !status.enabled && (
         <Alert tone="warning" className="mt-3">
-          You&apos;re an administrator — please turn this on. It protects the whole club&apos;s data if your password is ever stolen.
+          You&apos;re an administrator, so please turn this on. It protects the whole club&apos;s data if your password is ever stolen.
         </Alert>
       )}
 
       {recovery && (
         <Alert tone="info" className="mt-3">
-          <p className="font-semibold">Save your recovery codes now — they won&apos;t be shown again.</p>
+          <p className="font-semibold">Save your recovery codes now. They won&apos;t be shown again.</p>
           <div className="mt-2 grid grid-cols-2 gap-1 font-mono text-xs">
             {recovery.map((c) => (
               <span key={c}>{c}</span>

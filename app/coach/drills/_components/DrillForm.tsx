@@ -176,14 +176,14 @@ export default function DrillForm({
       />
       <TextField
         label="Tags"
-        hint="Comma-separated — helps you find it later."
+        hint="Comma-separated. Helps you find it later."
         defaultValue={v.tags.join(", ")}
         onChange={(e) => set("tags", csv(e.target.value))}
       />
 
       <div className="flex flex-col gap-1.5">
         <span className="text-sm font-semibold text-ink">Court diagram</span>
-        <span className="text-xs text-ink-dim">Optional — place players, cones and a ball, and draw movement or pass arrows.</span>
+        <span className="text-xs text-ink-dim">Optional. Place players, cones and a ball, and draw movement or pass arrows.</span>
         <CourtDiagramEditor value={v.courtDiagram ?? EMPTY_DIAGRAM} onChange={(cd: CourtDiagram) => set("courtDiagram", cd)} />
       </div>
 

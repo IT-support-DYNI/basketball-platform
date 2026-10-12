@@ -18,8 +18,8 @@ export default function PublicAboutPage() {
           <p className="eyebrow">About the club</p>
           <h1>A club, not an academy pipeline.</h1>
           <p className="lead">
-            We&apos;re run by Diverse Youth Northern Ireland — a community basketball club running juniors through
-            seniors out of one gym. Some of our players will go on to play at a high level. Most won&apos;t — and the
+            We&apos;re run by Diverse Youth Northern Ireland: a community basketball club running juniors through
+            seniors out of one gym. Some of our players will go on to play at a high level. Most won&apos;t, and the
             season should be worth it either way.
           </p>
         </div>
@@ -43,11 +43,11 @@ export default function PublicAboutPage() {
         <div className="wrap" style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
           <div className="card">
             <p className="card-label">Where we play</p>
-            <p>This is where the club&apos;s venue name, address and parking notes go — ask the club to add its real details here.</p>
+            <p>This is where the club&apos;s venue name, address and parking notes go. Ask the club to add its real details here.</p>
           </div>
           <div className="card">
             <p className="card-label">Get in touch</p>
-            <p>This is where the club&apos;s contact email and safeguarding lead go — ask the club to add its real details here.</p>
+            <p>This is where the club&apos;s contact email and safeguarding lead go. Ask the club to add its real details here.</p>
             <Link className="btn btn-primary btn-sm" href="/register" style={{ marginTop: 14 }}>
               Register interest
             </Link>

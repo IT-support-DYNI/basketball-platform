@@ -63,7 +63,7 @@ import LandingFooter from "@/app/club/_components/LandingFooter";
 // "DYNI Blazers · DYNI Blazers" in the tab (Next applies the nearest
 // template, then the root's, in sequence). Description-only override.
 export const metadata: Metadata = {
-  description: "DYNI Blazers basketball club — teams, players and coaches.",
+  description: "DYNI Blazers basketball club: teams, players and coaches.",
 };
 
 /** The public club site's own shell — separate from the internal app's

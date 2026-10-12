@@ -2,6 +2,7 @@
 
 import { FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { safeExternalHref } from "@/lib/safe-url";
 
 type Highlight = { id: number; title: string; url: string; uploaded?: boolean };
 
@@ -134,7 +135,7 @@ export default function HighlightsSection({
 
       {highlights.length === 0 && !adding && (
         <p className="mt-2 text-sm text-ink-dim">
-          {editable ? "Add a highlight — link to where it's hosted, or upload the clip directly." : "No highlights yet."}
+          {editable ? "Add a highlight: link to where it's hosted, or upload the clip directly." : "No highlights yet."}
         </p>
       )}
 
@@ -150,7 +151,7 @@ export default function HighlightsSection({
                   </span>
                 ) : (
                   <a
-                    href={h.url}
+                    href={safeExternalHref(h.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink hover:text-flame-on-bg"
@@ -200,7 +201,7 @@ export default function HighlightsSection({
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={'Title — e.g. "U16 vs Northgate — 24pts"'}
+            placeholder={'Title, e.g. "U16 vs Northgate, 24pts"'}
             required
             maxLength={80}
             className="w-full rounded-control border border-line bg-surface-2 px-3 py-2 text-sm outline-none focus:border-flame-ink"

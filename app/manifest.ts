@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "DYNI Blazers",
     short_name: "DYNI Blazers",
     description:
-      "DYNI Blazers club platform — schedule, attendance, communication and player development for members and staff.",
+      "DYNI Blazers club platform: schedule, attendance, communication and player development for members and staff.",
     start_url: "/",
     display: "standalone",
     background_color: "#0b0b0f",

@@ -28,10 +28,11 @@ const shortLines = z.array(z.string().trim().min(1).max(200)).max(20);
  * the top). The shape is owned by components/training/CourtDiagram.
  */
 export const MARKER_KINDS = ["player", "opponent", "cone", "ball", "coach"] as const;
-export const ARROW_KINDS = ["move", "pass", "dribble", "screen"] as const;
+export const ARROW_KINDS = ["move", "cut", "pass", "dribble", "screen", "handoff", "shot"] as const;
 const norm = z.number().min(0).max(1);
 
-export const courtDiagramSchema = z.object({
+/** One step of a diagram: where everyone is, and what happens next (arrows). */
+const diagramFrame = {
   markers: z
     .array(
       z.object({
@@ -50,10 +51,29 @@ export const courtDiagramSchema = z.object({
         kind: z.enum(ARROW_KINDS),
         from: z.object({ x: norm, y: norm }),
         to: z.object({ x: norm, y: norm }),
+        /** Bend: 0 or absent is straight; -1 to 1 curves it to one side or the other. */
+        curve: z.number().min(-1).max(1).optional(),
       }),
     )
     .max(30),
+  /** What happens in this step, shown under the court. */
+  caption: z.string().trim().max(200).optional(),
+};
+
+export const MAX_DIAGRAM_STEPS = 12;
+
+/**
+ * The top-level markers/arrows are step 1, so every diagram saved before steps
+ * existed is still a valid one-step diagram. `steps` holds step 2 onwards; a
+ * marker keeps its id across steps, which is what the animation follows.
+ */
+export const courtDiagramSchema = z.object({
+  ...diagramFrame,
+  steps: z.array(z.object(diagramFrame)).max(MAX_DIAGRAM_STEPS - 1).optional(),
+  /** "full" for a vertical full court (lib/diagram-court.ts); absent means half court. */
+  court: z.enum(["half", "full"]).optional(),
 });
+export type DiagramFrame = z.infer<z.ZodObject<typeof diagramFrame>>;
 export type CourtDiagram = z.infer<typeof courtDiagramSchema>;
 
 export const createDrillSchema = z.object({
@@ -96,7 +116,12 @@ export const trainingBlockSchema = z.object({
   durationMinutes: z.number().int().min(1).max(180).optional(),
   notes: z.string().trim().max(2000).optional(),
   drillId: z.number().int().positive().nullable().optional(),
+  /** A play from the library this block practises. A block links a drill or a play, not both. */
+  playId: z.number().int().positive().nullable().optional(),
   courtDiagram: courtDiagramSchema.nullable().optional(),
+}).refine((b) => !(b.drillId && b.playId), {
+  message: "A block can link a drill or a play, not both.",
+  path: ["playId"],
 });
 
 export const createTrainingPlanSchema = z.object({

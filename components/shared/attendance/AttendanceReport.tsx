@@ -104,7 +104,7 @@ export default function AttendanceReport({ teams }: { teams: Team[] }) {
                 <td className="px-4 py-2.5 text-right tabular text-ink-dim">{r.absent}</td>
                 <td className="px-4 py-2.5 text-right tabular text-ink-dim">{r.excused}</td>
                 <td className="px-4 py-2.5 text-right tabular font-semibold text-ink">
-                  {r.percentage != null ? `${r.percentage}%` : "—"}
+                  {r.percentage != null ? `${r.percentage}%` : "No data"}
                 </td>
               </tr>
             ))}

@@ -108,7 +108,7 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
       <fieldset className="space-y-2 rounded-control border border-flame/25 bg-flame/[0.04] p-4">
         <legend className="px-1 font-mono text-[11px] uppercase tracking-wider text-flame-on-bg">Your bio</legend>
         <p className="text-xs text-ink-faint">
-          Shown at the top of your profile — club members and coaches see this, and, if the club approves
+          Shown at the top of your profile. Club members and coaches see this, and, if the club approves
           your profile as public, so could anyone scouting for talent. Make it count.
         </p>
         <textarea
@@ -116,7 +116,7 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
           onChange={on("bio")}
           rows={4}
           maxLength={1000}
-          placeholder="Position, playing style, what you're working on, achievements — your call."
+          placeholder="Position, playing style, what you're working on, achievements: your call."
           className={field}
         />
         <p className="text-right text-[11px] text-ink-faint">{v.bio.length}/1000</p>
@@ -158,7 +158,7 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
         </div>
         {v.hasPreviousClub === "yes" && (
           <label className="block text-xs text-ink-dim">
-            Which club, and when? (e.g. Belfast Star U14, 2023–2025)
+            Which club, and when? (e.g. Belfast Star U14, 2023 to 2025)
             <input value={v.previousClubs} onChange={on("previousClubs")} required minLength={2} maxLength={300} className={field} />
           </label>
         )}
@@ -173,7 +173,7 @@ export default function EditProfileForm({ playerId, initial }: { playerId: numbe
           <label className="text-xs text-ink-dim">Weight (kg)<input type="number" min={20} max={200} value={v.weightKg} onChange={on("weightKg")} className={field} /></label>
           <label className="text-xs text-ink-dim">Preferred hand
             <select value={v.preferredHand} onChange={on("preferredHand")} className={field}>
-              <option value="">—</option>
+              <option value="">Not set</option>
               <option value="RIGHT">Right</option>
               <option value="LEFT">Left</option>
               <option value="AMBIDEXTROUS">Both</option>

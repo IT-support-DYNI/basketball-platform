@@ -76,7 +76,10 @@ export const GET = route<{ id: string }>(async (req: NextRequest, { params }) =>
 });
 
 function csvCell(value: unknown): string {
-  const s = String(value ?? "");
+  let s = String(value ?? "");
+  // A name like "=HYPERLINK(...)" would run as a formula when the export is
+  // opened in Excel/Sheets; a leading apostrophe keeps it plain text.
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

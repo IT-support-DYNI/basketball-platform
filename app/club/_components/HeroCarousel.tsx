@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Fragment, useEffect, useRef, useState } from "react";
 import StatCount from "./StatCount";
+import ClubImg from "./ClubImg";
+import type { ClubPhotoSlug } from "@/lib/club-photos";
 
 export type HeroSlide = {
   label: string;
@@ -13,6 +15,9 @@ export type HeroSlide = {
   lead: string;
   tabTitle: string;
   ctas: { label: string; href: string; primary?: boolean }[];
+  /** Fills the slide's photo frame (hidden below 860px). */
+  photo?: ClubPhotoSlug;
+  photoPosition?: string;
 };
 
 const HOLD_MS = 7000;
@@ -169,8 +174,14 @@ export default function HeroCarousel({
                 </div>
               )}
             </div>
-            <div className="slide-photo">
-              <div className="photo"></div>
+            <div className={`slide-photo${slide.photo ? " has-photo" : ""}`}>
+              {slide.photo ? (
+                <div className="photo has-img">
+                  <ClubImg slug={slide.photo} sizes="100vw" priority={i === 0} position={slide.photoPosition} />
+                </div>
+              ) : (
+                <div className="photo"></div>
+              )}
             </div>
           </article>
         ))}

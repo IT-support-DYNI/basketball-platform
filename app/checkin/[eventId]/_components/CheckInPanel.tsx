@@ -41,7 +41,7 @@ export default function CheckInPanel({
         if (body.alreadyCheckedIn) {
           setMessage("You're already checked in.");
         } else {
-          setMessage(body.status === "LATE" ? "Checked in — marked late." : "Checked in.");
+          setMessage(body.status === "LATE" ? "Checked in (marked late)." : "Checked in.");
         }
         setRecord({
           status: body.status ?? "PRESENT",
@@ -124,7 +124,7 @@ export default function CheckInPanel({
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
                 className="w-32 rounded-control border border-line bg-surface-2 px-3 py-2 text-lg tracking-[0.3em]"
-                placeholder="––––"
+                placeholder="0000"
               />
             </label>
             <button

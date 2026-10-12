@@ -9,7 +9,7 @@ export default function DisplaySettingsPage() {
       <PageHeader
         eyebrow="Settings"
         title="Display & accessibility"
-        lead="How the app looks on your account — these follow you to any device you sign in on."
+        lead="How the app looks on your account. These follow you to any device you sign in on."
       />
       <DisplaySettings />
     </main>

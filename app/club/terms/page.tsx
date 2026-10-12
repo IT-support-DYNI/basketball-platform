@@ -16,7 +16,7 @@ const SECTIONS: { n: string; title: string; body: ReactNode }[] = [
   {
     n: "2",
     title: "Membership and registration",
-    body: "Registering doesn't guarantee a place on a team — an administrator reviews and approves every registration, and may decline one (for example if a team is full, or eligibility information is missing). We'll always tell you why if a registration isn't approved.\n\nYou agree to keep your registration information accurate and up to date, particularly emergency contact and medical details — a coach may need to act on them without warning.",
+    body: "Registering doesn't guarantee a place on a team. An administrator reviews and approves every registration, and may decline one (for example if a team is full, or eligibility information is missing). We'll always tell you why if a registration isn't approved.\n\nYou agree to keep your registration information accurate and up to date, particularly emergency contact and medical details, as a coach may need to act on them without warning.",
   },
   {
     n: "3",
@@ -26,27 +26,27 @@ const SECTIONS: { n: string; title: string; body: ReactNode }[] = [
   {
     n: "4",
     title: "Code of conduct",
-    body: "Every member agrees to the club's Code of Conduct as part of registration — see that document for the full detail. Breaching it (on or off the court, including online in team messages) may lead to a warning, suspension, or in serious cases removal from the club, at the club's discretion and following its own fair process.",
+    body: "Every member agrees to the club's Code of Conduct as part of registration (see that document for the full detail. Breaching it (on or off the court, including online in team messages) may lead to a warning, suspension, or in serious cases removal from the club, at the club's discretion and following its own fair process.",
   },
   {
     n: "5",
     title: "Attendance, sessions and changes",
-    body: "Training and match sessions are published on the club calendar; you're responsible for checking it and RSVPing where asked. The club may reschedule, relocate or cancel a session — we'll do our best to give reasonable notice, but circumstances (weather, venue availability, coach illness) aren't always predictable.\n\nCheck-in at a session (in person, by QR code or venue PIN) creates an attendance record used for safety accounting and, where relevant, development tracking.",
+    body: "Training and match sessions are published on the club calendar; you're responsible for checking it and RSVPing where asked. The club may reschedule, relocate or cancel a session. We'll do our best to give reasonable notice, but circumstances (weather, venue availability, coach illness) aren't always predictable.\n\nCheck-in at a session (in person, by QR code or venue PIN) creates an attendance record used for safety accounting and, where relevant, development tracking.",
   },
   {
     n: "6",
     title: "Health, safety and medical information",
-    body: "You (or, for a junior, your guardian) must tell the club about any medical condition, allergy or welfare need that could affect participation or that staff should know about in an emergency, and keep that information current. By registering, you also accept the club's Emergency Medical Treatment Consent, which authorises staff to arrange emergency care if you can't be reached — see that document for the specifics.\n\nBasketball carries an inherent risk of injury. The club takes reasonable care (qualified coaching, appropriate supervision, First Aid-trained staff at sessions) but can't eliminate that risk, and members and guardians take part on that understanding.",
+    body: "You (or, for a junior, your guardian) must tell the club about any medical condition, allergy or welfare need that could affect participation or that staff should know about in an emergency, and keep that information current. By registering, you also accept the club's Emergency Medical Treatment Consent, which authorises staff to arrange emergency care if you can't be reached (see that document for the specifics).\n\nBasketball carries an inherent risk of injury. The club takes reasonable care (qualified coaching, appropriate supervision, First Aid-trained staff at sessions) but can't eliminate that risk, and members and guardians take part on that understanding.",
   },
   {
     n: "7",
     title: "Photography, video and public profiles",
-    body: "The club may take photos or video at sessions and matches for the team channel, the club website or social media, but only uses images of a specific member where separate media consent has been given for them — see the Photography & Media Consent document. This is opt-in and can be withdrawn at any time.",
+    body: "The club may take photos or video at sessions and matches for the team channel, the club website or social media, but only uses images of a specific member where separate media consent has been given for them (see the Photography & Media Consent document. This is opt-in and can be withdrawn at any time.",
   },
   {
     n: "8",
     title: "Safeguarding",
-    body: "The club is committed to the welfare of every member, especially junior players. All coaches and volunteers working with juniors are vetted (AccessNI checks) and given safeguarding training. Anyone — a member, a guardian, or anyone else — can raise a safeguarding concern at dyniblazers.co.uk/club/safeguarding at any time; it goes straight to the club's admin team, and can be made anonymously if preferred.",
+    body: "The club is committed to the welfare of every member, especially junior players. All coaches and volunteers working with juniors are vetted (AccessNI checks) and given safeguarding training. Anyone (a member, a guardian or anyone else) can raise a safeguarding concern at dyniblazers.co.uk/club/safeguarding at any time; it goes straight to the club's admin team, and can be made anonymously if preferred.",
   },
   {
     n: "9",
@@ -61,7 +61,7 @@ const SECTIONS: { n: string; title: string; body: ReactNode }[] = [
   {
     n: "10",
     title: "Messaging and platform use",
-    body: "Team and direct messages within the platform are for club-related communication. They're moderated after the fact rather than in real time, so members and guardians are expected to use the same standard of conduct as anywhere else in the club. Staff messaging junior players is limited to what's needed for club business (session logistics, feedback, and similar) — never one-to-one outside a club context.",
+    body: "Team and direct messages within the platform are for club-related communication. They're moderated after the fact rather than in real time, so members and guardians are expected to use the same standard of conduct as anywhere else in the club. Staff messaging junior players is limited to what's needed for club business (session logistics, feedback, and similar), never one-to-one outside a club context.",
   },
   {
     n: "11",
@@ -76,7 +76,7 @@ const SECTIONS: { n: string; title: string; body: ReactNode }[] = [
   {
     n: "13",
     title: "Changes to these terms",
-    body: "We may update these terms from time to time — for example as the platform gains new features (fees, live scorekeeping) or the club's own policies change. Continuing to take part after a material change means you accept the update; for anything significant, we'll ask members and guardians to explicitly re-accept, the same way as for other consent documents.",
+    body: "We may update these terms from time to time, for example as the platform gains new features (fees, live scorekeeping) or the club's own policies change. Continuing to take part after a material change means you accept the update; for anything significant, we'll ask members and guardians to explicitly re-accept, the same way as for other consent documents.",
   },
   {
     n: "14",

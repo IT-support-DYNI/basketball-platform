@@ -49,7 +49,7 @@ export default function SessionStatusControls({
       {recurring &&
         (confirmSeries ? (
           <button type="button" disabled={loading} onClick={() => setStatus("CANCELLED", "series")} className={`${btn} bg-danger text-on-flame`}>
-            Confirm — cancel all future
+            Confirm: cancel all future
           </button>
         ) : (
           <button type="button" disabled={loading} onClick={() => setConfirmSeries(true)} className={`${btn} border border-line text-ink-dim hover:text-ink`}>

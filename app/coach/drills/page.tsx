@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { getTenantContext } from "@/lib/tenant";
 import { listDrills } from "@/lib/drills";
 import PageHeader from "@/components/ui/PageHeader";
+import CoachingTabs from "@/components/shared/coaching/CoachingTabs";
 import { ButtonLink } from "@/components/ui/Button";
 import DrillLibrary from "@/app/coach/drills/_components/DrillLibrary";
 
@@ -16,8 +17,9 @@ export default async function CoachDrillsPage() {
 
   return (
     <main className="flex flex-col gap-8">
+      <CoachingTabs />
       <PageHeader
-        eyebrow="Coach"
+        eyebrow="Coaching"
         title="Drill library"
         lead="The club's shared bank of practice drills. Anything here can be dropped into a session plan."
         actions={<ButtonLink href="/coach/drills/new">New drill</ButtonLink>}

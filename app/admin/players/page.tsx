@@ -52,8 +52,8 @@ export default async function AdminPlayersPage() {
                       {m.team.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-2.5 tabular text-ink-dim">{m.jerseyNumber ?? "—"}</td>
-                  <td className="px-4 py-2.5 text-ink-dim">{m.position ?? "—"}</td>
+                  <td className="px-4 py-2.5 tabular text-ink-dim">{m.jerseyNumber ?? "Not set"}</td>
+                  <td className="px-4 py-2.5 text-ink-dim">{m.position ?? "Not set"}</td>
                   <td className="px-4 py-2.5"><StatusBadge status={m.status} /></td>
                 </tr>
               ))}

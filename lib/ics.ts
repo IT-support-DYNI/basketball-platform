@@ -73,7 +73,7 @@ function vevent(e: IcsEvent, now: Date): string[] {
     `DTSTART:${toIcsUtc(e.startAt)}`,
     `DTEND:${toIcsUtc(e.endAt)}`,
     `SUMMARY:${esc(e.title)}`,
-    `DESCRIPTION:${esc(descParts.join(" — "))}`,
+    `DESCRIPTION:${esc(descParts.join(". "))}`,
     `LAST-MODIFIED:${toIcsUtc(e.updatedAt)}`,
     `STATUS:${e.status === "CANCELLED" ? "CANCELLED" : "CONFIRMED"}`,
   ];

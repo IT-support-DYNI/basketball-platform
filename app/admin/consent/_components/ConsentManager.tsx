@@ -90,7 +90,7 @@ export default function ConsentManager({ docs }: { docs: Doc[] }) {
           />
           <label className="flex items-center gap-2 text-sm text-ink-dim">
             <input type="checkbox" checked={nt.requiredForPlayers} onChange={(e) => setNt({ ...nt, requiredForPlayers: e.target.checked })} className="h-4 w-4 accent-flame" />
-            Required — players must accept before using the app
+            Required: players must accept before using the app
           </label>
           <button disabled={busy} className="rounded-full bg-flame px-5 py-2 text-sm font-bold text-on-flame disabled:opacity-50">
             Publish

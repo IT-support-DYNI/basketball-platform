@@ -8,6 +8,7 @@ import { requireAuth, requireRole } from "@/lib/authorization";
 import { authorize } from "@/lib/authz/guard";
 import { bulkAttendanceSchema } from "@/lib/contracts/attendance";
 import { prisma } from "@/lib/prisma";
+import { rosterPlayerFilter } from "@/lib/roster";
 
 export const GET = route<{ id: string }>(async (_req, { params }) => {
   const session = requireAuth(await getServerSession(authOptions));
@@ -39,6 +40,17 @@ export const PUT = route<{ id: string }>(async (req: NextRequest, { params }) =>
 
   const body = bulkAttendanceSchema.parse(await req.json());
   const coachProfileId = session.user.coachProfileId!;
+
+  // Only players on this event's team can be marked — otherwise a coach could
+  // write attendance history onto any player in the club.
+  const rostered = await prisma.playerProfile.findMany({
+    where: { AND: [rosterPlayerFilter(event.teamId), { id: { in: body.records.map((r) => r.playerId) } }] },
+    select: { id: true },
+  });
+  const allowed = new Set(rostered.map((p) => p.id));
+  if (body.records.some((r) => !allowed.has(r.playerId))) {
+    throw new ForbiddenError("One or more of those players isn't on this team.");
+  }
 
   const results = await prisma.$transaction(
     body.records.map((record) =>

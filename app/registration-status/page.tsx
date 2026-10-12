@@ -33,7 +33,7 @@ export default async function RegistrationStatusPage() {
 
   const body =
     player.registrationStatus === "PENDING"
-      ? `You applied to join ${player.registrationTeam?.name ?? "a team"}. An administrator will review your registration shortly — you'll get a notification the moment there's a decision.`
+      ? `You applied to join ${player.registrationTeam?.name ?? "a team"}. An administrator will review your registration shortly, and you'll get a notification the moment there's a decision.`
       : player.registrationStatus === "CHANGES_REQUESTED"
         ? "An administrator has asked for a change before your registration can be approved."
         : "If you think this is a mistake, please contact the club directly.";
@@ -68,7 +68,7 @@ export default async function RegistrationStatusPage() {
           ) : (
             <li className="flex flex-col gap-2 text-warning">
               <span className="flex items-center gap-2">
-                <Dot /> Confirm your email — check {player.user.email} for the link
+                <Dot /> Confirm your email: check {player.user.email} for the link
               </span>
               <ResendVerificationButton />
             </li>

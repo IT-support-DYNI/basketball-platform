@@ -9,28 +9,64 @@ import Ticker from "@/app/club/_components/Ticker";
 import RegisterInterestForm from "@/app/club/_components/RegisterInterestForm";
 import RevealBlock from "@/app/club/_components/RevealBlock";
 import StoryTabs from "@/app/club/_components/StoryTabs";
+import ClubImg from "@/app/club/_components/ClubImg";
+import { clubPhoto, type ClubPhotoSlug } from "@/lib/club-photos";
+import { SITE_URL } from "@/lib/site";
 
 // Bypasses the root layout's "%s · DYNI Blazers" template for a one-off
 // exact title, rather than doubling up ("… · DYNI Blazers · DYNI Blazers").
 export const metadata: Metadata = {
-  title: { absolute: "DYNI Blazers — A club, not an academy" },
+  title: { absolute: "DYNI Blazers | A club, not an academy" },
   description: "A community basketball club run by Diverse Youth Northern Ireland. Junior to senior, one club.",
+  alternates: { canonical: `${SITE_URL}/club` },
+  openGraph: {
+    type: "website",
+    url: `${SITE_URL}/club`,
+    siteName: "DYNI Blazers",
+    title: "DYNI Blazers | A club, not an academy",
+    description: "A community basketball club run by Diverse Youth Northern Ireland. Junior to senior, one club.",
+    images: [{ url: `${SITE_URL}/brand/dyni-crest-512.png`, width: 512, height: 512, alt: "DYNI Blazers crest" }],
+  },
+};
+
+/**
+ * Tells search engines who the club is and which image is its logo (Google
+ * uses `logo` for the knowledge panel and the site name for results).
+ * https://developers.google.com/search/docs/appearance/structured-data/organization
+ */
+const CLUB_JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SportsOrganization",
+      "@id": `${SITE_URL}/#club`,
+      name: "DYNI Blazers",
+      sport: "Basketball",
+      url: `${SITE_URL}/club`,
+      logo: `${SITE_URL}/brand/dyni-crest-512.png`,
+      parentOrganization: { "@type": "Organization", name: "Diverse Youth Northern Ireland" },
+      address: { "@type": "PostalAddress", addressLocality: "Belfast", addressRegion: "Northern Ireland", addressCountry: "GB" },
+    },
+    { "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "DYNI Blazers", url: SITE_URL, publisher: { "@id": `${SITE_URL}/#club` } },
+  ],
 };
 
 const HERO_SLIDES: HeroSlide[] = [
   {
-    label: "Hero 01 — Culture",
+    label: "Hero 01: Culture",
     eyebrow: "A club, not an academy",
     words: ["Everyone", "develops", "here."],
-    lead: "Juniors through seniors on the same floor, to the same standards. No trial-and-cut, no season on the bench — if you turn up, you get coached.",
+    lead: "Juniors through seniors on the same floor, to the same standards. No trial-and-cut, no season on the bench. If you turn up, you get coached.",
     tabTitle: "The culture",
     ctas: [
       { label: "Start registration", href: "/register", primary: true },
       { label: "What we're about", href: "#about" },
     ],
+    photo: "warm-up-line",
+    photoPosition: "50% 45%",
   },
   {
-    label: "Hero 02 — Teams",
+    label: "Hero 02: Teams",
     eyebrow: "Junior to senior · one club",
     words: ["Every", "squad,", "one", "floor."],
     lead: "From our youngest juniors to the senior squad, everyone trains out of the same hall, with the same coaching staff and the same expectations.",
@@ -39,25 +75,31 @@ const HERO_SLIDES: HeroSlide[] = [
       { label: "All teams", href: "/club/teams" },
       { label: "Full roster", href: "/club/roster" },
     ],
+    photo: "squad-with-balls",
+    photoPosition: "50% 35%",
   },
   {
-    label: "Hero 03 — Trials",
+    label: "Hero 03: Trials",
     eyebrow: "Open trials",
     words: ["Come", "down", "and", "play."],
-    lead: "Bring trainers and a water bottle — we'll sort the rest. Come down and see if you like us.",
+    lead: "Bring trainers and a water bottle and we'll sort the rest. Come down and see if you like us.",
     tabTitle: "Open trials",
     ctas: [{ label: "Register for trials", href: "/register", primary: true }],
+    photo: "one-on-one",
+    photoPosition: "50% 40%",
   },
   {
-    label: "Hero 04 — Coaches",
+    label: "Hero 04: Coaches",
     eyebrow: "Our coaches",
     words: ["Real", "coaching,", "every", "session."],
-    lead: "Every coach on our roster is here every week, not just for match day — meet the people who'll actually be running your sessions.",
+    lead: "Every coach on our roster is here every week, not just for match day. Meet the people who'll actually be running your sessions.",
     tabTitle: "Our coaches",
     ctas: [
       { label: "Meet the coaches", href: "/club/coaches" },
       { label: "Safeguarding", href: "/club/safeguarding" },
     ],
+    photo: "coach-instructions",
+    photoPosition: "50% 30%",
   },
 ];
 
@@ -74,7 +116,7 @@ const CULTURE_POINTS = [
   {
     n: "01",
     title: "Everyone develops",
-    body: "Every player gets a development plan and feedback they can actually act on — not a score in a coach's notebook.",
+    body: "Every player gets a development plan and feedback they can actually act on, not a score in a coach's notebook.",
   },
   {
     n: "02",
@@ -110,14 +152,15 @@ const AUDIENCE_CARDS = [
   },
 ];
 
-const MOMENTS = [
-  { caption: "Match day", big: true },
-  { caption: "Training session" },
-  { caption: "Juniors on the floor" },
-  { caption: "Free-throw drill" },
-  { caption: "Open trials" },
-  { caption: "Senior squad" },
-  { caption: "Club moment", wide: true },
+/** The landing's gallery preview — the full set lives on /club/moments. */
+const MOMENTS: { slug: ClubPhotoSlug; big?: boolean; wide?: boolean }[] = [
+  { slug: "drive-to-the-rim", big: true },
+  { slug: "contested-shot" },
+  { slug: "dribble-past-defender" },
+  { slug: "shot-from-range" },
+  { slug: "attacking-the-gap" },
+  { slug: "scrimmage-under-basket" },
+  { slug: "nothing-but-net", wide: true },
 ];
 
 const SAFE_CARDS = [
@@ -125,7 +168,7 @@ const SAFE_CARDS = [
   { title: "Guardian consent", body: "Photos, profiles and video are opt-in per player, and reversible at any time." },
   {
     title: "A named lead, on request",
-    body: "The club has a designated safeguarding lead — ask at registration or via the club's contact details for who to reach and how.",
+    body: "The club has a designated safeguarding lead. Ask at registration or via the club's contact details for who to reach and how.",
   },
   { title: "Open sessions", body: "Parents and guardians are welcome to stay and watch any session, any age group." },
 ];
@@ -142,6 +185,7 @@ export default async function ClubLandingPage() {
 
   return (
     <main id="top">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(CLUB_JSON_LD) }} />
       <HeroCarousel slides={HERO_SLIDES} stats={statTiles} />
 
       {/* Live / latest match score — right under the hero so it's the first
@@ -152,7 +196,9 @@ export default async function ClubLandingPage() {
 
       <section className="culture culture-dark" id="about">
         <div className="wrap culture-in">
-          <RevealBlock className="photo"></RevealBlock>
+          <RevealBlock className="photo has-img">
+            <ClubImg slug="warm-up-line" sizes="(max-width: 900px) 100vw, 50vw" />
+          </RevealBlock>
           <RevealBlock delayMs={80}>
             <p className="eyebrow">Our culture</p>
             <h2>A club, not an academy</h2>
@@ -209,9 +255,9 @@ export default async function ClubLandingPage() {
                   content: (
                     <div>
                       <p>
-                        We&apos;re run by Diverse Youth Northern Ireland — a community basketball club running
+                        We&apos;re run by Diverse Youth Northern Ireland: a community basketball club running
                         juniors through seniors out of one gym. Some of our players will go on to play at a high
-                        level. Most won&apos;t — and the season should be worth it either way.
+                        level. Most won&apos;t, and the season should be worth it either way.
                       </p>
                       <Link href="/club/about">Read more about the club →</Link>
                     </div>
@@ -272,13 +318,15 @@ export default async function ClubLandingPage() {
           <div className="gal-grid">
             {MOMENTS.map((m, i) => (
               <RevealBlock
-                key={m.caption}
+                key={m.slug}
                 as="figure"
                 delayMs={i * 60}
                 className={`tile${m.big ? " big" : ""}${m.wide ? " wide" : ""}`}
               >
-                <div className="photo"></div>
-                <figcaption>{m.caption}</figcaption>
+                <div className="photo has-img">
+                  <ClubImg slug={m.slug} sizes={m.big || m.wide ? "(max-width: 760px) 100vw, 50vw" : "(max-width: 760px) 50vw, 25vw"} />
+                </div>
+                <figcaption>{clubPhoto(m.slug).caption}</figcaption>
               </RevealBlock>
             ))}
           </div>
@@ -310,7 +358,9 @@ export default async function ClubLandingPage() {
       <section className="safe" id="safeguarding">
         <div className="wrap">
           <RevealBlock as="div" className="safe-top">
-            <div className="photo"></div>
+            <div className="photo has-img">
+              <ClubImg slug="players-and-staff" sizes="(max-width: 820px) 100vw, 50vw" />
+            </div>
             <div className="safe-top-copy">
               <p className="eyebrow">Safeguarding</p>
               <h3>Every coach vetted. Every session planned.</h3>

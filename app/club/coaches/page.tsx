@@ -20,7 +20,7 @@ export default async function PublicCoachesPage() {
       <section style={{ padding: "var(--section-y) 0" }}>
         <div className="wrap">
           {coaches.length === 0 ? (
-            <p className="lead">No coach profiles are public yet — check back soon.</p>
+            <p className="lead">No coach profiles are public yet. Check back soon.</p>
           ) : (
             <div className="coach-grid">
               {coaches.map((c, i) => (

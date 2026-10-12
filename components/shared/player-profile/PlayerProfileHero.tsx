@@ -31,7 +31,7 @@ function StatCell({ label, value, tone = "text-[#F1EDE4]" }: { label: string; va
   return (
     <div className="min-w-[5.5rem] flex-1 px-5 py-4 transition duration-150 hover:bg-white/[0.03]">
       <p className="font-mono text-[10px] uppercase tracking-wider text-[#8F897C]">{label}</p>
-      <p className={`mt-1 truncate font-condensed text-xl font-bold tabular sm:text-2xl ${tone}`}>{value ?? "—"}</p>
+      <p className={`mt-1 truncate font-condensed text-xl font-bold tabular sm:text-2xl ${tone}`}>{value ?? "Not set"}</p>
     </div>
   );
 }

@@ -41,7 +41,7 @@ export default async function AdminAuditPage() {
       <PageHeader
         eyebrow="Administrator"
         title="Audit log"
-        lead="An append-only record of sensitive actions across the club — registration decisions, roster exports, account security changes."
+        lead="An append-only record of sensitive actions across the club: registration decisions, roster exports, account security changes."
       />
       <AuditLogViewer
         initial={first}

@@ -6,15 +6,11 @@ import { usePathname } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 
 import { cn } from "@/lib/cn";
-import type { NavItem } from "@/lib/navigation";
+import { activeNavHref, type NavItem } from "@/lib/navigation";
 import Brandmark from "../Brandmark";
 import LogoutButton from "../LogoutButton";
 import ThemeToggle from "../theme/ThemeToggle";
 import NavIcon from "./NavIcon";
-
-function isActive(pathname: string, href: string) {
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
 
 function NotificationBell({ unreadCount }: { unreadCount: number }) {
   return (
@@ -72,9 +68,11 @@ export default function PrimaryNav({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const moreActive = all.some(
-    (item) => !primary.some((p) => p.href === item.href) && isActive(pathname, item.href),
-  );
+  // Exactly one item is active: the longest match across the whole menu
+  // (lib/navigation.ts#activeNavHref), so a sub-page never lights up two items.
+  const activeHref = activeNavHref(pathname, all);
+  const isActive = (href: string) => href === activeHref;
+  const moreActive = activeHref != null && !primary.some((p) => p.href === activeHref);
 
   // Sliding active-pill indicator (desktop nav only) — measures the active
   // item's real position/width and animates a shared background to it,
@@ -83,7 +81,7 @@ export default function PrimaryNav({
   const navRef = useRef<HTMLElement>(null);
   const itemRefs = useRef<Record<string, HTMLElement | null>>({});
   const [activePillRect, setActivePillRect] = useState({ left: 0, width: 0, visible: false });
-  const activeKey = moreActive || open ? "more" : primary.find((item) => isActive(pathname, item.href))?.href;
+  const activeKey = moreActive || open ? "more" : activeHref;
 
   useLayoutEffect(() => {
     const container = navRef.current;
@@ -129,16 +127,9 @@ export default function PrimaryNav({
               }}
             />
             {primary.map((item) => {
-              const active = isActive(pathname, item.href);
-              // Text colour follows the *pill's* location (activeKey), not
-              // this item's own independent isActive check — the two can
-              // legitimately disagree: on a sub-route like /coach/training/
-              // plans, "Training" still matches isActive (prefix match) but
-              // moreActive has already moved the pill over to "More", since
-              // "Session plans" is a full-menu-only item. Colouring off the
-              // item's own check made "Training"'s text turn white with no
-              // orange pill under it — invisible text. This was a real,
-              // reproducible bug, not a screenshot fluke.
+              const active = isActive(item.href);
+              // Text colour follows the pill (activeKey), which moves to "More"
+              // while the drawer is open even though this item stays active.
               const pillIsHere = activeKey === item.href;
               return (
                 <Link
@@ -194,7 +185,7 @@ export default function PrimaryNav({
       >
         <div className="mx-auto flex w-full max-w-md">
           {primary.map((item) => {
-            const active = isActive(pathname, item.href);
+            const active = isActive(item.href);
             return (
               <Link
                 key={item.href}
@@ -252,7 +243,7 @@ export default function PrimaryNav({
 
             <ul className="grid grid-cols-2 gap-1.5 p-4 sm:grid-cols-3">
               {all.map((item) => {
-                const active = isActive(pathname, item.href);
+                const active = isActive(item.href);
                 return (
                   <li key={item.href}>
                     <Link

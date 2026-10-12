@@ -116,7 +116,7 @@ export default function RecordEvaluationForm({ players }: { players: PlayerOptio
           ))
         )}
       </div>
-      <p className="text-xs text-slate-500">Overall score is the average of the categories above — computed automatically.</p>
+      <p className="text-xs text-slate-500">Overall score is the average of the categories above, worked out automatically.</p>
 
       {periodType === "MONTHLY" && (
         <>

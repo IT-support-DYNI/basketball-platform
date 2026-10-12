@@ -19,11 +19,18 @@
 .dyni-landing {
   color-scheme: light;
 
-  /* Base surfaces */
-  --bg: #F6F4EF;
-  --bg-deep: #ECE8DF;
-  --surface: #FFFFFF;
-  --surface-alt: #ECE8DF;
+  /* Base surfaces. A step down from near-white so club photos aren't
+     washed out next to the page. */
+  --bg: #EFEBE4;
+  --bg-deep: #E6E1D7;
+  --surface: #FBFAF7;
+  --surface-alt: #E6E1D7;
+
+  /* How strongly the hero photo is faded into --bg (left edge, 36%, 68%,
+     right edge, bottom; then the mobile fade). A cream wash bleaches a photo
+     far more than a dark one, so light mode keeps it narrow and light. */
+  --scrim-0: 82%; --scrim-1: 60%; --scrim-2: 0%; --scrim-3: 0%; --scrim-b: 70%;
+  --scrim-m0: 90%; --scrim-m1: 58%; --scrim-m2: 10%;
   --border: #A39D92;
 
   /* Ink */
@@ -71,6 +78,8 @@
     color-scheme: dark;
     --bg: #1C1915;
     --bg-deep: #131110;
+    --scrim-0: 94%; --scrim-1: 78%; --scrim-2: 22%; --scrim-3: 6%; --scrim-b: 88%;
+    --scrim-m0: 96%; --scrim-m1: 80%; --scrim-m2: 45%;
     --surface: #262220;
     --surface-alt: #362F2A;
     --border: #4A443C;
@@ -92,6 +101,8 @@ html[data-theme="dark"] .dyni-landing {
   color-scheme: dark;
   --bg: #1C1915;
   --bg-deep: #131110;
+  --scrim-0: 94%; --scrim-1: 78%; --scrim-2: 22%; --scrim-3: 6%; --scrim-b: 88%;
+  --scrim-m0: 96%; --scrim-m1: 80%; --scrim-m2: 45%;
   --surface: #262220;
   --surface-alt: #362F2A;
   --border: #4A443C;

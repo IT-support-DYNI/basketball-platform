@@ -18,7 +18,7 @@ export default function ResendVerificationButton() {
   }
 
   if (state === "sent") {
-    return <p className="text-sm text-success">Sent — check your inbox for the new link.</p>;
+    return <p className="text-sm text-success">Sent. Check your inbox for the new link.</p>;
   }
 
   return (

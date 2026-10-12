@@ -52,7 +52,7 @@ export default async function AdminSettingsPage() {
         <h2 className="font-bold text-slate-900">Performance categories</h2>
         <p className="mt-1 text-sm text-slate-500">
           What coaches score players on when they record an evaluation. Reorder, rename, add new
-          ones, or retire ones you no longer use — retiring keeps past evaluations intact.
+          ones, or retire ones you no longer use. Retiring one keeps past evaluations intact.
         </p>
         <div className="mt-4">
           <PerformanceCategoriesManager />

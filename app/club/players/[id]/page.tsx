@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { getPublicPlayer } from "@/lib/public-site";
+import { safeExternalHref } from "@/lib/safe-url";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const player = await getPublicPlayer(Number(params.id));
@@ -31,7 +32,7 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
       <div className="profile-banner">
         {player.jerseyNumber != null && <span className="profile-banner-jersey">{player.jerseyNumber}</span>}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="profile-banner-crest" src="/brand/dyni-blazers-crest.png" alt="" />
+        <img className="profile-banner-crest" src="/brand/dyni-crest-256.png" alt="" width={256} height={256} />
         <div className="profile-banner-body">
           <div className="profile-banner-photo">
             {player.photoUrl ? (
@@ -75,19 +76,19 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
       <div className="profile-stat-bar">
         <div className="profile-stat">
           <span className="l">Position</span>
-          <span className="v">{player.positionLabel ?? "—"}</span>
+          <span className="v">{player.positionLabel ?? "Not listed"}</span>
         </div>
         <div className="profile-stat">
           <span className="l">Team</span>
-          <span className="v">{player.team ?? "—"}</span>
+          <span className="v">{player.team ?? "Not listed"}</span>
         </div>
         <div className="profile-stat">
           <span className="l">Age group</span>
-          <span className="v">{player.ageGroup ?? "—"}</span>
+          <span className="v">{player.ageGroup ?? "Not listed"}</span>
         </div>
         <div className="profile-stat">
           <span className="l">Status</span>
-          <span className="v">{player.publicStatus ?? "—"}</span>
+          <span className="v">{player.publicStatus ?? "Not listed"}</span>
         </div>
       </div>
 
@@ -99,15 +100,15 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
               <div className="profile-stat-bar" style={{ marginTop: 14, border: "var(--border-hairline)", borderRadius: "var(--radius-sm)" }}>
                 <div className="profile-stat">
                   <span className="l">Height</span>
-                  <span className="v">{player.stats.heightCm ? `${(player.stats.heightCm / 100).toFixed(2)}m` : "—"}</span>
+                  <span className="v">{player.stats.heightCm ? `${(player.stats.heightCm / 100).toFixed(2)}m` : "Not listed"}</span>
                 </div>
                 <div className="profile-stat">
                   <span className="l">Weight</span>
-                  <span className="v">{player.stats.weightKg ? `${player.stats.weightKg}kg` : "—"}</span>
+                  <span className="v">{player.stats.weightKg ? `${player.stats.weightKg}kg` : "Not listed"}</span>
                 </div>
                 <div className="profile-stat">
                   <span className="l">Hand</span>
-                  <span className="v">{player.stats.preferredHand ? player.stats.preferredHand[0] + player.stats.preferredHand.slice(1).toLowerCase() : "—"}</span>
+                  <span className="v">{player.stats.preferredHand ? player.stats.preferredHand[0] + player.stats.preferredHand.slice(1).toLowerCase() : "Not listed"}</span>
                 </div>
               </div>
             </div>
@@ -135,7 +136,7 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
                 {player.highlights.map((h) => (
                   <li key={h.id}>
                     <a
-                      href={h.url}
+                      href={safeExternalHref(h.url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{

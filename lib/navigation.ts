@@ -19,6 +19,7 @@ export type Capability =
   | "player.videos"
   | "player.feedback"
   | "player.profile"
+  | "player.playbook"
   | "coach.home"
   | "coach.team"
   | "coach.players"
@@ -28,6 +29,7 @@ export type Capability =
   | "coach.performance"
   | "coach.drills"
   | "coach.plans"
+  | "coach.plays"
   | "announcements"
   | "messages"
   | "admin.home"
@@ -45,6 +47,7 @@ export type Capability =
   | "admin.audit"
   | "admin.settings"
   | "guardian.home"
+  | "guardian.playbook"
   | "account.security"
   | "account.data"
   | "account.display";
@@ -54,6 +57,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "player.home",
     "player.team",
     "player.schedule",
+    "player.playbook",
     "player.videos",
     "player.feedback",
     "player.profile",
@@ -72,6 +76,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "coach.videos",
     "coach.performance",
     "coach.plans",
+    "coach.plays",
     "coach.drills",
     "announcements",
     "messages",
@@ -100,7 +105,7 @@ const ROLE_CAPABILITIES: Record<string, Capability[]> = {
     "account.data",
     "account.display",
   ],
-  GUARDIAN: ["guardian.home", "announcements", "messages", "account.security", "account.data", "account.display"],
+  GUARDIAN: ["guardian.home", "guardian.playbook", "announcements", "messages", "account.security", "account.data", "account.display"],
 };
 
 export function capabilitiesFor(roles: string | string[]): Set<Capability> {
@@ -123,6 +128,7 @@ export type NavIconName =
   | "video"
   | "users"
   | "whistle"
+  | "playbook"
   | "megaphone"
   | "chat"
   | "clipboard"
@@ -141,6 +147,8 @@ export type NavItem = {
   icon: NavIconName;
   /** Surfaced in the mobile bottom bar (max 4 per role); the rest live behind "More". */
   primary?: boolean;
+  /** Other path prefixes that belong to this item (a hub spanning several areas). */
+  matches?: string[];
 };
 
 /** One flat, ordered list; the visible subset is whatever the caller can access. */
@@ -161,10 +169,19 @@ const NAV: NavItem[] = [
   { label: "Players", href: "/admin/players", capability: "admin.players", icon: "users", primary: true },
 
   { label: "Schedule", href: "/player/training", capability: "player.schedule", icon: "calendar", primary: true },
-  { label: "Training", href: "/coach/training", capability: "coach.training", icon: "calendar", primary: true },
+  { label: "Schedule", href: "/coach/training", capability: "coach.training", icon: "calendar", primary: true },
   { label: "Training", href: "/admin/training", capability: "admin.training", icon: "calendar" },
-  { label: "Session plans", href: "/coach/training/plans", capability: "coach.plans", icon: "clipboard" },
-  { label: "Drills", href: "/coach/drills", capability: "coach.drills", icon: "whistle" },
+  // One hub for a coach's training content; tabs on each page switch between
+  // session plans, drills and plays (components/shared/coaching/CoachingTabs).
+  {
+    label: "Coaching",
+    href: "/coach/training/plans",
+    capability: "coach.plans",
+    icon: "clipboard",
+    matches: ["/coach/drills", "/coach/plays"],
+  },
+  { label: "Playbook", href: "/player/playbook", capability: "player.playbook", icon: "playbook" },
+  { label: "Playbook", href: "/guardian/playbook", capability: "guardian.playbook", icon: "playbook" },
 
   { label: "Attendance", href: "/coach/attendance", capability: "coach.attendance", icon: "attendance", primary: true },
   { label: "Attendance", href: "/admin/attendance", capability: "admin.attendance", icon: "attendance" },
@@ -211,4 +228,23 @@ export function primaryNavFor(roles: string | string[]): NavItem[] {
   return navFor(roles)
     .filter((item) => item.primary)
     .slice(0, 4);
+}
+
+const underPath = (pathname: string, prefix: string) => pathname === prefix || pathname.startsWith(`${prefix}/`);
+
+/**
+ * Which one menu item the current page belongs to: the item whose href (or one
+ * of its `matches`) is the longest prefix of the path. Longest wins so
+ * /coach/training/plans is "Coaching", not "Schedule" (/coach/training).
+ */
+export function activeNavHref(pathname: string, items: NavItem[]): string | undefined {
+  let best: { href: string; length: number } | undefined;
+  for (const item of items) {
+    for (const prefix of [item.href, ...(item.matches ?? [])]) {
+      if (underPath(pathname, prefix) && (!best || prefix.length > best.length)) {
+        best = { href: item.href, length: prefix.length };
+      }
+    }
+  }
+  return best?.href;
 }

@@ -31,7 +31,7 @@ export default function UploadVideoForm() {
     });
     const uploadUrlBody = await uploadUrlRes.json();
     if (!uploadUrlRes.ok) {
-      throw new Error(uploadUrlBody.error ?? "Video storage isn't set up yet — contact your site administrator.");
+      throw new Error(uploadUrlBody.error ?? "Video storage isn't set up yet. Contact your site administrator.");
     }
 
     let putRes: Response;

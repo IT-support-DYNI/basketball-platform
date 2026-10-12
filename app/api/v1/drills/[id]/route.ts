@@ -51,7 +51,7 @@ export const DELETE = route<{ id: string }>(async (_req, { params }) => {
     "delete",
     "Drill",
     { createdByUserId: drill.createdByUserId },
-    "Only the coach who added this drill can delete it — you can archive it instead.",
+    "Only the coach who added this drill can delete it. You can archive it instead.",
   );
   await prisma.drill.delete({ where: { id: drill.id } });
   return noContent();

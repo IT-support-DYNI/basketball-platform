@@ -41,6 +41,13 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5M16 6.2A3 3 0 0 1 16 12m5 7c0-2.4-1.6-4.2-3.8-4.8" />
     </>
   ),
+  playbook: (
+    <>
+      <rect x="3.5" y="5" width="17" height="14" rx="2" />
+      <path d="M12 5v14M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" />
+      <path d="m6 8.5 2 2m0-2-2 2M16 14.5l1.5-1.5 1.5 1.5" />
+    </>
+  ),
   whistle: (
     <>
       <path d="M11 9h9l-2.5 5.5A6 6 0 1 1 11 9Z" />

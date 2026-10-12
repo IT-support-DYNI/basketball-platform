@@ -21,11 +21,53 @@ const planInclude = {
     orderBy: { order: "asc" as const },
     include: {
       drill: {
-        select: { id: true, name: true, category: true, difficulty: true, durationMinutes: true, archivedAt: true },
+        select: {
+          id: true,
+          name: true,
+          category: true,
+          difficulty: true,
+          durationMinutes: true,
+          archivedAt: true,
+          courtDiagram: true,
+        },
+      },
+      play: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          courtDiagram: true,
+          archivedAt: true,
+          assignments: { select: { teamId: true } },
+        },
       },
     },
   },
 } satisfies import("@prisma/client").Prisma.TrainingPlanInclude;
+
+type RawPlan = Prisma.TrainingPlanGetPayload<{ include: typeof planInclude }>;
+
+/** Replace each linked play's assignment list with one flag: is it in this
+ *  plan's team playbook? A plan's reader never learns which other teams have
+ *  the play. */
+function shapePlan(plan: RawPlan) {
+  return {
+    ...plan,
+    blocks: plan.blocks.map(({ play, ...b }) => ({
+      ...b,
+      play: play
+        ? {
+            id: play.id,
+            name: play.name,
+            type: play.type,
+            courtDiagram: play.courtDiagram,
+            inTeamPlaybook: play.archivedAt == null && play.assignments.some((a) => a.teamId === plan.teamId),
+          }
+        : null,
+    })),
+  };
+}
+export type PlanWithBlocks = ReturnType<typeof shapePlan>;
 
 export async function listPlans(
   teamIds: number[],
@@ -96,7 +138,22 @@ export async function planForCaller(session: Session, id: number) {
   if (authorize(session).cannot("read", "TrainingPlan", scope)) {
     throw new ForbiddenError("You don't have access to this session plan.");
   }
-  return plan;
+  return shapePlan(plan);
+}
+
+/** A block may only link a drill this club can see and a play from this
+ *  club's library; anything else is a 400 rather than a foreign-key error. */
+async function assertBlockLinks(clubId: number, blocks: BlockInput[]) {
+  const drillIds = [...new Set(blocks.map((b) => b.drillId).filter((x): x is number => x != null))];
+  const playIds = [...new Set(blocks.map((b) => b.playId).filter((x): x is number => x != null))];
+  const [drills, plays] = await Promise.all([
+    drillIds.length
+      ? prisma.drill.count({ where: { id: { in: drillIds }, OR: [{ clubId }, { clubId: null }] } })
+      : 0,
+    playIds.length ? prisma.play.count({ where: { id: { in: playIds }, clubId } }) : 0,
+  ]);
+  if (drills !== drillIds.length) throw new BadRequestError("One of those drills wasn't found.");
+  if (plays !== playIds.length) throw new BadRequestError("One of those plays wasn't found.");
 }
 
 export async function createPlan(
@@ -136,11 +193,14 @@ export async function createPlan(
       title: b.title,
       durationMinutes: b.durationMinutes,
       notes: b.notes,
+      // Keep each block's own diagram and its linked drill or play.
+      courtDiagram: b.courtDiagram ?? Prisma.JsonNull,
       ...(b.drillId != null ? { drill: { connect: { id: b.drillId } } } : {}),
+      ...(b.playId != null ? { play: { connect: { id: b.playId } } } : {}),
     }));
   }
 
-  return prisma.trainingPlan.create({
+  const created = await prisma.trainingPlan.create({
     data: {
       teamId: input.teamId,
       seasonId: season.id,
@@ -155,6 +215,7 @@ export async function createPlan(
     },
     include: planInclude,
   });
+  return shapePlan(created);
 }
 
 type BlockInput = {
@@ -163,6 +224,7 @@ type BlockInput = {
   durationMinutes?: number;
   notes?: string;
   drillId?: number | null;
+  playId?: number | null;
   courtDiagram?: Prisma.InputJsonValue | null;
 };
 
@@ -187,12 +249,17 @@ export async function updatePlan(
     throw new ForbiddenError("You can't edit this session plan.");
   }
 
+  if (patch.blocks) {
+    const { clubId } = await getTenantContext(session);
+    await assertBlockLinks(clubId, patch.blocks);
+  }
+
   const eventId =
     patch.eventId === undefined || plan.isTemplate
       ? undefined
       : await resolveEventLink(patch.eventId, plan.teamId, id);
 
-  return prisma.$transaction(async (tx) => {
+  const updated = await prisma.$transaction(async (tx) => {
     if (patch.blocks) {
       await tx.trainingBlock.deleteMany({ where: { trainingPlanId: id } });
       await tx.trainingBlock.createMany({
@@ -204,6 +271,7 @@ export async function updatePlan(
           durationMinutes: b.durationMinutes ?? null,
           notes: b.notes ?? null,
           drillId: b.drillId ?? null,
+          playId: b.playId ?? null,
           courtDiagram: b.courtDiagram ?? Prisma.JsonNull,
         })),
       });
@@ -226,6 +294,7 @@ export async function updatePlan(
       include: planInclude,
     });
   });
+  return shapePlan(updated);
 }
 
 export async function deletePlan(session: Session, id: number) {

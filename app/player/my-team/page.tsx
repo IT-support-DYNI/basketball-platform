@@ -38,7 +38,7 @@ export default async function PlayerMyTeamPage() {
     return (
       <main>
         <h1 className="font-display text-3xl text-ink">My Team</h1>
-        <p className="mt-3 text-sm text-slate-500">You&apos;re not assigned to a team yet — ask your coach or admin.</p>
+        <p className="mt-3 text-sm text-slate-500">You&apos;re not assigned to a team yet. Ask your coach or admin.</p>
       </main>
     );
   }
@@ -68,7 +68,7 @@ export default async function PlayerMyTeamPage() {
               <span className="font-medium text-slate-800">
                 {m.jerseyNumber != null ? `#${m.jerseyNumber} ` : ""}{m.player.user.name}
               </span>
-              <span className="text-slate-500">{m.position ?? "—"}</span>
+              <span className="text-slate-500">{m.position ?? "Not set"}</span>
             </li>
           ))}
         </ul>

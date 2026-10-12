@@ -15,7 +15,7 @@ export default async function PublicRosterPage() {
           <p className="eyebrow">Roster</p>
           <h1>The squad.</h1>
           <p className="lead">
-            Every profile here is published with the player&apos;s — and for juniors, their guardian&apos;s —
+            Every profile here is published with the player&apos;s (and, for juniors, their guardian&apos;s)
             explicit permission. Players who haven&apos;t opted in simply don&apos;t appear.
           </p>
         </div>
