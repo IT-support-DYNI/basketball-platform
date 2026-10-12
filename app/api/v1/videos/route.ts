@@ -6,7 +6,7 @@ import { route } from "@/lib/api";
 import { requireAuth, requireRole } from "@/lib/authorization";
 import { createVideoSchema } from "@/lib/contracts/video";
 import { getPlaybackUrl } from "@/lib/storage";
-import { visibleVideoWhere } from "@/lib/videos";
+import { videoAssignmentSelect, visibleAssignmentWhere, visibleVideoWhere } from "@/lib/videos";
 import { prisma } from "@/lib/prisma";
 
 /** Admin: every video. Coach: videos for their teams (+ ones they uploaded). Player: videos assigned to their team or to them personally. */
@@ -22,7 +22,10 @@ export const GET = route(async (req: NextRequest) => {
 
   const videos = await prisma.video.findMany({
     where,
-    include: { assignments: true, uploadedBy: { select: { name: true } } },
+    include: {
+      assignments: { where: visibleAssignmentWhere(session), select: videoAssignmentSelect },
+      uploadedBy: { select: { name: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 

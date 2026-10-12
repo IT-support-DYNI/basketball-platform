@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { Session } from "next-auth";
 
-import { visibleVideoWhere } from "./videos";
+import { videoAssignmentSelect, visibleAssignmentWhere, visibleVideoWhere } from "./videos";
 
 function session(overrides: Partial<Session["user"]>): Session {
   return {
@@ -36,6 +36,49 @@ describe("visibleVideoWhere", () => {
     const where = visibleVideoWhere(session({ role: "PLAYER" }));
     expect(where).toEqual({
       assignments: { some: { OR: [{ teamId: -1 }, { playerId: -1 }] } },
+    });
+  });
+});
+
+describe("visibleAssignmentWhere", () => {
+  it("admin sees every assignment", () => {
+    expect(visibleAssignmentWhere(session({ role: "ADMIN" }))).toEqual({});
+  });
+
+  it("a coach sees assignments to their teams or to players currently on them", () => {
+    expect(visibleAssignmentWhere(session({ role: "COACH", teamIds: [3, 4] }))).toEqual({
+      OR: [
+        { teamId: { in: [3, 4] } },
+        {
+          player: {
+            memberships: { some: { teamId: { in: [3, 4] }, status: { notIn: ["FORMER", "INACTIVE"] } } },
+          },
+        },
+      ],
+    });
+  });
+
+  it("a player sees only their own team's and their own personal assignment", () => {
+    expect(visibleAssignmentWhere(session({ role: "PLAYER", teamId: 5, playerId: 12 }))).toEqual({
+      OR: [{ teamId: 5 }, { playerId: 12 }],
+    });
+  });
+
+  it("a guardian (no team/player id in session) matches no assignment", () => {
+    expect(visibleAssignmentWhere(session({ role: "GUARDIAN" }))).toEqual({
+      OR: [{ teamId: -1 }, { playerId: -1 }],
+    });
+  });
+});
+
+describe("videoAssignmentSelect", () => {
+  it("only ever selects ids and names from related rows", () => {
+    expect(videoAssignmentSelect).toEqual({
+      id: true,
+      teamId: true,
+      playerId: true,
+      team: { select: { id: true, name: true } },
+      player: { select: { id: true, user: { select: { id: true, name: true } } } },
     });
   });
 });

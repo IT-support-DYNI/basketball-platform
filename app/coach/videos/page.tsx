@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlaybackUrl } from "@/lib/storage";
+import { videoAssignmentSelect, visibleAssignmentWhere } from "@/lib/videos";
 import UploadVideoForm from "@/app/coach/videos/_components/UploadVideoForm";
 import AssignVideoForm from "@/app/coach/videos/_components/AssignVideoForm";
 
@@ -14,7 +15,7 @@ export default async function CoachVideosPage() {
     prisma.video.findMany({
       where: { uploadedByUserId: Number(session!.user.id) },
       orderBy: { createdAt: "desc" },
-      include: { assignments: { include: { team: true, player: { include: { user: true } } } } },
+      include: { assignments: { where: visibleAssignmentWhere(session!), select: videoAssignmentSelect } },
     }),
     prisma.team.findMany({ where: { id: { in: teamIds } }, select: { id: true, name: true } }),
   ]);
