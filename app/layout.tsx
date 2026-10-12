@@ -66,6 +66,8 @@ const plexMono = localFont({
 });
 
 export const metadata: Metadata = {
+  // Absolute URLs for icons, Open Graph images and canonicals.
+  metadataBase: new URL("https://dyniblazers.co.uk"),
   title: {
     default: "DYNI Blazers",
     template: "%s · DYNI Blazers",
