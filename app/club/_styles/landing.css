@@ -115,19 +115,19 @@ html[data-theme=dark] .toggle .sun{display:none}
 .slide-photo .photo::after{color:var(--text-3)}
 /* A real photo fills the whole hero behind the copy. A scrim in the page's own
    background colour (so it works in light and dark themes) keeps the headline
-   readable on the left and fades the photo into the tab strip below. */
+   readable on the left (strength per theme: --scrim-* in tokens/colors.css) and fades the photo into the tab strip below. */
 .slide-photo.has-photo{position:absolute;inset:0;margin:0;border-radius:0;z-index:0;display:block}
 .slide-photo.has-photo .photo{border:none;background:none}
 .slide-photo.has-photo::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(90deg,color-mix(in srgb,var(--bg) 94%,transparent) 0%,color-mix(in srgb,var(--bg) 78%,transparent) 36%,color-mix(in srgb,var(--bg) 22%,transparent) 68%,color-mix(in srgb,var(--bg) 6%,transparent) 100%),
-    linear-gradient(0deg,color-mix(in srgb,var(--bg) 88%,transparent) 0%,transparent 32%)}
+  background:linear-gradient(90deg,color-mix(in srgb,var(--bg) var(--scrim-0),transparent) 0%,color-mix(in srgb,var(--bg) var(--scrim-1),transparent) 36%,color-mix(in srgb,var(--bg) var(--scrim-2),transparent) 68%,color-mix(in srgb,var(--bg) var(--scrim-3),transparent) 100%),
+    linear-gradient(0deg,color-mix(in srgb,var(--bg) var(--scrim-b),transparent) 0%,transparent 32%)}
 .slide:has(.has-photo) .hero-stat{background:color-mix(in srgb,var(--surface) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 /* Over a photo the spinning ball outline stays, just fainter, so it reads as
    texture rather than competing with the people in the picture. */
 .hero:has(.has-photo) .hero-watermark{opacity:.05}
 @media (max-width:860px){
   .slide-photo.has-photo{display:block}
-  .slide-photo.has-photo::after{background:linear-gradient(0deg,color-mix(in srgb,var(--bg) 96%,transparent) 0%,color-mix(in srgb,var(--bg) 80%,transparent) 55%,color-mix(in srgb,var(--bg) 45%,transparent) 100%)}
+  .slide-photo.has-photo::after{background:linear-gradient(0deg,color-mix(in srgb,var(--bg) var(--scrim-m0),transparent) 0%,color-mix(in srgb,var(--bg) var(--scrim-m1),transparent) 55%,color-mix(in srgb,var(--bg) var(--scrim-m2),transparent) 100%)}
 }
 .hero h1{font-size:clamp(2.75rem,5.4vw,4.75rem);color:var(--text-1);max-width:15ch}
 .hero h1 .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 .1em .05em;margin:0 -.1em}
