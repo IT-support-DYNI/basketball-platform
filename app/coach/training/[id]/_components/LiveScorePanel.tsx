@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/Button";
@@ -17,9 +17,11 @@ type Score = {
 
 /**
  * Courtside scoring for a match: big tap targets (it's used on a phone at the
- * side of the court), every tap saved straight away. The public homepage
- * scoreboard polls the same data, so a basket shows there within seconds —
- * but only when the match's visibility is Public.
+ * side of the court), every tap saved straight away. Taps are sent as
+ * increments and applied atomically on the server, so quick taps can't
+ * overwrite each other; the panel shows the server's totals once every
+ * in-flight save has answered. The public homepage polls the same data, so a
+ * basket shows there within about half a minute, for Public matches only.
  */
 export default function LiveScorePanel({
   eventId,
@@ -38,11 +40,21 @@ export default function LiveScorePanel({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  async function save(patch: Record<string, unknown>, optimistic: Partial<Score>) {
-    const before = score;
-    setScore((s) => ({ ...s, ...optimistic }));
+  // Saves still waiting for an answer. Server totals are only applied when
+  // this reaches 0, so an older response can't overwrite a newer tap.
+  const inFlight = useRef(0);
+
+  /**
+   * `apply` updates the screen straight away; `undo` reverses just this change
+   * if the save fails, leaving any other taps that did save untouched.
+   */
+  async function save(patch: Record<string, unknown>, apply: (s: Score) => Score, undo: (s: Score) => Score) {
+    setScore(apply);
+    inFlight.current += 1;
     setBusy(true);
     setError("");
+    let failed = false;
+    let saved: Score | null = null;
     try {
       const res = await fetch(`/api/v1/events/${eventId}/score`, {
         method: "PATCH",
@@ -51,30 +63,45 @@ export default function LiveScorePanel({
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setScore(before);
+        failed = true;
         setError(body.error ?? "Couldn't save the score.");
-        return;
+      } else {
+        saved = {
+          opponentName: body.opponentName ?? null,
+          ourScore: body.ourScore ?? 0,
+          opponentScore: body.opponentScore ?? 0,
+          liveStatus: body.liveStatus ?? "UPCOMING",
+          period: body.period ?? null,
+        };
       }
-      setScore({
-        opponentName: body.opponentName ?? null,
-        ourScore: body.ourScore ?? 0,
-        opponentScore: body.opponentScore ?? 0,
-        liveStatus: body.liveStatus ?? "UPCOMING",
-        period: body.period ?? null,
-      });
-      if (body.liveStatus === "FINAL" || before.liveStatus === "FINAL") router.refresh();
     } catch {
-      setScore(before);
+      failed = true;
       setError("Couldn't reach the server. Check your connection and tap again.");
     } finally {
-      setBusy(false);
+      inFlight.current -= 1;
+      if (failed) setScore(undo);
+      if (inFlight.current === 0) {
+        setBusy(false);
+        if (saved) setScore(saved);
+      }
+      if (saved?.liveStatus === "FINAL" && patch.liveStatus === "FINAL") router.refresh();
     }
   }
 
+  /** Set some fields; on failure put back what they were (other fields untouched). */
+  const saveFields = (patch: Partial<Score>) => {
+    const before = Object.fromEntries(Object.keys(patch).map((k) => [k, score[k as keyof Score]])) as Partial<Score>;
+    return save(patch, (s) => ({ ...s, ...patch }), (s) => ({ ...s, ...before }));
+  };
+
   const bump = (side: "ourScore" | "opponentScore", by: number) => {
-    const next = Math.max(0, score[side] + by);
-    if (next === score[side]) return;
-    save({ [side]: next }, { [side]: next, ...(score.liveStatus === "UPCOMING" ? { liveStatus: "LIVE", period: 1 } : {}) });
+    if (score[side] + by < 0) return;
+    const starting = score.liveStatus === "UPCOMING";
+    save(
+      { [side === "ourScore" ? "addOur" : "addOpponent"]: by },
+      (s) => ({ ...s, [side]: Math.max(0, s[side] + by), ...(starting ? { liveStatus: "LIVE", period: 1 } : {}) }),
+      (s) => ({ ...s, [side]: Math.max(0, s[side] - by) }),
+    );
   };
 
   const finished = score.liveStatus === "FINAL";
@@ -98,8 +125,8 @@ export default function LiveScorePanel({
       </div>
       <p className="mt-1 text-sm text-ink-dim">
         {isPublic
-          ? "Shown on the public homepage while the match is live, and as the latest result for 3 days after."
-          : "Only the club sees this score. Set the match's visibility to Public to show it on the homepage."}
+          ? "Shown on the public homepage while the match is live (up to 4 hours from tip-off), then as the latest result for up to 3 days from tip-off, until another public match replaces it."
+          : "Only coaches and admins see this score. Ask an admin to make this match public to show it on the homepage."}
       </p>
 
       <label className="mt-4 block max-w-sm text-xs text-ink-dim">
@@ -108,7 +135,7 @@ export default function LiveScorePanel({
           value={opponent}
           onChange={(e) => setOpponent(e.target.value)}
           onBlur={() => {
-            if (opponent.trim() !== (score.opponentName ?? "")) save({ opponentName: opponent.trim() || null }, { opponentName: opponent.trim() || null });
+            if (opponent.trim() !== (score.opponentName ?? "")) saveFields({ opponentName: opponent.trim() || null });
           }}
           maxLength={80}
           placeholder="e.g. Belfast Star U16"
@@ -133,7 +160,6 @@ export default function LiveScorePanel({
                 <Button
                   key={n}
                   size="lg"
-                  disabled={finished}
                   onClick={() => bump(side, n)}
                   aria-label={`Add ${n} to ${label}`}
                 >
@@ -143,7 +169,7 @@ export default function LiveScorePanel({
               <Button
                 size="lg"
                 variant="secondary"
-                disabled={finished || score[side] === 0}
+                disabled={score[side] === 0}
                 onClick={() => bump(side, -1)}
                 aria-label={`Take 1 off ${label}`}
               >
@@ -156,7 +182,7 @@ export default function LiveScorePanel({
 
       <div className="mt-5 flex flex-wrap items-center gap-2">
         {score.liveStatus === "UPCOMING" && (
-          <Button onClick={() => save({ liveStatus: "LIVE", period: 1 }, { liveStatus: "LIVE", period: 1 })} disabled={busy}>
+          <Button onClick={() => saveFields({ liveStatus: "LIVE", period: 1 })} disabled={busy}>
             Start match
           </Button>
         )}
@@ -167,8 +193,7 @@ export default function LiveScorePanel({
               <select
                 value={score.period ?? 1}
                 onChange={(e) => {
-                  const period = Number(e.target.value);
-                  save({ period }, { period });
+                  saveFields({ period: Number(e.target.value) });
                 }}
                 className="rounded-control border border-line bg-surface-2 px-2 py-2 text-sm text-ink"
               >
@@ -180,14 +205,14 @@ export default function LiveScorePanel({
                 <option value={6}>OT2</option>
               </select>
             </label>
-            <Button variant="secondary" onClick={() => save({ liveStatus: "HALF_TIME" }, { liveStatus: "HALF_TIME" })} disabled={busy}>
+            <Button variant="secondary" onClick={() => saveFields({ liveStatus: "HALF_TIME" })} disabled={busy}>
               Half time
             </Button>
           </>
         )}
         {score.liveStatus === "HALF_TIME" && (
           <Button
-            onClick={() => save({ liveStatus: "LIVE", period: 3 }, { liveStatus: "LIVE", period: 3 })}
+            onClick={() => saveFields({ liveStatus: "LIVE", period: 3 })}
             disabled={busy}
           >
             Start second half
@@ -199,7 +224,7 @@ export default function LiveScorePanel({
             disabled={busy}
             onClick={() => {
               if (window.confirm(`End the match at ${score.ourScore}-${score.opponentScore}? This marks it as the final result.`)) {
-                save({ liveStatus: "FINAL" }, { liveStatus: "FINAL", period: null });
+                saveFields({ liveStatus: "FINAL", period: null });
               }
             }}
           >
@@ -207,9 +232,9 @@ export default function LiveScorePanel({
           </Button>
         )}
         {finished && (
-          <Button variant="ghost" onClick={() => save({ liveStatus: "LIVE" }, { liveStatus: "LIVE" })} disabled={busy}>
-            Reopen to correct the score
-          </Button>
+          <p className="text-sm text-ink-dim">
+            Full time. You can still correct the score above; every change to a final result is recorded in the audit log.
+          </p>
         )}
       </div>
 

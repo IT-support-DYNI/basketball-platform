@@ -14,6 +14,7 @@ import AttendanceCorrections from "@/app/coach/training/[id]/_components/Attenda
 import SessionStatusControls from "@/app/coach/training/[id]/_components/SessionStatusControls";
 import LiveScorePanel from "@/app/coach/training/[id]/_components/LiveScorePanel";
 import { SCORE_EVENT_TYPES } from "@/lib/live-scores";
+import { canEditEvent } from "@/lib/authz/guard";
 
 export default async function CoachEventDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -107,7 +108,10 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
         </div>
       </div>
 
-      {(SCORE_EVENT_TYPES as readonly string[]).includes(event.type) && event.status !== "CANCELLED" && (
+      {(SCORE_EVENT_TYPES as readonly string[]).includes(event.type) &&
+        event.status !== "CANCELLED" &&
+        session &&
+        canEditEvent(session, event) && (
         <LiveScorePanel
           eventId={event.id}
           teamName={event.team?.name ?? "DYNI Blazers"}

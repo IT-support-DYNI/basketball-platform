@@ -101,7 +101,7 @@ describe("updateScoreSchema", () => {
     [{ period: 0 }, "quarter 0"],
     [{ period: 11 }, "quarter 11"],
     [{ liveStatus: "PAUSED" }, "an unknown status"],
-  ])("rejects %j (%s)", (body) => {
+  ] as [unknown, string][])("rejects %j (%s)", (body) => {
     expect(updateScoreSchema.safeParse(body).success).toBe(false);
   });
 
