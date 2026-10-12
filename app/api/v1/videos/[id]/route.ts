@@ -5,23 +5,30 @@ import { authOptions } from "@/lib/auth";
 import { route } from "@/lib/api";
 import { requireAuth, requireRole } from "@/lib/authorization";
 import { getPlaybackUrl } from "@/lib/storage";
-import { videoAssignmentSelect, visibleVideoWhere } from "@/lib/videos";
+import { idParam } from "@/lib/contracts/common";
+import { videoAssignmentSelect, visibleAssignmentWhere, visibleVideoWhere } from "@/lib/videos";
 import { prisma } from "@/lib/prisma";
 
 export const GET = route<{ id: string }>(async (_req, { params }) => {
   const session = requireAuth(await getServerSession(authOptions));
 
+  const id = idParam.safeParse(params.id);
+  if (!id.success) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const video = await prisma.video.findFirst({
-    where: { id: Number(params.id), ...visibleVideoWhere(session) },
-    include: { assignments: { select: videoAssignmentSelect } },
+    where: { id: id.data, ...visibleVideoWhere(session) },
+    include: {
+      assignments: { where: visibleAssignmentWhere(session), select: videoAssignmentSelect },
+    },
   });
 
   if (!video) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json({
-    ...video,
-    playbackUrl: video.externalUrl ?? (video.key ? await getPlaybackUrl(video.key) : ""),
-    thumbnailUrl: video.thumbnailKey ? await getPlaybackUrl(video.thumbnailKey) : null,
-  });
+
+  const [playbackUrl, thumbnailUrl] = await Promise.all([
+    video.externalUrl ?? (video.key ? getPlaybackUrl(video.key) : ""),
+    video.thumbnailKey ? getPlaybackUrl(video.thumbnailKey) : null,
+  ]);
+  return NextResponse.json({ ...video, playbackUrl, thumbnailUrl });
 });
 
 export const DELETE = route<{ id: string }>(async (_req, { params }) => {
