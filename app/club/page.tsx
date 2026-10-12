@@ -173,8 +173,20 @@ const SAFE_CARDS = [
   { title: "Open sessions", body: "Parents and guardians are welcome to stay and watch any session, any age group." },
 ];
 
+// The scoreboard is live data: render per request, never a build-time snapshot.
+export const dynamic = "force-dynamic";
+
 export default async function ClubLandingPage() {
-  const [stats, nextFixture, scoreboard] = await Promise.all([getClubStats(), getNextFixture(), getPublicScoreboard()]);
+  const [stats, nextFixture, scoreboard] = await Promise.all([
+    getClubStats(),
+    getNextFixture(),
+    // The scoreboard is optional: if it fails, log it and render the page
+    // without it rather than taking the whole homepage down.
+    getPublicScoreboard().catch((err) => {
+      console.error("[club] scoreboard load failed", err);
+      return null;
+    }),
+  ]);
 
   const statTiles = [
     { value: stats.teams, label: "Teams" },

@@ -1,4 +1,4 @@
-import type { MatchLiveStatus } from "@prisma/client";
+import type { MatchLiveStatus, Prisma } from "@prisma/client";
 
 import { prisma } from "./prisma";
 
@@ -8,15 +8,20 @@ import { prisma } from "./prisma";
  * team-only or club-only match never reaches a stranger.
  *
  * What it shows, in order of preference:
- *   1. every public match currently LIVE or at HALF_TIME;
- *   2. otherwise the most recent FINAL result from the last 3 days;
- *   3. otherwise nothing (the page's "Next up" section covers upcoming games).
+ *   1. up to 4 public matches currently LIVE or at HALF_TIME that tipped off
+ *      in the last 4 hours (a match nobody marked full time drops off then,
+ *      instead of showing as "Live now" for good);
+ *   2. otherwise the most recent FINAL result that tipped off in the last
+ *      3 days;
+ *   3. otherwise nothing.
  */
 
 export const SCORE_EVENT_TYPES = ["MATCH", "TOURNAMENT"] as const;
 
-/** How long a finished result stays on the homepage. */
-const RESULT_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+/** How long after tip-off a match can still show as live. */
+export const LIVE_WINDOW_MS = 4 * 60 * 60 * 1000;
+/** How long after tip-off a finished result stays on the homepage. */
+export const RESULT_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
 
 export type PublicScore = {
   id: number;
@@ -33,7 +38,7 @@ export type PublicScore = {
 };
 
 export type PublicScoreboard = {
-  /** "live" while any match is in progress — the client polls only then. */
+  /** "live" while any match is in progress; the client polls every 15s then, every 60s otherwise. */
   mode: "live" | "result" | "none";
   matches: PublicScore[];
 };
@@ -51,22 +56,9 @@ const select = {
   locationText: true,
   team: { select: { name: true } },
   venue: { select: { name: true } },
-} as const;
+} satisfies Prisma.EventSelect;
 
-type Row = {
-  id: number;
-  title: string;
-  opponentName: string | null;
-  ourScore: number | null;
-  opponentScore: number | null;
-  liveStatus: MatchLiveStatus | null;
-  period: number | null;
-  startAt: Date;
-  scoreUpdatedAt: Date | null;
-  locationText: string | null;
-  team: { name: string } | null;
-  venue: { name: string } | null;
-};
+type Row = Prisma.EventGetPayload<{ select: typeof select }>;
 
 function toPublic(e: Row): PublicScore {
   return {
@@ -84,26 +76,35 @@ function toPublic(e: Row): PublicScore {
   };
 }
 
-export async function getPublicScoreboard(now: Date = new Date()): Promise<PublicScoreboard> {
+/** The two scoreboard queries' filters. Pure, so the visibility gate and the
+ *  time windows are unit-tested (lib/live-scores.test.ts). */
+export function scoreboardWhere(now: Date): { live: Prisma.EventWhereInput; result: Prisma.EventWhereInput } {
   const base = {
     type: { in: [...SCORE_EVENT_TYPES] },
     visibility: "PUBLIC" as const,
     status: { not: "CANCELLED" as const },
   };
+  return {
+    live: {
+      ...base,
+      liveStatus: { in: ["LIVE", "HALF_TIME"] },
+      startAt: { gte: new Date(now.getTime() - LIVE_WINDOW_MS) },
+    },
+    result: {
+      ...base,
+      liveStatus: "FINAL",
+      startAt: { gte: new Date(now.getTime() - RESULT_WINDOW_MS) },
+    },
+  };
+}
 
-  const live = await prisma.event.findMany({
-    where: { ...base, liveStatus: { in: ["LIVE", "HALF_TIME"] } },
-    select,
-    orderBy: { startAt: "asc" },
-    take: 4,
-  });
+export async function getPublicScoreboard(now: Date = new Date()): Promise<PublicScoreboard> {
+  const where = scoreboardWhere(now);
+
+  const live = await prisma.event.findMany({ where: where.live, select, orderBy: { startAt: "asc" }, take: 4 });
   if (live.length > 0) return { mode: "live", matches: live.map(toPublic) };
 
-  const result = await prisma.event.findFirst({
-    where: { ...base, liveStatus: "FINAL", startAt: { gte: new Date(now.getTime() - RESULT_WINDOW_MS) } },
-    select,
-    orderBy: { startAt: "desc" },
-  });
+  const result = await prisma.event.findFirst({ where: where.result, select, orderBy: { startAt: "desc" } });
   if (result) return { mode: "result", matches: [toPublic(result)] };
 
   return { mode: "none", matches: [] };
