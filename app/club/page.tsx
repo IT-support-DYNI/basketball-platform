@@ -11,12 +11,44 @@ import RevealBlock from "@/app/club/_components/RevealBlock";
 import StoryTabs from "@/app/club/_components/StoryTabs";
 import ClubImg from "@/app/club/_components/ClubImg";
 import { clubPhoto, type ClubPhotoSlug } from "@/lib/club-photos";
+import { SITE_URL } from "@/lib/site";
 
 // Bypasses the root layout's "%s · DYNI Blazers" template for a one-off
 // exact title, rather than doubling up ("… · DYNI Blazers · DYNI Blazers").
 export const metadata: Metadata = {
   title: { absolute: "DYNI Blazers | A club, not an academy" },
   description: "A community basketball club run by Diverse Youth Northern Ireland. Junior to senior, one club.",
+  alternates: { canonical: `${SITE_URL}/club` },
+  openGraph: {
+    type: "website",
+    url: `${SITE_URL}/club`,
+    siteName: "DYNI Blazers",
+    title: "DYNI Blazers | A club, not an academy",
+    description: "A community basketball club run by Diverse Youth Northern Ireland. Junior to senior, one club.",
+    images: [{ url: `${SITE_URL}/brand/dyni-crest-512.png`, width: 512, height: 512, alt: "DYNI Blazers crest" }],
+  },
+};
+
+/**
+ * Tells search engines who the club is and which image is its logo (Google
+ * uses `logo` for the knowledge panel and the site name for results).
+ * https://developers.google.com/search/docs/appearance/structured-data/organization
+ */
+const CLUB_JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SportsOrganization",
+      "@id": `${SITE_URL}/#club`,
+      name: "DYNI Blazers",
+      sport: "Basketball",
+      url: `${SITE_URL}/club`,
+      logo: `${SITE_URL}/brand/dyni-crest-512.png`,
+      parentOrganization: { "@type": "Organization", name: "Diverse Youth Northern Ireland" },
+      address: { "@type": "PostalAddress", addressLocality: "Belfast", addressRegion: "Northern Ireland", addressCountry: "GB" },
+    },
+    { "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "DYNI Blazers", url: SITE_URL, publisher: { "@id": `${SITE_URL}/#club` } },
+  ],
 };
 
 const HERO_SLIDES: HeroSlide[] = [
@@ -153,6 +185,7 @@ export default async function ClubLandingPage() {
 
   return (
     <main id="top">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(CLUB_JSON_LD) }} />
       <HeroCarousel slides={HERO_SLIDES} stats={statTiles} />
 
       {/* Live / latest match score — right under the hero so it's the first

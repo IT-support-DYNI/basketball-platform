@@ -122,7 +122,9 @@ html[data-theme=dark] .toggle .sun{display:none}
   background:linear-gradient(90deg,color-mix(in srgb,var(--bg) 94%,transparent) 0%,color-mix(in srgb,var(--bg) 78%,transparent) 36%,color-mix(in srgb,var(--bg) 22%,transparent) 68%,color-mix(in srgb,var(--bg) 6%,transparent) 100%),
     linear-gradient(0deg,color-mix(in srgb,var(--bg) 88%,transparent) 0%,transparent 32%)}
 .slide:has(.has-photo) .hero-stat{background:color-mix(in srgb,var(--surface) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.hero:has(.has-photo) .hero-watermark{display:none}
+/* Over a photo the spinning ball outline stays, just fainter, so it reads as
+   texture rather than competing with the people in the picture. */
+.hero:has(.has-photo) .hero-watermark{opacity:.05}
 @media (max-width:860px){
   .slide-photo.has-photo{display:block}
   .slide-photo.has-photo::after{background:linear-gradient(0deg,color-mix(in srgb,var(--bg) 96%,transparent) 0%,color-mix(in srgb,var(--bg) 80%,transparent) 55%,color-mix(in srgb,var(--bg) 45%,transparent) 100%)}
