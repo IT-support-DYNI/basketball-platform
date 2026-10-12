@@ -12,7 +12,7 @@ const WORDMARK: Record<Size, string> = {
 
 /**
  * The DYNI Blazers lockup: club crest + wordmark. `href` makes the whole thing a
- * link (used in the app shell); omit it for a static mark (used on auth screens).
+ * link (the app shell, and the auth screens back to the club site); omit it for a static mark.
  */
 export default function Brandmark({
   size = "md",

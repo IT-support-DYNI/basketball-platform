@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import Brandmark from "@/components/Brandmark";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
+/** Where the crest (and the register page's Cancel) take someone who backs out. */
+export const SITE_HOME = "/club";
+
 /**
  * Full-height frame for the unauthenticated screens (sign in, register, status,
  * set password). Dark court-line backdrop, crest, theme toggle from the first
@@ -30,7 +33,7 @@ export default function AuthShell({
 
       <div className={`relative z-10 w-full ${width === "lg" ? "max-w-xl" : "max-w-md"}`}>
         <div className="mb-6 flex justify-center">
-          <Brandmark size="lg" wordmark={false} />
+          <Brandmark size="lg" wordmark={false} href={SITE_HOME} />
         </div>
 
         <div className="rounded-card border border-line bg-surface/95 p-7 shadow-pop backdrop-blur">
