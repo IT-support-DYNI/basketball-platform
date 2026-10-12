@@ -35,7 +35,9 @@ const storageHost = process.env.STORAGE_ENDPOINT
 
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${devScript}`,
+  // 'wasm-unsafe-eval' lets the photo cut-out (lib/photo-cutout.ts) compile
+  // MediaPipe's same-origin WebAssembly. It does not allow JavaScript eval().
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${devScript}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob:${storageHost}`,
   "font-src 'self'",

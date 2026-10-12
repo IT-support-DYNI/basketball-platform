@@ -677,6 +677,10 @@ model PlayerPhoto {
   playerProfileId Int
   playerProfile   PlayerProfile @relation(fields: [playerProfileId], references: [id], onDelete: Cascade)
   storageKey      String
+  /// The background was removed in the browser before upload
+  /// (lib/photo-cutout.ts), so the public pages show it NBA-style: the
+  /// player standing straight on the banner instead of in a box.
+  isCutout        Boolean       @default(false)
   createdAt       DateTime      @default(now())
 
   @@unique([playerProfileId, storageKey])

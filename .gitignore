@@ -21,3 +21,6 @@ npm-debug.log*
 .agents/
 .claude/skills/
 skills-lock.json
+
+# MediaPipe wasm runtime, copied from node_modules by scripts/copy-mediapipe-wasm.mjs
+/public/mediapipe/

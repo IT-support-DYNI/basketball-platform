@@ -122,6 +122,9 @@ export type PublicPlayerCard = {
   id: number;
   name: string;
   photoUrl: string | null;
+  /** The photo has its background removed: show it standing on the
+   *  banner/card (NBA style), not filling a box. */
+  photoIsCutout: boolean;
   position: string | null;
   positionLabel: string | null;
   team: string | null;
@@ -135,6 +138,13 @@ export type PublicPlayerCard = {
   publicStatus: "Active" | "Trialist" | null;
 };
 
+/** Only the cut-out photos' keys: enough to tell if the current photo is one. */
+const CUTOUT_PHOTOS = { where: { isCutout: true }, select: { storageKey: true } } as const;
+
+function isCutout(currentKey: string | null, cutouts: { storageKey: string }[]): boolean {
+  return !!currentKey && cutouts.some((p) => p.storageKey === currentKey);
+}
+
 /** Roster cards for the public "meet the team" grid — approved players only. */
 export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> {
   const players = await prisma.playerProfile.findMany({
@@ -146,6 +156,7 @@ export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> 
         include: { team: { select: { name: true, ageGroup: true } } },
         take: 1,
       },
+      photos: CUTOUT_PHOTOS,
     },
     take: limit,
     orderBy: { updatedAt: "desc" },
@@ -160,6 +171,7 @@ export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> 
         id: p.id,
         name: p.user.name,
         photoUrl: p.publicShowPhoto ? await resolvePhotoUrl(p.photoUrl) : null,
+        photoIsCutout: p.publicShowPhoto && isCutout(p.photoUrl, p.photos),
         position: membership?.position ?? null,
         positionLabel: membership?.position ? POSITION_LABELS[membership.position] ?? membership.position : null,
         publicStatus,
@@ -200,6 +212,7 @@ export async function getPublicPlayer(playerId: number): Promise<PublicPlayerPro
         take: 1,
       },
       highlights: { orderBy: { createdAt: "desc" } },
+      photos: CUTOUT_PHOTOS,
     },
   });
   if (!player || !player.publicProfileApproved) return null;
@@ -216,6 +229,7 @@ export async function getPublicPlayer(playerId: number): Promise<PublicPlayerPro
     id: player.id,
     name: player.user.name,
     photoUrl: player.publicShowPhoto ? await resolvePhotoUrl((visible as { photoUrl?: string | null }).photoUrl) : null,
+    photoIsCutout: player.publicShowPhoto && isCutout(player.photoUrl, player.photos),
     position: membership?.position ?? null,
     positionLabel: membership?.position ? POSITION_LABELS[membership.position] ?? membership.position : null,
     publicStatus,

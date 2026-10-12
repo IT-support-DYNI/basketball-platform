@@ -55,6 +55,8 @@ export const updatePlayerSchema = z.object({
   // A private-bucket storage key ("player-photos/<uuid>"), not a public URL —
   // see lib/player-profile-view.ts's resolvePhotoUrl for why.
   photoUrl: storageKey("player-photos").optional(),
+  /** Sent with a new photoUrl: true when the browser removed the background. */
+  photoIsCutout: z.boolean().optional(),
   contactPhone: z.string().max(40).optional(),
   guardianName: z.string().max(120).optional(),
   guardianContact: z.string().max(40).optional(),
