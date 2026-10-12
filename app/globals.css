@@ -23,9 +23,9 @@
 :root {
   color-scheme: light;
 
-  --ground: 246 244 239;   /* #F6F4EF */
-  --surface: 255 255 255;  /* #FFFFFF */
-  --surface-2: 236 232 223; /* #ECE8DF */
+  --ground: 239 235 228;   /* #EFEBE4, a step down from near-white so photos aren't washed out */
+  --surface: 251 250 247;  /* #FBFAF7 */
+  --surface-2: 230 225 215; /* #E6E1D7 */
   --surface-3: 223 217 204; /* one step past "elevated card", for modals/popovers */
 
   --ink: 42 39 35;          /* #2A2723 */
@@ -87,9 +87,9 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --ground: 246 244 239;
-  --surface: 255 255 255;
-  --surface-2: 236 232 223;
+  --ground: 239 235 228;
+  --surface: 251 250 247;
+  --surface-2: 230 225 215;
   --surface-3: 223 217 204;
   --ink: 42 39 35;
   --ink-dim: 81 76 68;
