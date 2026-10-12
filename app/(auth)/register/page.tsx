@@ -6,8 +6,8 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 
 import { cn } from "@/lib/cn";
-import AuthShell from "@/components/shared/auth/AuthShell";
-import { Button } from "@/components/ui/Button";
+import AuthShell, { SITE_HOME } from "@/components/shared/auth/AuthShell";
+import { Button, buttonClass } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { Select } from "@/components/ui/Select";
 import { RadioGroup } from "@/components/ui/RadioGroup";
@@ -43,8 +43,9 @@ export default function RegisterPage() {
 
   useEffect(() => {
     fetch("/api/v1/public/teams")
-      .then((r) => r.json())
-      .then(setTeams)
+      .then((r) => (r.ok ? r.json() : []))
+      // An error body is an object, not a list; never let it crash the form.
+      .then((list) => setTeams(Array.isArray(list) ? list : []))
       .catch(() => {});
     fetch("/api/v1/registration/draft")
       .then((r) => (r.ok ? r.json() : null))
@@ -202,6 +203,9 @@ export default function RegisterPage() {
           />
           {error && <Alert tone="danger">{error}</Alert>}
           <Button type="submit" size="lg" fullWidth loading={busy}>Start</Button>
+          <Link href={SITE_HOME} className={buttonClass({ variant: "ghost", size: "lg", fullWidth: true })}>
+            Cancel
+          </Link>
         </form>
       ) : (
         <div className="flex flex-col gap-5">
@@ -324,6 +328,11 @@ export default function RegisterPage() {
               <Button type="submit" loading={busy} disabled={step === 4 && d.consent !== "yes"}>
                 {step === 5 ? "Submit registration" : "Continue"}
               </Button>
+              {/* Leaving keeps the draft (it is saved after every step), so
+                  Cancel just goes back to the site without a confirm. */}
+              <Link href={SITE_HOME} className="ml-auto text-sm font-semibold text-ink-dim hover:text-ink hover:underline">
+                Cancel
+              </Link>
             </div>
           </form>
         </div>
