@@ -88,15 +88,41 @@ export type CreateVenueInput = z.infer<typeof createVenueSchema>;
 export type UpdateVenueInput = z.infer<typeof updateVenueSchema>;
 export type RsvpInput = z.infer<typeof rsvpSchema>;
 
+const scoreStep = z.number().int().min(-3).max(3).refine((n) => n !== 0, "A score change can't be 0.");
+
 /** Live score update for a MATCH / TOURNAMENT event (coach of the team, or
  *  admin). Every field is optional so the scoring panel can send one change
- *  at a time; `null` clears opponentName / period. */
-export const updateScoreSchema = z.object({
-  opponentName: z.string().trim().max(80).nullable().optional(),
-  ourScore: z.number().int().min(0).max(300).optional(),
-  opponentScore: z.number().int().min(0).max(300).optional(),
-  liveStatus: z.enum(["UPCOMING", "LIVE", "HALF_TIME", "FINAL"]).optional(),
-  /// Quarter 1–4; 5+ = overtime.
-  period: z.number().int().min(1).max(10).nullable().optional(),
-});
+ *  at a time; `null` clears opponentName / period.
+ *
+ *  Taps send `addOur` / `addOpponent` (−3…3), applied atomically on the
+ *  server so quick taps or two scorers never overwrite each other. The
+ *  absolute `ourScore` / `opponentScore` are for typed-in corrections. */
+export const updateScoreSchema = z
+  .object({
+    opponentName: z
+      .string()
+      .trim()
+      .max(80)
+      .nullable()
+      .optional()
+      .transform((s) => (s === undefined ? undefined : s || null)),
+    ourScore: z.number().int().min(0).max(300).optional(),
+    opponentScore: z.number().int().min(0).max(300).optional(),
+    addOur: scoreStep.optional(),
+    addOpponent: scoreStep.optional(),
+    liveStatus: z.enum(["UPCOMING", "LIVE", "HALF_TIME", "FINAL"]).optional(),
+    /// Quarter 1–4; 5+ = overtime.
+    period: z.number().int().min(1).max(10).nullable().optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (Object.values(v).every((x) => x === undefined)) {
+      ctx.addIssue({ code: "custom", message: "Nothing to update." });
+    }
+    if (v.ourScore !== undefined && v.addOur !== undefined) {
+      ctx.addIssue({ code: "custom", path: ["addOur"], message: "Send ourScore or addOur, not both." });
+    }
+    if (v.opponentScore !== undefined && v.addOpponent !== undefined) {
+      ctx.addIssue({ code: "custom", path: ["addOpponent"], message: "Send opponentScore or addOpponent, not both." });
+    }
+  });
 export type UpdateScoreInput = z.infer<typeof updateScoreSchema>;
