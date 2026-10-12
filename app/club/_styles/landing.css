@@ -233,6 +233,10 @@ html[data-theme=dark] .toggle .sun{display:none}
 .team{position:relative;display:block;border:var(--border-hairline);border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:3/4;transform-style:preserve-3d;transition:border-color var(--dur-base) var(--ease-out)}
 .team:hover{border-color:var(--accent)}
 .team .photo{position:absolute;inset:0;border:none}
+/* Cut-out on a roster card: the player stands on the card's dark ground with
+   a brand glow, matching their profile banner, instead of filling the card. */
+.team .photo.is-cutout{background:radial-gradient(60% 45% at 50% 62%,color-mix(in srgb,var(--accent) 34%,transparent),transparent),var(--ground-dark)}
+.team .photo.is-cutout img{inset:auto 0 0 0;height:88%;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 12px 22px rgba(0,0,0,.5))}
 .team::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,10,6,.15) 30%,rgba(13,10,6,.88));pointer-events:none}
 .team-top{position:absolute;inset:12px 12px auto;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .team-code{font-family:var(--font-mono);font-size:var(--type-label-sm);font-weight:600;letter-spacing:.14em;padding:4px 9px;border-radius:var(--radius-xs);background:var(--accent);color:var(--on-accent)}
@@ -430,6 +434,13 @@ html[data-theme=dark] .toggle .sun{display:none}
 .profile-banner-body{position:relative;z-index:2;display:flex;align-items:flex-end;gap:clamp(20px,3vw,36px);margin-top:18px}
 .profile-banner-photo{width:clamp(130px,16vw,200px);height:clamp(160px,20vw,250px);flex:none;border-radius:var(--radius-lg) var(--radius-lg) 0 0;overflow:hidden}
 .profile-banner-photo .photo{width:100%;height:100%;border:none}
+/* NBA-style: a photo with its background removed (lib/photo-cutout.ts) has
+   no box at all. The player stands on the banner's bottom edge, bigger, with
+   a soft shadow and a faint brand glow behind. */
+.profile-banner-photo.is-cutout{position:relative;width:clamp(180px,22vw,300px);height:clamp(220px,28vw,360px);border-radius:0;overflow:visible}
+.profile-banner-photo.is-cutout::before{content:"";position:absolute;inset:12% -18% -6%;background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 38%,transparent),transparent);pointer-events:none}
+.profile-banner-photo.is-cutout .photo.has-img{background:none}
+.profile-banner-photo.is-cutout .photo img{object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 16px 28px rgba(0,0,0,.5))}
 .profile-banner-info{padding-bottom:26px}
 .profile-banner-meta{font-family:var(--font-mono);font-size:var(--type-label);text-transform:uppercase;letter-spacing:.14em;color:rgba(246,233,214,.7)}
 .profile-banner-name{font-family:var(--font-condensed);font-weight:800;text-transform:uppercase;line-height:.92;font-size:clamp(2rem,5vw,3.5rem);color:var(--photo-text);margin-top:6px;max-width:14ch}
@@ -444,6 +455,7 @@ html[data-theme=dark] .toggle .sun{display:none}
 @media (max-width:700px){
   .profile-banner-body{flex-direction:column;align-items:flex-start}
   .profile-banner-photo{width:130px;height:130px;border-radius:var(--radius-lg)}
+  .profile-banner-photo.is-cutout{width:190px;height:230px;border-radius:0}
 }
 
 .back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.16em;color:var(--text-2)}

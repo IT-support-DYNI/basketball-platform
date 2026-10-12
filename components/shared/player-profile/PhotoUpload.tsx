@@ -1,12 +1,26 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import * as RadixMenu from "@radix-ui/react-dropdown-menu";
+
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/cn";
 
 interface PreviousPhoto {
   key: string;
   url: string;
+}
+
+/** A photo picked for upload, with its cut-out once the browser has made one. */
+interface Pending {
+  file: File;
+  originalUrl: string;
+  cutout: { blob: Blob; url: string } | null;
+  status: "working" | "ready" | "failed";
+  note?: string;
+  choice: "cutout" | "original";
 }
 
 /**
@@ -15,6 +29,11 @@ interface PreviousPhoto {
  * three-step upload flow as the coach video uploader underneath either way:
  * presigned PUT URL, upload straight to storage, then PATCH the player
  * record with the resulting key.
+ *
+ * A new photo first goes through a preview: the browser removes the
+ * background (lib/photo-cutout.ts) so the public profile can show the
+ * player NBA-style, standing on the banner. The player sees the cut-out
+ * next to the original and picks one, so a poor cut-out never goes live.
  */
 export default function PhotoUpload({ playerId }: { playerId: number }) {
   const router = useRouter();
@@ -23,6 +42,41 @@ export default function PhotoUpload({ playerId }: { playerId: number }) {
   const [error, setError] = useState("");
   const [photos, setPhotos] = useState<PreviousPhoto[] | null>(null);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
+  const [pending, setPending] = useState<Pending | null>(null);
+
+  // Free the preview images' memory once they're replaced or the dialog closes.
+  const originalUrl = pending?.originalUrl;
+  const cutoutUrl = pending?.cutout?.url;
+  useEffect(() => () => { if (originalUrl) URL.revokeObjectURL(originalUrl); }, [originalUrl]);
+  useEffect(() => () => { if (cutoutUrl) URL.revokeObjectURL(cutoutUrl); }, [cutoutUrl]);
+
+  async function preparePhoto(file: File) {
+    setError("");
+    const url = URL.createObjectURL(file);
+    setPending({ file, originalUrl: url, cutout: null, status: "working", choice: "original" });
+    try {
+      // Loaded on demand: the segmenter is only needed once someone picks a photo.
+      const { cutOutPerson } = await import("@/lib/photo-cutout");
+      const blob = await cutOutPerson(file);
+      const cutout = { blob, url: URL.createObjectURL(blob) };
+      setPending((p) => (p && p.originalUrl === url ? { ...p, cutout, status: "ready", choice: "cutout" } : p));
+    } catch (err) {
+      const note =
+        err instanceof Error && err.name === "NoPersonFoundError"
+          ? "We couldn't find one person clearly enough to cut out. A photo of just the player, from the waist up, against a plain wall works best."
+          : "The background couldn't be removed on this device. You can still use the original photo.";
+      setPending((p) => (p && p.originalUrl === url ? { ...p, status: "failed", note } : p));
+    }
+  }
+
+  async function savePending() {
+    if (!pending) return;
+    const ok =
+      pending.choice === "cutout" && pending.cutout
+        ? await handleFile(pending.cutout.blob, "image/png", true)
+        : await handleFile(pending.file, pending.file.type || "image/jpeg", false);
+    if (ok) setPending(null);
+  }
 
   async function loadPhotos() {
     setLoadingPhotos(true);
@@ -37,11 +91,11 @@ export default function PhotoUpload({ playerId }: { playerId: number }) {
     }
   }
 
-  async function applyPhotoUrl(photoUrl: string, failureMessage: string) {
+  async function applyPhotoUrl(photoUrl: string, failureMessage: string, photoIsCutout?: boolean) {
     const patchRes = await fetch(`/api/v1/players/${playerId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ photoUrl }),
+      body: JSON.stringify({ photoUrl, photoIsCutout }),
     });
     if (!patchRes.ok) {
       const patchBody = await patchRes.json().catch(() => ({}));
@@ -67,43 +121,47 @@ export default function PhotoUpload({ playerId }: { playerId: number }) {
     }
   }
 
-  async function handleFile(file: File) {
+  /** Upload a photo and make it the profile photo. True when it worked. */
+  async function handleFile(file: Blob, contentType: string, isCutout: boolean): Promise<boolean> {
     setError("");
     setBusy(true);
     try {
       const urlRes = await fetch(`/api/v1/players/${playerId}/photo-upload-url`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contentType: file.type || "image/jpeg" }),
+        body: JSON.stringify({ contentType }),
       });
       const urlBody = await urlRes.json();
       if (!urlRes.ok) {
         setError(urlBody.error ?? "Couldn't start the upload.");
-        return;
+        return false;
       }
 
       let putRes: Response;
       try {
         putRes = await fetch(urlBody.uploadUrl, {
           method: "PUT",
-          headers: { "Content-Type": file.type || "image/jpeg" },
+          headers: { "Content-Type": contentType },
           body: file,
         });
       } catch {
         setError("Upload failed. Please try again, or contact your site administrator if this keeps happening.");
-        return;
+        return false;
       }
       if (!putRes.ok) {
         setError("Upload failed. Please try again, or contact your site administrator if this keeps happening.");
-        return;
+        return false;
       }
 
-      if (await applyPhotoUrl(urlBody.key, "Photo uploaded but couldn't be saved to your profile.")) {
+      if (await applyPhotoUrl(urlBody.key, "Photo uploaded but couldn't be saved to your profile.", isCutout)) {
         setPhotos(null);
         router.refresh();
+        return true;
       }
+      return false;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+      return false;
     } finally {
       setBusy(false);
     }
@@ -118,7 +176,7 @@ export default function PhotoUpload({ playerId }: { playerId: number }) {
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (file) handleFile(file);
+          if (file) preparePhoto(file);
           e.target.value = "";
         }}
       />
@@ -202,11 +260,94 @@ export default function PhotoUpload({ playerId }: { playerId: number }) {
           </RadixMenu.Content>
         </RadixMenu.Portal>
       </RadixMenu.Root>
-      {error && (
+      <Dialog open={!!pending} onOpenChange={(open) => !open && !busy && setPending(null)}>
+        {pending && (
+          <DialogContent
+            title="Your new photo"
+            description="Pick how it shows on your public profile. The cut-out stands you on the banner, like a pro player page. It works best with a photo of just you, waist up."
+            className="max-w-lg"
+          >
+            <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Photo style">
+              <PhotoChoice
+                label="Cut-out"
+                selected={pending.choice === "cutout"}
+                disabled={pending.status !== "ready"}
+                onSelect={() => setPending((p) => (p ? { ...p, choice: "cutout" } : p))}
+              >
+                {pending.status === "working" && (
+                  <span className="p-3 text-center text-xs text-[#C9C3B6]">
+                    Removing the background...
+                    <br />
+                    The first time can take a minute.
+                  </span>
+                )}
+                {pending.status === "failed" && <span className="p-3 text-center text-xs text-[#C9C3B6]">Not available</span>}
+                {pending.cutout && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={pending.cutout.url} alt="Your photo with the background removed" className="h-full w-full object-contain object-bottom" />
+                )}
+              </PhotoChoice>
+              <PhotoChoice
+                label="Original"
+                selected={pending.choice === "original"}
+                onSelect={() => setPending((p) => (p ? { ...p, choice: "original" } : p))}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={pending.originalUrl} alt="Your original photo" className="h-full w-full object-cover" />
+              </PhotoChoice>
+            </div>
+            {pending.note && <p className="mt-3 text-sm text-ink-dim">{pending.note}</p>}
+            {error && <p role="alert" className="mt-3 text-sm text-danger">{error}</p>}
+            <div className="mt-5 flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setPending(null)} disabled={busy}>
+                Cancel
+              </Button>
+              <Button onClick={savePending} loading={busy} disabled={pending.status === "working"}>
+                Use this photo
+              </Button>
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
+      {error && !pending && (
         <p role="alert" className="absolute right-0 top-9 w-44 rounded-control border border-danger/40 bg-surface p-2 text-xs text-danger shadow-pop">
           {error}
         </p>
       )}
     </div>
+  );
+}
+
+/** One option in the preview: the photo on the profile banner's dark ground. */
+function PhotoChoice({
+  label,
+  selected,
+  disabled,
+  onSelect,
+  children,
+}: {
+  label: string;
+  selected: boolean;
+  disabled?: boolean;
+  onSelect: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      disabled={disabled}
+      onClick={onSelect}
+      className={cn(
+        "flex flex-col gap-1.5 rounded-card border-2 p-1.5 text-left transition disabled:cursor-not-allowed",
+        selected ? "border-flame" : "border-line hover:border-line-strong",
+      )}
+    >
+      <span className="flex aspect-[4/5] items-end justify-center overflow-hidden rounded-control bg-[#1C1915]">
+        {children}
+      </span>
+      <span className="px-1 text-sm font-semibold text-ink">{label}</span>
+    </button>
   );
 }
