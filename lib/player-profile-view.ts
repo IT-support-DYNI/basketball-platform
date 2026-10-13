@@ -6,6 +6,7 @@ import { resolvePlayerViewerScope, serializePlayerProfile } from "@/lib/authz/fi
 import { playerTeamIds } from "@/lib/roster";
 import { computeAttendanceStats } from "@/lib/attendance";
 import { getPlaybackUrl } from "@/lib/storage";
+import { CUTOUT_PHOTOS, isCutoutPhoto } from "@/lib/player-photo";
 
 /** photoUrl stores a private-bucket key ("player-photos/<uuid>"), never a
  *  bare public URL — resolved to a short-lived signed GET fresh on every
@@ -52,7 +53,7 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
       },
       highlights: { orderBy: { createdAt: "desc" } },
       // Only to tell whether the current photo is a background-removed cut-out.
-      photos: { where: { isCutout: true }, select: { storageKey: true } },
+      photos: CUTOUT_PHOTOS,
     },
   });
   if (!player) return null;
@@ -116,7 +117,7 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
 
   const photoKey = (visible as { photoUrl?: string | null }).photoUrl;
   const photoUrl = await resolvePhotoUrl(photoKey);
-  const photoIsCutout = !!photoKey && cutoutPhotos.some((p) => p.storageKey === photoKey);
+  const photoIsCutout = isCutoutPhoto(photoKey, cutoutPhotos);
 
   return {
     id: player.id,

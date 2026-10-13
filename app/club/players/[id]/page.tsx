@@ -34,9 +34,9 @@ export default async function PublicPlayerPage({ params }: { params: { id: strin
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="profile-banner-crest" src="/brand/dyni-crest-256.png" alt="" width={256} height={256} />
         <div className="profile-banner-body">
-          <div className={`profile-banner-photo${player.photoIsCutout ? " is-cutout" : ""}`}>
+          <div className="profile-banner-photo">
             {player.photoUrl ? (
-              <div className="photo has-img">
+              <div className={`photo has-img${player.photoIsCutout ? " is-cutout" : ""}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={player.photoUrl} alt="" />
               </div>

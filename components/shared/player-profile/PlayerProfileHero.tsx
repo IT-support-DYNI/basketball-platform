@@ -1,4 +1,5 @@
 import type { PlayerProfileView } from "@/lib/player-profile-view";
+import { cn } from "@/lib/cn";
 import CountUp from "@/components/ui/CountUp";
 import PhotoUpload from "./PhotoUpload";
 
@@ -109,31 +110,33 @@ export default function PlayerProfileHero({
              *  relative one — otherwise it clips PhotoUpload's edit badge,
              *  which deliberately hangs off the corner via negative insets */}
             <div className="relative h-full w-full overflow-hidden">
-              {player.photoUrl && player.photoIsCutout ? (
-                // A background-removed cut-out (lib/photo-cutout.ts): the
-                // player stands straight on the band, whole, like the
-                // reference. No edge fade needed.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={player.photoUrl}
-                  alt=""
-                  className="h-full w-full object-contain object-bottom drop-shadow-[0_14px_22px_rgba(0,0,0,0.35)]"
-                />
-              ) : player.photoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={player.photoUrl} alt="" className="h-full w-full object-cover object-top transition duration-200 hover:scale-105" />
+              {player.photoUrl ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={player.photoUrl}
+                    alt=""
+                    className={cn(
+                      "h-full w-full",
+                      // A cut-out stands whole on the band; a plain photo fills the box.
+                      player.photoIsCutout
+                        ? "object-contain object-bottom drop-shadow-[0_14px_22px_rgba(0,0,0,0.35)]"
+                        : "object-cover object-top transition duration-200 hover:scale-105",
+                    )}
+                  />
+                  {/* A plain rectangular photo fades into the band on its
+                   *  right edge, standing in for a cut-out. */}
+                  {!player.photoIsCutout && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-transparent via-flame/40 to-flame"
+                    />
+                  )}
+                </>
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-black/15 font-condensed text-6xl font-bold text-on-flame">
                   {initials}
                 </div>
-              )}
-              {/* A plain rectangular photo fades into the band on its right
-               *  edge, standing in for a cut-out. */}
-              {player.photoUrl && !player.photoIsCutout && (
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-transparent via-flame/40 to-flame"
-                />
               )}
             </div>
             {editable && <PhotoUpload playerId={player.id} />}

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import * as RadixMenu from "@radix-ui/react-dropdown-menu";
+import * as RadixRadio from "@radix-ui/react-radio-group";
 
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
@@ -13,12 +14,12 @@ interface PreviousPhoto {
   url: string;
 }
 
-/** A photo picked for upload, with its cut-out once the browser has made one. */
+/** A photo picked for upload. Still working while it has neither a cut-out
+ *  nor a note saying why there isn't one. */
 interface Pending {
   file: File;
   originalUrl: string;
   cutout: { blob: Blob; url: string } | null;
-  status: "working" | "ready" | "failed";
   note?: string;
   choice: "cutout" | "original";
 }
@@ -53,28 +54,24 @@ export default function PhotoUpload({ playerId }: { playerId: number }) {
   async function preparePhoto(file: File) {
     setError("");
     const url = URL.createObjectURL(file);
-    setPending({ file, originalUrl: url, cutout: null, status: "working", choice: "original" });
+    setPending({ file, originalUrl: url, cutout: null, choice: "original" });
+    // Only the latest pick may update the dialog.
+    const update = (patch: Partial<Pending>) => setPending((p) => (p && p.originalUrl === url ? { ...p, ...patch } : p));
     try {
       // Loaded on demand: the segmenter is only needed once someone picks a photo.
       const { cutOutPerson } = await import("@/lib/photo-cutout");
       const blob = await cutOutPerson(file);
-      const cutout = { blob, url: URL.createObjectURL(blob) };
-      setPending((p) => (p && p.originalUrl === url ? { ...p, cutout, status: "ready", choice: "cutout" } : p));
-    } catch (err) {
-      const note =
-        err instanceof Error && err.name === "NoPersonFoundError"
-          ? "We couldn't find one person clearly enough to cut out. A photo of just the player, from the waist up, against a plain wall works best."
-          : "The background couldn't be removed on this device. You can still use the original photo.";
-      setPending((p) => (p && p.originalUrl === url ? { ...p, status: "failed", note } : p));
+      if (blob) update({ cutout: { blob, url: URL.createObjectURL(blob) }, choice: "cutout" });
+      else update({ note: "We couldn't find one person clearly enough to cut out. A photo of just the player, from the waist up, against a plain wall works best." });
+    } catch {
+      update({ note: "The background couldn't be removed on this device. You can still use the original photo." });
     }
   }
 
   async function savePending() {
     if (!pending) return;
-    const ok =
-      pending.choice === "cutout" && pending.cutout
-        ? await handleFile(pending.cutout.blob, "image/png", true)
-        : await handleFile(pending.file, pending.file.type || "image/jpeg", false);
+    const { choice, cutout, file } = pending;
+    const ok = choice === "cutout" && cutout ? await handleFile(cutout.blob, true) : await handleFile(file, false);
     if (ok) setPending(null);
   }
 
@@ -122,7 +119,10 @@ export default function PhotoUpload({ playerId }: { playerId: number }) {
   }
 
   /** Upload a photo and make it the profile photo. True when it worked. */
-  async function handleFile(file: Blob, contentType: string, isCutout: boolean): Promise<boolean> {
+  async function handleFile(file: Blob, isCutout: boolean): Promise<boolean> {
+    // A cut-out is WebP, or PNG where the browser can't encode WebP; a picked
+    // file carries its own type. Either way the blob knows.
+    const contentType = file.type || "image/jpeg";
     setError("");
     setBusy(true);
     try {
@@ -267,42 +267,39 @@ export default function PhotoUpload({ playerId }: { playerId: number }) {
             description="Pick how it shows on your public profile. The cut-out stands you on the banner, like a pro player page. It works best with a photo of just you, waist up."
             className="max-w-lg"
           >
-            <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Photo style">
+            <RadixRadio.Root
+              aria-label="Photo style"
+              value={pending.choice}
+              onValueChange={(v) => setPending((p) => (p ? { ...p, choice: v as Pending["choice"] } : p))}
+              className="grid grid-cols-2 gap-3"
+            >
               <PhotoChoice
+                value="cutout"
                 label="Cut-out"
-                selected={pending.choice === "cutout"}
-                disabled={pending.status !== "ready"}
-                onSelect={() => setPending((p) => (p ? { ...p, choice: "cutout" } : p))}
+                disabled={!pending.cutout}
+                src={pending.cutout?.url}
+                alt="Your photo with the background removed"
+                contain
               >
-                {pending.status === "working" && (
-                  <span className="p-3 text-center text-xs text-[#C9C3B6]">
+                {pending.note ? (
+                  "Not available"
+                ) : (
+                  <>
                     Removing the background...
                     <br />
                     The first time can take a minute.
-                  </span>
-                )}
-                {pending.status === "failed" && <span className="p-3 text-center text-xs text-[#C9C3B6]">Not available</span>}
-                {pending.cutout && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={pending.cutout.url} alt="Your photo with the background removed" className="h-full w-full object-contain object-bottom" />
+                  </>
                 )}
               </PhotoChoice>
-              <PhotoChoice
-                label="Original"
-                selected={pending.choice === "original"}
-                onSelect={() => setPending((p) => (p ? { ...p, choice: "original" } : p))}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={pending.originalUrl} alt="Your original photo" className="h-full w-full object-cover" />
-              </PhotoChoice>
-            </div>
+              <PhotoChoice value="original" label="Original" src={pending.originalUrl} alt="Your original photo" />
+            </RadixRadio.Root>
             {pending.note && <p className="mt-3 text-sm text-ink-dim">{pending.note}</p>}
             {error && <p role="alert" className="mt-3 text-sm text-danger">{error}</p>}
             <div className="mt-5 flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setPending(null)} disabled={busy}>
                 Cancel
               </Button>
-              <Button onClick={savePending} loading={busy} disabled={pending.status === "working"}>
+              <Button onClick={savePending} loading={busy} disabled={!pending.cutout && !pending.note}>
                 Use this photo
               </Button>
             </div>
@@ -318,36 +315,44 @@ export default function PhotoUpload({ playerId }: { playerId: number }) {
   );
 }
 
-/** One option in the preview: the photo on the profile banner's dark ground. */
+/** One option in the preview: the photo on the profile banner's dark ground,
+ *  or `children` (a status line) until there is one. A Radix radio item, so
+ *  the pair gets arrow-key navigation like components/ui/RadioGroup. */
 function PhotoChoice({
+  value,
   label,
-  selected,
   disabled,
-  onSelect,
+  src,
+  alt,
+  contain = false,
   children,
 }: {
+  value: string;
   label: string;
-  selected: boolean;
   disabled?: boolean;
-  onSelect: () => void;
-  children: ReactNode;
+  src?: string;
+  alt: string;
+  contain?: boolean;
+  children?: ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={selected}
+    <RadixRadio.Item
+      value={value}
       disabled={disabled}
-      onClick={onSelect}
       className={cn(
-        "flex flex-col gap-1.5 rounded-card border-2 p-1.5 text-left transition disabled:cursor-not-allowed",
-        selected ? "border-flame" : "border-line hover:border-line-strong",
+        "flex flex-col gap-1.5 rounded-card border-2 border-line p-1.5 text-left outline-none transition hover:border-line-strong",
+        "focus-visible:ring-2 focus-visible:ring-flame data-[state=checked]:border-flame data-[disabled]:cursor-not-allowed",
       )}
     >
       <span className="flex aspect-[4/5] items-end justify-center overflow-hidden rounded-control bg-[#1C1915]">
-        {children}
+        {src ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={src} alt={alt} className={cn("h-full w-full", contain ? "object-contain object-bottom" : "object-cover")} />
+        ) : (
+          <span className="p-3 text-center text-xs text-[#C9C3B6]">{children}</span>
+        )}
       </span>
       <span className="px-1 text-sm font-semibold text-ink">{label}</span>
-    </button>
+    </RadixRadio.Item>
   );
 }

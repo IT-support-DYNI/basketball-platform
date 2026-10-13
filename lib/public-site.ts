@@ -1,6 +1,9 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 import { PUBLIC_SCOPE, serializePlayerProfile } from "@/lib/authz/field-visibility";
 import { getPlaybackUrl } from "@/lib/storage";
+import { CUTOUT_PHOTOS, isCutoutPhoto } from "@/lib/player-photo";
 
 /**
  * Read models for the unauthenticated public club site (/club/*, brief §28).
@@ -138,13 +141,6 @@ export type PublicPlayerCard = {
   publicStatus: "Active" | "Trialist" | null;
 };
 
-/** Only the cut-out photos' keys: enough to tell if the current photo is one. */
-const CUTOUT_PHOTOS = { where: { isCutout: true }, select: { storageKey: true } } as const;
-
-function isCutout(currentKey: string | null, cutouts: { storageKey: string }[]): boolean {
-  return !!currentKey && cutouts.some((p) => p.storageKey === currentKey);
-}
-
 /** Roster cards for the public "meet the team" grid — approved players only. */
 export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> {
   const players = await prisma.playerProfile.findMany({
@@ -171,7 +167,7 @@ export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> 
         id: p.id,
         name: p.user.name,
         photoUrl: p.publicShowPhoto ? await resolvePhotoUrl(p.photoUrl) : null,
-        photoIsCutout: p.publicShowPhoto && isCutout(p.photoUrl, p.photos),
+        photoIsCutout: p.publicShowPhoto && isCutoutPhoto(p.photoUrl, p.photos),
         position: membership?.position ?? null,
         positionLabel: membership?.position ? POSITION_LABELS[membership.position] ?? membership.position : null,
         publicStatus,
@@ -201,7 +197,9 @@ export type PublicPlayerProfile = PublicPlayerCard & {
 /** One player's public page. Returns null for anyone not approved — the
  *  page this feeds renders a 404 in that case, not an empty shell, so
  *  there's no way to tell "not approved" apart from "doesn't exist". */
-export async function getPublicPlayer(playerId: number): Promise<PublicPlayerProfile | null> {
+// cache(): the profile page and its generateMetadata both ask for the same
+// player in one request; this makes that one set of queries, not two.
+export const getPublicPlayer = cache(async (playerId: number): Promise<PublicPlayerProfile | null> => {
   const player = await prisma.playerProfile.findUnique({
     where: { id: playerId },
     include: {
@@ -229,7 +227,7 @@ export async function getPublicPlayer(playerId: number): Promise<PublicPlayerPro
     id: player.id,
     name: player.user.name,
     photoUrl: player.publicShowPhoto ? await resolvePhotoUrl((visible as { photoUrl?: string | null }).photoUrl) : null,
-    photoIsCutout: player.publicShowPhoto && isCutout(player.photoUrl, player.photos),
+    photoIsCutout: player.publicShowPhoto && isCutoutPhoto(player.photoUrl, player.photos),
     position: membership?.position ?? null,
     positionLabel: membership?.position ? POSITION_LABELS[membership.position] ?? membership.position : null,
     publicStatus,
@@ -265,7 +263,7 @@ export async function getPublicPlayer(playerId: number): Promise<PublicPlayerPro
         }
       : null,
   };
-}
+});
 
 export type PublicCoachCard = {
   id: number;
