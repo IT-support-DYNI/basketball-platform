@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-import { route } from "@/lib/api";
-import { requireAuth, AuthorizationError } from "@/lib/authorization";
+import { ForbiddenError, route } from "@/lib/api";
+import { requireAuth } from "@/lib/authorization";
 import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 
@@ -13,7 +13,7 @@ export const POST = route<{ id: string }>(async (_req, { params }) => {
   const playerId = Number(params.id);
 
   if (session.user.role !== "PLAYER" || session.user.playerId !== playerId) {
-    throw new AuthorizationError("You can only resubmit your own registration");
+    throw new ForbiddenError("You can only resubmit your own registration");
   }
 
   const player = await prisma.playerProfile.findUnique({ where: { id: playerId } });

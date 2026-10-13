@@ -70,15 +70,3 @@ export class RateLimitError extends ApiError {
     super(429, "RATE_LIMITED", message);
   }
 }
-
-/**
- * Back-compat alias. The old code threw `AuthorizationError(message, status)`
- * from lib/authorization.ts; that now maps onto this. 401 → Unauthorized,
- * anything else → Forbidden.
- */
-export class AuthorizationError extends ApiError {
-  constructor(message: string, status = 403) {
-    super(status, status === 401 ? "UNAUTHORIZED" : "FORBIDDEN", message);
-    this.name = "AuthorizationError";
-  }
-}

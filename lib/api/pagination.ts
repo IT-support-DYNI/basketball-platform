@@ -47,10 +47,3 @@ function clampInt(raw: string | null, min: number, max: number, fallback: number
   if (!Number.isInteger(n)) throw new BadRequestError(`Expected an integer, got "${raw}".`);
   return Math.min(max, Math.max(min, n));
 }
-
-/** Turn the parsed sort into a Prisma `orderBy` (or undefined). */
-export function toPrismaOrderBy<S extends string>(
-  sort: ListParams<S>["sort"],
-): Record<string, "asc" | "desc"> | undefined {
-  return sort ? { [sort.field]: sort.dir } : undefined;
-}

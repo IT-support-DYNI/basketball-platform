@@ -80,3 +80,6 @@ export const reviewRegistrationSchema = z.object({
   /// an admin confirms/reassigns it at approval time.
   teamId: z.number().int().positive().optional(),
 });
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type RegisterGuardianInput = z.infer<typeof registerGuardianSchema>;

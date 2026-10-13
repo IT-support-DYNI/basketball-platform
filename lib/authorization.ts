@@ -12,7 +12,6 @@
  *                               lib/authz/ability.ts
  */
 
-export { AuthorizationError } from "./api/errors";
 export {
   authorize,
   requireAbility,

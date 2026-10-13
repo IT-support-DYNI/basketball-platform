@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-import { route } from "@/lib/api";
-import { requireAuth, AuthorizationError } from "@/lib/authorization";
+import { ForbiddenError, route } from "@/lib/api";
+import { requireAuth } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 
 export const PATCH = route<{ id: string }>(async (_req, { params }) => {
@@ -12,7 +12,7 @@ export const PATCH = route<{ id: string }>(async (_req, { params }) => {
 
   if (!notification) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (notification.userId !== Number(session.user.id)) {
-    throw new AuthorizationError("You don't have access to this notification");
+    throw new ForbiddenError("You don't have access to this notification");
   }
 
   const updated = await prisma.notification.update({

@@ -10,20 +10,8 @@ import { z } from "zod";
 /** A numeric path/route id, coerced from the string Next gives us. */
 export const idParam = z.coerce.number().int().positive();
 
-/** Standard list query: ?page=&pageSize=&sort=&q= (see lib/api/pagination.ts). */
-export const listQuery = z.object({
-  page: z.coerce.number().int().min(1).optional(),
-  pageSize: z.coerce.number().int().min(1).max(100).optional(),
-  sort: z.string().optional(),
-  q: z.string().trim().optional(),
-});
-export type ListQuery = z.infer<typeof listQuery>;
-
 /** Date-only string (YYYY-MM-DD). */
 export const dateOnly = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD");
-
-/** Time-of-day string (HH:MM, 24h). */
-export const timeOfDay = z.string().regex(/^\d{2}:\d{2}$/, "Expected HH:MM");
 
 /** An outbound link a user typed (highlight, linked video). `z.string().url()`
  *  alone accepts any scheme — including `javascript:` — and these values end

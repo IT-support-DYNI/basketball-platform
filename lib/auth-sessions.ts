@@ -65,10 +65,3 @@ export async function revokeOtherAuthSessions(userId: number, keepTokenId: strin
   });
   return result.count;
 }
-
-export async function revokeAllAuthSessions(userId: number): Promise<void> {
-  await prisma.authSession.updateMany({
-    where: { userId, revokedAt: null },
-    data: { revokedAt: new Date() },
-  });
-}

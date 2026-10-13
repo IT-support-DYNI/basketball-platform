@@ -79,21 +79,6 @@ export async function hasOutstandingConsent(playerProfileId: number): Promise<bo
   return outstanding.length > 0;
 }
 
-/** Record acceptance of one version for one player. Idempotent per (version,
- *  player) via the unique index. */
-export async function acceptConsent(
-  documentVersionId: number,
-  playerProfileId: number,
-  acceptedByUserId: number,
-  byGuardian: boolean,
-) {
-  return prisma.consentRecord.upsert({
-    where: { documentVersionId_playerProfileId: { documentVersionId, playerProfileId } },
-    create: { documentVersionId, playerProfileId, acceptedByUserId, byGuardian },
-    update: {}, // acceptance is append-only — never overwrite the original timestamp
-  });
-}
-
 /** Which player the caller may manage consent for. A player → their own
  *  profile; a guardian → any linked child (must pass `playerProfileId`). */
 export async function resolveConsentSubject(

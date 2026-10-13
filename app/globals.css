@@ -16,7 +16,7 @@
  * can apply opacity modifiers — `bg-flame/10`, `ring-flame/25` etc. Consume them
  * as `rgb(var(--token))` in hand-written CSS. `--line*` are pre-baked rgba.
  *
- * Canonical values and rationale: lib/design/tokens.ts. --flame is the same
+ * These variables are the canonical values. --flame is the same
  * accent as /club's --accent (#FE440B) — one brand colour, one app.
  */
 

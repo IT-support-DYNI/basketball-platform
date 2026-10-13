@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-import { route } from "@/lib/api";
-import { requireRole, AuthorizationError } from "@/lib/authorization";
+import { ForbiddenError, route } from "@/lib/api";
+import { requireRole } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 
 export const DELETE = route<{ id: string }>(async (_req, { params }) => {
@@ -13,7 +13,7 @@ export const DELETE = route<{ id: string }>(async (_req, { params }) => {
 
   const isAuthor = announcement.authorUserId === Number(session.user.id);
   if (session.user.role !== "ADMIN" && !isAuthor) {
-    throw new AuthorizationError("You can only remove announcements you posted");
+    throw new ForbiddenError("You can only remove announcements you posted");
   }
 
   await prisma.announcement.delete({ where: { id: announcement.id } });

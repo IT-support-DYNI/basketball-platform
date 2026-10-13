@@ -11,8 +11,6 @@ import { errorResponse } from "./response";
  *  - consistent error handling: ApiError → its status/code; ZodError → 422
  *    VALIDATION with per-field details; anything else → 500 INTERNAL with no
  *    detail leaked (the real error is logged with the request id)
- *
- * `withApi` is kept as an alias so routes not yet migrated keep working.
  */
 
 export type RouteContext<P = Record<string, string>> = { params: P };
@@ -47,6 +45,3 @@ export function route<P = Record<string, string>>(handler: Handler<P>) {
     }
   };
 }
-
-/** @deprecated use `route` — kept so un-migrated handlers keep compiling. */
-export const withApi = route;

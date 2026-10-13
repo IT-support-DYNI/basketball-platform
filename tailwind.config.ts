@@ -4,7 +4,7 @@ import type { Config } from 'tailwindcss';
  * Colours resolve to the CSS custom properties in app/globals.css (stored as
  * RGB channel triplets), so every utility is theme-aware automatically
  * (light / dark) and opacity modifiers like `bg-flame/10` work. See
- * lib/design/tokens.ts for the canonical values.
+ * app/globals.css for the canonical values.
  *
  * The `slate` and `court` scales are kept as aliases onto the new tokens so
  * screens not yet migrated to the DYNI system stay legible in both themes.

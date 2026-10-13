@@ -7,7 +7,7 @@ import { verifyEmailMessage } from "./mail/templates";
 import { baseUrl } from "./base-url";
 import { logAudit } from "./audit";
 import { prisma } from "./prisma";
-import type { RegisterInput, RegisterGuardianInput } from "./contracts";
+import type { RegisterInput, RegisterGuardianInput } from "./contracts/registration";
 
 /**
  * Account creation for the three registration entry points — direct self,
