@@ -1,6 +1,7 @@
 import { NotificationCategory, NotificationType, Prisma } from "@prisma/client";
 
 import { CATEGORY_FOR_TYPE } from "./notification-categories";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 /*
  * Fan-out helpers: called inside the same transaction as the write
@@ -70,7 +71,7 @@ export async function teamPlayerUserIds(
   teamId: number,
 ): Promise<number[]> {
   const memberships = await tx.teamMembership.findMany({
-    where: { teamId, status: { notIn: ["FORMER", "INACTIVE"] } },
+    where: { teamId, status: ACTIVE_MEMBERSHIP },
     select: { player: { select: { userId: true } } },
   });
   return [...new Set(memberships.map((m) => m.player.userId))];

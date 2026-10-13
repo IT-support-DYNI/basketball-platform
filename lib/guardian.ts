@@ -2,6 +2,7 @@ import { prisma } from "./prisma";
 import { outstandingConsents } from "./consent";
 import { visibleEventScope } from "./events";
 import type { Session } from "next-auth";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 export type ChildSummary = {
   playerProfileId: number;
@@ -25,7 +26,7 @@ export async function childrenOf(guardianUserId: number): Promise<ChildSummary[]
         include: {
           user: { select: { id: true, name: true } },
           memberships: {
-            where: { status: { notIn: ["FORMER", "INACTIVE"] } },
+            where: { status: ACTIVE_MEMBERSHIP },
             orderBy: { joinedAt: "desc" },
             take: 1,
             include: { team: { select: { id: true, name: true } } },

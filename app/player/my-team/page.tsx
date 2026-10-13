@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getActiveSeason } from "@/lib/season";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 const STAFF_ROLE_LABEL: Record<string, string> = {
   HEAD_COACH: "Head coach",
@@ -23,7 +24,7 @@ export default async function PlayerMyTeamPage() {
         where: { id: teamId },
         include: {
           memberships: {
-            where: { seasonId: season.id, status: { notIn: ["FORMER", "INACTIVE"] } },
+            where: { seasonId: season.id, status: ACTIVE_MEMBERSHIP },
             orderBy: { jerseyNumber: "asc" },
             include: { player: { include: { user: { select: { name: true } } } } },
           },

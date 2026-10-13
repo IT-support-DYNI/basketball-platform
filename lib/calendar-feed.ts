@@ -4,6 +4,7 @@ import type { Session } from "next-auth";
 import { prisma } from "./prisma";
 import { visibleEventScope } from "./events";
 import type { IcsEvent } from "./ics";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 const icsSelect = {
   id: true,
@@ -48,7 +49,7 @@ export async function eventsForFeedToken(token: string): Promise<{ name: string;
     prisma.staffAssignment.findMany({ where: { userId: user.id }, select: { teamId: true } }),
     user.playerProfile
       ? prisma.teamMembership.findFirst({
-          where: { playerProfileId: user.playerProfile.id, status: { notIn: ["FORMER", "INACTIVE"] } },
+          where: { playerProfileId: user.playerProfile.id, status: ACTIVE_MEMBERSHIP },
           select: { teamId: true },
         })
       : null,

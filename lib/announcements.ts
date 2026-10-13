@@ -3,6 +3,7 @@ import type { Session } from "next-auth";
 
 import { prisma } from "./prisma";
 import { teamPlayerUserIds } from "./notify";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 /**
  * Announcements are a broadcast surface (brief §12) — distinct from chat and
@@ -24,7 +25,7 @@ async function callerTeamIds(session: Session): Promise<number[]> {
         player: {
           select: {
             memberships: {
-              where: { status: { notIn: ["FORMER", "INACTIVE"] } },
+              where: { status: ACTIVE_MEMBERSHIP },
               select: { teamId: true },
             },
             registrationTeamId: true,
@@ -123,7 +124,7 @@ export async function announcementAudience(
   if (a.scope === "TEAM" && a.teamId != null) {
     const players = await teamPlayerUserIds(tx, a.teamId);
     const guardians = await tx.guardianRelationship.findMany({
-      where: { player: { memberships: { some: { teamId: a.teamId, status: { notIn: ["FORMER", "INACTIVE"] } } } } },
+      where: { player: { memberships: { some: { teamId: a.teamId, status: ACTIVE_MEMBERSHIP } } } },
       select: { guardianUserId: true },
     });
     const staff = await tx.staffAssignment.findMany({ where: { teamId: a.teamId }, select: { userId: true } });

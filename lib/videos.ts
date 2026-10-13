@@ -1,5 +1,6 @@
 import type { Session } from "next-auth";
 import type { Prisma } from "@prisma/client";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 /**
  * Who can see a given Video row: Admin — every video. Coach — videos for
@@ -35,7 +36,6 @@ export function visibleVideoWhere(session: Session): Prisma.VideoWhereInput {
   };
 }
 
-const ACTIVE_MEMBERSHIP = { notIn: ["FORMER", "INACTIVE"] as ("FORMER" | "INACTIVE")[] };
 
 /**
  * Which of a visible video's assignments the caller may see. Admin — all.

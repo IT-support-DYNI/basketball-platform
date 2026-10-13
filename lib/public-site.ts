@@ -2,8 +2,8 @@ import { cache } from "react";
 
 import { prisma } from "@/lib/prisma";
 import { PUBLIC_SCOPE, serializePlayerProfile } from "@/lib/authz/field-visibility";
-import { getPlaybackUrl } from "@/lib/storage";
-import { CUTOUT_PHOTOS, isCutoutPhoto } from "@/lib/player-photo";
+import { CUTOUT_PHOTOS, highlightUrl, isCutoutPhoto, resolvePhotoUrl } from "@/lib/player-photo";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 /**
  * Read models for the unauthenticated public club site (/club/*, brief §28).
@@ -35,16 +35,6 @@ const STAFF_ROLE_LABELS: Record<string, string> = {
 // Best single line to show under a coach's name when they hold more than one
 // role/team — prefer the roles a visitor most wants to see first.
 const STAFF_ROLE_PRIORITY = ["HEAD_COACH", "WELFARE_OFFICER", "ASSISTANT_COACH", "TEAM_MANAGER", "MEDICAL_OFFICER", "STATISTICIAN"];
-
-async function resolvePhotoUrl(stored: string | null | undefined): Promise<string | null> {
-  if (!stored) return null;
-  if (!stored.startsWith("player-photos/") && !stored.startsWith("coach-photos/")) return null;
-  try {
-    return await getPlaybackUrl(stored, 3600);
-  } catch {
-    return null;
-  }
-}
 
 export type PublicFixture = {
   id: number;
@@ -81,7 +71,7 @@ export async function getClubStats() {
     prisma.team.count({ where: { status: "ACTIVE" } }),
     prisma.playerProfile.findMany({
       select: { id: true },
-      where: { memberships: { some: { status: { notIn: ["FORMER", "INACTIVE"] } } } },
+      where: { memberships: { some: { status: ACTIVE_MEMBERSHIP } } },
     }),
     prisma.coachProfile.count(),
     prisma.season.count({ where: { isActive: true } }),
@@ -108,7 +98,7 @@ export async function getPublicTeams(): Promise<PublicTeam[]> {
       name: true,
       ageGroup: true,
       description: true,
-      _count: { select: { memberships: { where: { status: { notIn: ["FORMER", "INACTIVE"] } } } } },
+      _count: { select: { memberships: { where: { status: ACTIVE_MEMBERSHIP } } } },
     },
     orderBy: { name: "asc" },
   });
@@ -148,7 +138,7 @@ export async function getPublicPlayers(limit = 12): Promise<PublicPlayerCard[]> 
     include: {
       user: { select: { name: true } },
       memberships: {
-        where: { status: { notIn: ["FORMER", "INACTIVE"] } },
+        where: { status: ACTIVE_MEMBERSHIP },
         include: { team: { select: { name: true, ageGroup: true } } },
         take: 1,
       },
@@ -205,7 +195,7 @@ export const getPublicPlayer = cache(async (playerId: number): Promise<PublicPla
     include: {
       user: { select: { name: true } },
       memberships: {
-        where: { status: { notIn: ["FORMER", "INACTIVE"] } },
+        where: { status: ACTIVE_MEMBERSHIP },
         include: { team: { select: { name: true, ageGroup: true } } },
         take: 1,
       },
@@ -226,22 +216,22 @@ export const getPublicPlayer = cache(async (playerId: number): Promise<PublicPla
   return {
     id: player.id,
     name: player.user.name,
-    photoUrl: player.publicShowPhoto ? await resolvePhotoUrl((visible as { photoUrl?: string | null }).photoUrl) : null,
+    photoUrl: player.publicShowPhoto ? await resolvePhotoUrl(visible.photoUrl) : null,
     photoIsCutout: player.publicShowPhoto && isCutoutPhoto(player.photoUrl, player.photos),
     position: membership?.position ?? null,
     positionLabel: membership?.position ? POSITION_LABELS[membership.position] ?? membership.position : null,
     publicStatus,
     team: membership?.team.name ?? null,
     ageGroup: membership?.team.ageGroup ?? null,
-    bio: player.publicShowBio ? ((visible as { bio?: string | null }).bio ?? null) : null,
+    bio: player.publicShowBio ? (visible.bio ?? null) : null,
     jerseyNumber: membership?.jerseyNumber ?? null,
-    quote: player.publicShowQuote ? ((visible as { quote?: string | null }).quote ?? null) : null,
+    quote: player.publicShowQuote ? (visible.quote ?? null) : null,
     highlights: player.publicShowHighlights
       ? await Promise.all(
           player.highlights.map(async (h) => ({
             id: h.id,
             title: h.title,
-            url: h.url ?? (h.storageKey ? await getPlaybackUrl(h.storageKey, 3600) : ""),
+            url: await highlightUrl(h),
             uploaded: !!h.storageKey,
           })),
         )

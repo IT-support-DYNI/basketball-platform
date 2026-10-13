@@ -8,6 +8,7 @@ import EditProfileForm from "@/app/player/profile/_components/EditProfileForm";
 import PlayerProfileHero from "@/components/shared/player-profile/PlayerProfileHero";
 import PlayerProfileSections from "@/components/shared/player-profile/PlayerProfileSections";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 export default async function PlayerProfilePage() {
   const session = await getServerSession(authOptions);
@@ -20,7 +21,7 @@ export default async function PlayerProfilePage() {
         include: {
           user: true,
           memberships: {
-            where: { seasonId: season.id, status: { notIn: ["FORMER", "INACTIVE"] } },
+            where: { seasonId: season.id, status: ACTIVE_MEMBERSHIP },
             include: { team: { select: { name: true } } },
             take: 1,
           },

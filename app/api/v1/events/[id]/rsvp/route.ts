@@ -9,6 +9,7 @@ import { authorize } from "@/lib/authz/guard";
 import { rsvpSchema } from "@/lib/contracts/event";
 import { capacityState, rsvpWindowState, tallyResponses } from "@/lib/rsvp";
 import { prisma } from "@/lib/prisma";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 async function loadEvent(id: number) {
   const event = await prisma.event.findUnique({
@@ -53,7 +54,7 @@ export const GET = route<{ id: string }>(async (_req, { params }) => {
     }),
     event.teamId != null
       ? prisma.teamMembership.count({
-          where: { teamId: event.teamId, status: { notIn: ["FORMER", "INACTIVE"] } },
+          where: { teamId: event.teamId, status: ACTIVE_MEMBERSHIP },
         })
       : 0,
   ]);

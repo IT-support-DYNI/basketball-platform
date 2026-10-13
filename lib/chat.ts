@@ -11,6 +11,7 @@ import {
 } from "./safeguarding";
 import { notifyUsers } from "./notify";
 import { sendPushToUsers } from "./push";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 /**
  * Two-way chat. Transport is polling (the client re-fetches); a realtime
@@ -73,7 +74,7 @@ export async function ensureTeamConversation(teamId: number): Promise<number> {
 
   const [players, staff, existing] = await Promise.all([
     prisma.teamMembership.findMany({
-      where: { teamId, status: { notIn: ["FORMER", "INACTIVE"] } },
+      where: { teamId, status: ACTIVE_MEMBERSHIP },
       select: { player: { select: { userId: true } } },
     }),
     prisma.staffAssignment.findMany({ where: { teamId }, select: { userId: true } }),

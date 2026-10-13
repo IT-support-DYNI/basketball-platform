@@ -22,12 +22,14 @@ type MembershipFields = {
   status?: MembershipStatus;
 };
 
-const NON_FORMER: MembershipStatus[] = ["FORMER", "INACTIVE"];
+/** On the current roster: any membership not FORMER or INACTIVE. Use as a
+ *  membership `status` filter: `where: { status: ACTIVE_MEMBERSHIP }`. */
+export const ACTIVE_MEMBERSHIP: { notIn: MembershipStatus[] } = { notIn: ["FORMER", "INACTIVE"] };
 
 /** Prisma `include`/`select` fragment to load the team ids an access check needs. */
 export const playerTeamIdsSelect = {
   memberships: {
-    where: { status: { notIn: NON_FORMER } },
+    where: { status: ACTIVE_MEMBERSHIP },
     select: { teamId: true },
   },
 } satisfies Prisma.PlayerProfileSelect;
@@ -52,7 +54,7 @@ export function rosterPlayerFilter(team: number | number[], seasonId?: number) {
     memberships: {
       some: {
         teamId: Array.isArray(team) ? { in: team } : team,
-        status: { notIn: NON_FORMER },
+        status: ACTIVE_MEMBERSHIP,
         ...(seasonId != null ? { seasonId } : {}),
       },
     },

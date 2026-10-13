@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { route, ok } from "@/lib/api";
 import { requireAuth } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 /** GET — people the caller can start a conversation with: everyone on a team
  *  they share (players + staff). */
@@ -21,7 +22,7 @@ export const GET = route(async () => {
 
   const [players, staff] = await Promise.all([
     prisma.teamMembership.findMany({
-      where: { teamId: { in: teamIds }, status: { notIn: ["FORMER", "INACTIVE"] } },
+      where: { teamId: { in: teamIds }, status: ACTIVE_MEMBERSHIP },
       select: { player: { select: { user: { select: { id: true, name: true } } } } },
     }),
     prisma.staffAssignment.findMany({

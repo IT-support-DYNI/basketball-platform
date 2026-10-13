@@ -5,6 +5,7 @@ import { route, ok } from "@/lib/api";
 import { requireAuth, requirePlayerAccess } from "@/lib/authorization";
 import { idParam } from "@/lib/contracts/common";
 import { prisma } from "@/lib/prisma";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 /** GET /api/v1/players/:id/memberships — the player's full team history across seasons. */
 export const GET = route<{ id: string }>(async (_req, { params, requestId }) => {
@@ -13,7 +14,7 @@ export const GET = route<{ id: string }>(async (_req, { params, requestId }) => 
 
   const player = await prisma.playerProfile.findUnique({
     where: { id: playerProfileId },
-    select: { id: true, memberships: { where: { status: { notIn: ["FORMER", "INACTIVE"] } }, select: { teamId: true } } },
+    select: { id: true, memberships: { where: { status: ACTIVE_MEMBERSHIP }, select: { teamId: true } } },
   });
   if (!player) return ok([], { requestId });
   requirePlayerAccess(session, { id: player.id, teamIds: [...new Set(player.memberships.map((m) => m.teamId))] });

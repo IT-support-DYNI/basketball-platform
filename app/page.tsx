@@ -2,13 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-
-const ROLE_HOME: Record<string, string> = {
-  ADMIN: "/admin/dashboard",
-  COACH: "/coach/dashboard",
-  PLAYER: "/player/dashboard",
-  GUARDIAN: "/guardian",
-};
+import { ROLE_HOME } from "@/lib/role-home";
 
 /** Signed out (or an unrecognised role) lands on the public site, not the
  *  sign-in form — dyniblazers.co.uk should read as a club's front door, not

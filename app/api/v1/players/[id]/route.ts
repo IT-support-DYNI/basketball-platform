@@ -8,7 +8,7 @@ import { resolvePlayerViewerScope, serializePlayerProfile, canEditPlayerField } 
 import { clubHistoryUpdate } from "@/lib/club-history";
 import { idParam } from "@/lib/contracts/common";
 import { updatePlayerSchema } from "@/lib/contracts/team";
-import { playerTeamIds, playerTeamIdsSelect } from "@/lib/roster";
+import { playerTeamIds, playerTeamIdsSelect, ACTIVE_MEMBERSHIP } from "@/lib/roster";
 import { prisma } from "@/lib/prisma";
 
 export const GET = route<{ id: string }>(async (_req, { params, requestId }) => {
@@ -20,7 +20,7 @@ export const GET = route<{ id: string }>(async (_req, { params, requestId }) => 
     include: {
       user: { select: { id: true, name: true, email: true, isActive: true } },
       memberships: {
-        where: { status: { notIn: ["FORMER", "INACTIVE"] } },
+        where: { status: ACTIVE_MEMBERSHIP },
         include: { team: { select: { id: true, name: true } }, season: { select: { name: true, isActive: true } } },
       },
     },

@@ -21,6 +21,7 @@ import { verifyPassword } from "./password";
 import { getLockoutState, recordLoginAttempt } from "./login-throttle";
 import { isMfaEnabled, verifyMfaChallenge } from "./mfa";
 import { createAuthSession, touchAuthSession } from "./auth-sessions";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 /** A valid bcrypt hash of a random string — compared against when no account
  *  exists, so a missing account and a wrong password take about the same time. */
@@ -152,7 +153,7 @@ export const authOptions: NextAuthOptions = {
               id: true,
               registrationStatus: true,
               memberships: {
-                where: { status: { notIn: ["FORMER", "INACTIVE"] } },
+                where: { status: ACTIVE_MEMBERSHIP },
                 orderBy: { updatedAt: "desc" },
                 take: 1,
                 select: { teamId: true },

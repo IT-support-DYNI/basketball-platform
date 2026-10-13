@@ -8,6 +8,7 @@ import Providers from "./providers";
 import NavBar from "@/components/NavBar";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import DisplayPrefsScript from "@/components/theme/DisplayPrefsScript";
+import { SITE_URL } from "@/lib/site";
 
 // Same face swap as the public /club site (app/club/layout.tsx), applied
 // app-wide so the internal admin/coach/player/guardian screens match it:
@@ -67,7 +68,7 @@ const plexMono = localFont({
 
 export const metadata: Metadata = {
   // Absolute URLs for icons, Open Graph images and canonicals.
-  metadataBase: new URL("https://dyniblazers.co.uk"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "DYNI Blazers",
     template: "%s · DYNI Blazers",

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
 import { getActiveSeason } from "@/lib/season";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 export default async function AdminPerformancePage() {
   const season = await getActiveSeason();
@@ -9,7 +10,7 @@ export default async function AdminPerformancePage() {
     orderBy: { name: "asc" },
     include: {
       memberships: {
-        where: { seasonId: season.id, status: { notIn: ["FORMER", "INACTIVE"] } },
+        where: { seasonId: season.id, status: ACTIVE_MEMBERSHIP },
         include: {
           player: {
             include: {

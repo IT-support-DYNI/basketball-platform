@@ -8,7 +8,7 @@ import { resolvePlayerViewerScope } from "@/lib/authz/field-visibility";
 import { idParam } from "@/lib/contracts/common";
 import { createHighlightSchema } from "@/lib/contracts/team";
 import { playerTeamIds, playerTeamIdsSelect } from "@/lib/roster";
-import { getPlaybackUrl } from "@/lib/storage";
+import { highlightUrl } from "@/lib/player-photo";
 import { prisma } from "@/lib/prisma";
 
 /** A player's highlight reel — same visibility rule as bio/photoUrl:
@@ -39,7 +39,7 @@ export const GET = route<{ id: string }>(async (_req, { params, requestId }) => 
     rows.map(async (h) => ({
       id: h.id,
       title: h.title,
-      url: h.url ?? (h.storageKey ? await getPlaybackUrl(h.storageKey, 3600) : ""),
+      url: await highlightUrl(h),
       uploaded: !!h.storageKey,
     })),
   );
@@ -71,7 +71,7 @@ export const POST = route<{ id: string }>(async (req: NextRequest, { params, req
     {
       id: highlight.id,
       title: highlight.title,
-      url: highlight.url ?? (highlight.storageKey ? await getPlaybackUrl(highlight.storageKey, 3600) : ""),
+      url: await highlightUrl(highlight),
       uploaded: !!highlight.storageKey,
     },
     requestId,

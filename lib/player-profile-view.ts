@@ -3,26 +3,11 @@ import type { Session } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { getActiveSeason } from "@/lib/season";
 import { resolvePlayerViewerScope, serializePlayerProfile } from "@/lib/authz/field-visibility";
-import { playerTeamIds } from "@/lib/roster";
+import { playerTeamIds, ACTIVE_MEMBERSHIP } from "@/lib/roster";
 import { computeAttendanceStats } from "@/lib/attendance";
-import { getPlaybackUrl } from "@/lib/storage";
-import { CUTOUT_PHOTOS, isCutoutPhoto } from "@/lib/player-photo";
+import { CUTOUT_PHOTOS, highlightUrl, isCutoutPhoto, resolvePhotoUrl } from "@/lib/player-photo";
+import { ageOn } from "@/lib/age";
 
-/** photoUrl stores a private-bucket key ("player-photos/<uuid>"), never a
- *  bare public URL — resolved to a short-lived signed GET fresh on every
- *  load, same rule the app already applies to video. Falls back to null
- *  (not the raw key) if storage isn't configured or the value predates this
- *  and is something else entirely — a broken image is worse than no image,
- *  the initials-avatar fallback already handles "no photo" cleanly. */
-async function resolvePhotoUrl(stored: string | null | undefined): Promise<string | null> {
-  if (!stored) return null;
-  if (!stored.startsWith("player-photos/")) return null;
-  try {
-    return await getPlaybackUrl(stored, 3600);
-  } catch {
-    return null;
-  }
-}
 
 /**
  * One read model for a rich, NBA.com-style player profile page — used by both
@@ -30,16 +15,6 @@ async function resolvePhotoUrl(stored: string | null | undefined): Promise<strin
  * field-visibility engine as the API (lib/authz/field-visibility.ts): nothing
  * this function returns has skipped that check.
  */
-function ageFromDob(dob: Date | null): number | null {
-  if (!dob) return null;
-  const now = new Date();
-  let age = now.getFullYear() - dob.getFullYear();
-  const beforeBirthday =
-    now.getMonth() < dob.getMonth() || (now.getMonth() === dob.getMonth() && now.getDate() < dob.getDate());
-  if (beforeBirthday) age -= 1;
-  return age;
-}
-
 export async function loadPlayerProfileView(playerId: number, session: Session) {
   const season = await getActiveSeason();
 
@@ -48,7 +23,7 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
     include: {
       user: { select: { id: true, name: true, email: true } },
       memberships: {
-        where: { status: { notIn: ["FORMER", "INACTIVE"] } },
+        where: { status: ACTIVE_MEMBERSHIP },
         include: { team: { select: { id: true, name: true } } },
       },
       highlights: { orderBy: { createdAt: "desc" } },
@@ -71,7 +46,7 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
         rawHighlights.map(async (h) => ({
           id: h.id,
           title: h.title,
-          url: h.url ?? (h.storageKey ? await getPlaybackUrl(h.storageKey, 3600) : "") ?? "",
+          url: await highlightUrl(h),
           uploaded: !!h.storageKey,
         })),
       )
@@ -115,7 +90,7 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
       : null;
   }
 
-  const photoKey = (visible as { photoUrl?: string | null }).photoUrl;
+  const photoKey = visible.photoUrl;
   const photoUrl = await resolvePhotoUrl(photoKey);
   const photoIsCutout = isCutoutPhoto(photoKey, cutoutPhotos);
 
@@ -124,22 +99,22 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
     name: user.name,
     photoUrl,
     photoIsCutout,
-    bio: (visible as { bio?: string | null }).bio ?? null,
-    quote: (visible as { quote?: string | null }).quote ?? null,
+    bio: visible.bio ?? null,
+    quote: visible.quote ?? null,
     // Undefined when this viewer can't see club history (field-visibility
     // strips it); null when the player was never asked.
     clubHistory:
       "hasPreviousClub" in visible
         ? {
-            hasPreviousClub: (visible as { hasPreviousClub?: boolean | null }).hasPreviousClub ?? null,
-            previousClubs: (visible as { previousClubs?: string | null }).previousClubs ?? null,
+            hasPreviousClub: visible.hasPreviousClub ?? null,
+            previousClubs: visible.previousClubs ?? null,
           }
         : undefined,
-    nationality: (visible as { nationality?: string | null }).nationality ?? null,
-    heightCm: (visible as { heightCm?: number | null }).heightCm ?? null,
-    weightKg: (visible as { weightKg?: number | null }).weightKg ?? null,
-    preferredHand: (visible as { preferredHand?: string | null }).preferredHand ?? null,
-    age: ageFromDob((visible as { dateOfBirth?: Date | null }).dateOfBirth ?? null),
+    nationality: visible.nationality ?? null,
+    heightCm: visible.heightCm ?? null,
+    weightKg: visible.weightKg ?? null,
+    preferredHand: visible.preferredHand ?? null,
+    age: visible.dateOfBirth ? ageOn(visible.dateOfBirth) : null,
     team: currentMembership?.team.name ?? null,
     position: currentMembership?.position ?? null,
     jerseyNumber: currentMembership?.jerseyNumber ?? null,

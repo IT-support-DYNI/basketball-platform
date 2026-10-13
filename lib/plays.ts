@@ -8,6 +8,7 @@ import { sendPushToUsers } from "./push";
 import { NotFoundError } from "./api/errors";
 import { teamClubScope } from "./tenant";
 import { planAssignmentChange } from "./playbook";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 /**
  * The playbook. A Play lives in the club's shared library (coaches read all of
@@ -93,7 +94,7 @@ export async function playbookTeamIds(session: Session): Promise<number[]> {
   if (session.user.role === "GUARDIAN") {
     const memberships = await prisma.teamMembership.findMany({
       where: {
-        status: { notIn: ["FORMER", "INACTIVE"] },
+        status: ACTIVE_MEMBERSHIP,
         player: { guardians: { some: { guardianUserId: Number(session.user.id) } } },
       },
       select: { teamId: true },

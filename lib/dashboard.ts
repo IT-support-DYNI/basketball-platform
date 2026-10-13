@@ -3,9 +3,9 @@ import { Session } from "next-auth";
 import { computeAttendanceStats } from "./attendance";
 import { prisma } from "./prisma";
 import { rosterPlayerFilter } from "./roster";
+import { ACTIVE_MEMBERSHIP } from "@/lib/roster";
 
 /** Membership statuses that don't count towards a team's live roster size. */
-const OFF_ROSTER = ["FORMER", "INACTIVE"] as const;
 
 /*
  * Shared by app/api/dashboard/route.ts (for any future non-web client)
@@ -25,7 +25,7 @@ export async function getAdminDashboard() {
       prisma.playerProfile.count({ where: { registrationStatus: { not: "APPROVED" } } }),
       prisma.team.findMany({
         orderBy: { name: "asc" },
-        include: { _count: { select: { memberships: { where: { status: { notIn: [...OFF_ROSTER] } } } } } },
+        include: { _count: { select: { memberships: { where: { status: ACTIVE_MEMBERSHIP } } } } },
       }),
       prisma.announcement.findMany({
         orderBy: { createdAt: "desc" },

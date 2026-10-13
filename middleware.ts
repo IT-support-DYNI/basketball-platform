@@ -1,19 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+import { ROLE_HOME } from "@/lib/role-home";
+
 /*
  * Coarse-grained UX redirect only — NOT the security boundary.
  * Every route handler re-checks role/ownership itself via
  * lib/authorization.ts, because middleware here only sees the
  * JWT, not the resource being requested.
  */
-
-const ROLE_HOME: Record<string, string> = {
-  ADMIN: "/admin/dashboard",
-  COACH: "/coach/dashboard",
-  PLAYER: "/player/dashboard",
-  GUARDIAN: "/guardian",
-};
 
 const ROLE_PREFIX: Record<string, string> = {
   ADMIN: "/admin",
