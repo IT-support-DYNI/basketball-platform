@@ -51,13 +51,15 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
         include: { team: { select: { id: true, name: true } } },
       },
       highlights: { orderBy: { createdAt: "desc" } },
+      // Only to tell whether the current photo is a background-removed cut-out.
+      photos: { where: { isCutout: true }, select: { storageKey: true } },
     },
   });
   if (!player) return null;
 
   const teamIds = playerTeamIds(player);
   const scope = await resolvePlayerViewerScope(session, { id: player.id, userId: player.userId, teamIds });
-  const { user, memberships, highlights: rawHighlights, ...rest } = player;
+  const { user, memberships, highlights: rawHighlights, photos: cutoutPhotos, ...rest } = player;
   const visible = serializePlayerProfile(rest, scope);
 
   // Highlights aren't a PlayerProfile scalar, so serializePlayerProfile never
@@ -112,12 +114,15 @@ export async function loadPlayerProfileView(playerId: number, session: Session) 
       : null;
   }
 
-  const photoUrl = await resolvePhotoUrl((visible as { photoUrl?: string | null }).photoUrl);
+  const photoKey = (visible as { photoUrl?: string | null }).photoUrl;
+  const photoUrl = await resolvePhotoUrl(photoKey);
+  const photoIsCutout = !!photoKey && cutoutPhotos.some((p) => p.storageKey === photoKey);
 
   return {
     id: player.id,
     name: user.name,
     photoUrl,
+    photoIsCutout,
     bio: (visible as { bio?: string | null }).bio ?? null,
     quote: (visible as { quote?: string | null }).quote ?? null,
     // Undefined when this viewer can't see club history (field-visibility
