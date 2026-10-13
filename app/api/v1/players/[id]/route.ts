@@ -124,8 +124,9 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params, re
   if (typeof editable.photoUrl === "string" && editable.photoUrl.startsWith("player-photos/")) {
     await prisma.playerPhoto.upsert({
       where: { playerProfileId_storageKey: { playerProfileId: playerId, storageKey: editable.photoUrl } },
-      create: { playerProfileId: playerId, storageKey: editable.photoUrl },
-      update: {},
+      create: { playerProfileId: playerId, storageKey: editable.photoUrl, isCutout: body.photoIsCutout ?? false },
+      // Re-selecting an old photo sends no flag, so it keeps the one it has.
+      update: body.photoIsCutout === undefined ? {} : { isCutout: body.photoIsCutout },
     });
   }
 

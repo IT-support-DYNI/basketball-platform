@@ -63,7 +63,7 @@ export default function RosterFilterGrid({ players }: { players: PublicPlayerCar
         <div className="team-grid">
           {filtered.map((p, i) => (
             <TiltCard key={p.id} className="team" href={`/club/players/${p.id}`} delayMs={(i % 9) * 60}>
-              <div className={`photo${p.photoUrl ? " has-img" : ""}`}>
+              <div className={`photo${p.photoUrl ? " has-img" : ""}${p.photoIsCutout ? " is-cutout" : ""}`}>
                 {p.photoUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.photoUrl} alt="" />

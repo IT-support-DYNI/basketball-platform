@@ -106,8 +106,8 @@ describe("updateScoreSchema", () => {
     [{ period: 0 }, "quarter 0"],
     [{ period: 11 }, "quarter 11"],
     [{ liveStatus: "PAUSED" }, "an unknown status"],
-  ] as [unknown, string][])("rejects %j (%s)", (body) => {
-    expect(updateScoreSchema.safeParse(body).success).toBe(false);
+  ] as [unknown, string][])("rejects %j (%s)", (body, what) => {
+    expect(updateScoreSchema.safeParse(body).success, what).toBe(false);
   });
 
   it("turns a blank opponent name into null", () => {
