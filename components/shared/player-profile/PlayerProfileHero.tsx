@@ -100,16 +100,26 @@ export default function PlayerProfileHero({
         </div>
 
         <div className="relative mt-3 flex h-56 items-stretch gap-5 pr-6 sm:h-64 sm:pr-8 md:h-72">
-          {/* photo — large, flush to the left/bottom band edges, with a
-           *  gradient fade into the band colour on its right edge standing
-           *  in for a real cutout (our uploads are plain rectangles, not
-           *  transparent-background cutout PNGs like the reference's) */}
+          {/* photo — large, flush to the left/bottom band edges. A cut-out
+           *  (background removed at upload) stands on the band as is; a
+           *  plain rectangular photo gets a fade into the band colour on its
+           *  right edge instead. */}
           <div className="animate-avatar-pop relative w-40 flex-none sm:w-56 md:w-72">
             {/* overflow-hidden lives on this inner wrapper, not the outer
              *  relative one — otherwise it clips PhotoUpload's edit badge,
              *  which deliberately hangs off the corner via negative insets */}
             <div className="relative h-full w-full overflow-hidden">
-              {player.photoUrl ? (
+              {player.photoUrl && player.photoIsCutout ? (
+                // A background-removed cut-out (lib/photo-cutout.ts): the
+                // player stands straight on the band, whole, like the
+                // reference. No edge fade needed.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={player.photoUrl}
+                  alt=""
+                  className="h-full w-full object-contain object-bottom drop-shadow-[0_14px_22px_rgba(0,0,0,0.35)]"
+                />
+              ) : player.photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={player.photoUrl} alt="" className="h-full w-full object-cover object-top transition duration-200 hover:scale-105" />
               ) : (
@@ -117,10 +127,14 @@ export default function PlayerProfileHero({
                   {initials}
                 </div>
               )}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-transparent via-flame/40 to-flame"
-              />
+              {/* A plain rectangular photo fades into the band on its right
+               *  edge, standing in for a cut-out. */}
+              {player.photoUrl && !player.photoIsCutout && (
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-transparent via-flame/40 to-flame"
+                />
+              )}
             </div>
             {editable && <PhotoUpload playerId={player.id} />}
           </div>
