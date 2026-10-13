@@ -65,8 +65,8 @@ export const updatePlayerSchema = z.object({
   bio: z.string().max(1000).optional(),
   /// The player's own one-liner, shown under their name. null/"" clears it.
   quote: z.string().trim().max(140).nullable().optional(),
-  /// Club history. previousClubs is required when hasPreviousClub is true
-  /// (enforced in the route, where the stored value is known).
+  /// Club history. The yes/club-name pairing is checked against the stored
+  /// answer in the route (lib/club-history.ts#clubHistoryUpdate).
   hasPreviousClub: z.boolean().optional(),
   previousClubs: z.string().trim().max(300).nullable().optional(),
   address: z.string().max(300).optional(),

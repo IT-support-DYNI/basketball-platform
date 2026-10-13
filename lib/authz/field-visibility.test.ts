@@ -23,6 +23,32 @@ const profile = {
   memberships: [{ teamId: 3 }],
 };
 
+describe("club history visibility and editing", () => {
+  const withHistory = { id: 1, hasPreviousClub: true, previousClubs: "Belfast Star" };
+
+  it("is shown to the player, team coach, team welfare and admin only", () => {
+    for (const k of ["TEAM_COACH", "TEAM_WELFARE", "ADMIN"] as ViewerKind[]) {
+      expect(serializePlayerProfile(withHistory, scope([k]))).toMatchObject({ previousClubs: "Belfast Star" });
+    }
+    // The player (and a linked guardian) carry the SELF kind.
+    expect(serializePlayerProfile(withHistory, scope(["SELF"], true))).toMatchObject({ previousClubs: "Belfast Star" });
+    for (const k of ["TEAMMATE", "CLUB_MEMBER", "TEAM_MEDICAL", "PUBLIC"] as ViewerKind[]) {
+      const out = serializePlayerProfile(withHistory, scope([k]));
+      expect(out).not.toHaveProperty("previousClubs");
+      expect(out).not.toHaveProperty("hasPreviousClub");
+    }
+  });
+
+  it("can only be edited by someone who can read it", () => {
+    expect(canEditPlayerField(scope(["TEAM_MEDICAL"]), "previousClubs")).toBe(false);
+    expect(canEditPlayerField(scope(["TEAM_MEDICAL"]), "hasPreviousClub")).toBe(false);
+    expect(canEditPlayerField(scope(["TEAM_COACH"]), "previousClubs")).toBe(true);
+    expect(canEditPlayerField(scope(["SELF"], true), "hasPreviousClub")).toBe(true);
+    // A linked guardian: SELF kind, but not the player themselves.
+    expect(canEditPlayerField(scope(["SELF"], false), "previousClubs")).toBe(true);
+  });
+});
+
 describe("serializePlayerProfile", () => {
   it("a teammate sees only the public/club basics", () => {
     const out = serializePlayerProfile(profile, scope(["CLUB_MEMBER", "TEAMMATE"]));
