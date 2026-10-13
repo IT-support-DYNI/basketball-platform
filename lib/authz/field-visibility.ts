@@ -60,6 +60,8 @@ export const PLAYER_FIELD_VIEWERS: Record<string, ViewerKind[]> = {
 /** Only a player/guardian/admin may write these. */
 export const PLAYER_MEDICAL_FIELDS = ["medicalNotes"] as const;
 export const PLAYER_WELFARE_FIELDS = ["welfareNotes"] as const;
+/** Only people who can read club history may change it. */
+export const PLAYER_CLUB_HISTORY_FIELDS = ["hasPreviousClub", "previousClubs"] as const;
 
 export type ViewerScope = {
   kinds: Set<ViewerKind>;
@@ -151,6 +153,10 @@ export function canEditPlayerField(scope: ViewerScope, field: string): boolean {
   }
   if ((PLAYER_WELFARE_FIELDS as readonly string[]).includes(field)) {
     return scope.kinds.has("ADMIN") || scope.kinds.has("TEAM_WELFARE") || scope.isSelf;
+  }
+  // A medical officer can't see club history, so mustn't be able to wipe it.
+  if ((PLAYER_CLUB_HISTORY_FIELDS as readonly string[]).includes(field)) {
+    return scope.isSelf || PLAYER_FIELD_VIEWERS[field].some((k) => scope.kinds.has(k));
   }
   return true;
 }

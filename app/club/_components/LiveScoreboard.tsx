@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { PublicScoreboard } from "@/lib/live-scores";
 import { periodLabel } from "@/lib/live-score-labels";
@@ -8,46 +8,66 @@ import { periodLabel } from "@/lib/live-score-labels";
 /** Poll fast while a match is on, slowly otherwise (to notice one starting). */
 const LIVE_POLL_MS = 15_000;
 const IDLE_POLL_MS = 60_000;
+/** After this many failed polls in a row, say the score may be out of date. */
+const STALE_AFTER_FAILURES = 3;
+
+const EMPTY: PublicScoreboard = { mode: "none", matches: [] };
 
 /**
  * Homepage live score strip. Server-rendered with the current scoreboard so
  * it's there on first paint (and for crawlers), then kept fresh by polling
- * /api/v1/public/live-scores — paused while the tab is hidden. Renders nothing
- * when there is no live match or recent result.
+ * /api/v1/public/live-scores, paused while the tab is hidden. `initial` is
+ * null when the server couldn't load it; polling then fills it in. Renders
+ * nothing when there is no live match or recent result.
  */
-export default function LiveScoreboard({ initial }: { initial: PublicScoreboard }) {
-  const [board, setBoard] = useState(initial);
+export default function LiveScoreboard({ initial }: { initial: PublicScoreboard | null }) {
+  const [board, setBoard] = useState(initial ?? EMPTY);
+  const [stale, setStale] = useState(false);
+  // The latest board for the polling loop, which is set up once and would
+  // otherwise only ever see the first render's value.
+  const boardRef = useRef(board);
+  boardRef.current = board;
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
     let cancelled = false;
+    let inFlight = false;
+    let failures = 0;
 
     const schedule = (mode: PublicScoreboard["mode"]) => {
+      if (timer) clearTimeout(timer);
       timer = setTimeout(tick, mode === "live" ? LIVE_POLL_MS : IDLE_POLL_MS);
     };
 
     async function tick() {
-      if (cancelled) return;
+      // One request at a time: a tab switch mid-fetch must not start a
+      // second polling loop.
+      if (cancelled || inFlight) return;
       if (document.visibilityState === "hidden") return schedule("none");
+      inFlight = true;
       try {
         const res = await fetch("/api/v1/public/live-scores", { cache: "no-store" });
-        if (res.ok) {
-          const next = (await res.json()) as PublicScoreboard;
-          if (!cancelled) setBoard(next);
-          return schedule(next.mode);
-        }
-      } catch {
-        // Network blip — keep showing the last score and try again.
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const next = (await res.json()) as PublicScoreboard;
+        if (cancelled) return;
+        failures = 0;
+        setStale(false);
+        setBoard(next);
+        schedule(next.mode);
+      } catch (err) {
+        if (cancelled) return;
+        failures += 1;
+        if (failures === STALE_AFTER_FAILURES) console.warn("[scoreboard] updates failing", err);
+        if (failures >= STALE_AFTER_FAILURES) setStale(true);
+        schedule(boardRef.current.mode);
+      } finally {
+        inFlight = false;
       }
-      schedule(board.mode);
     }
 
-    schedule(board.mode);
+    schedule(initial ? initial.mode : "live");
     const onVisible = () => {
-      if (document.visibilityState === "visible") {
-        if (timer) clearTimeout(timer);
-        tick();
-      }
+      if (document.visibilityState === "visible") tick();
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
@@ -75,6 +95,7 @@ export default function LiveScoreboard({ initial }: { initial: PublicScoreboard 
             "Latest result"
           )}
         </p>
+        {stale && <p className="scoreboard-meta">Score updates paused. Refresh the page to check the latest.</p>}
         <ul className="scoreboard-list">
           {board.matches.map((m) => {
             const opponent = m.opponentName || "Opponent";
@@ -97,7 +118,7 @@ export default function LiveScoreboard({ initial }: { initial: PublicScoreboard 
                 <p className="scoreboard-meta">
                   <span className={`scoreboard-status${m.liveStatus === "LIVE" ? " is-live" : ""}`}>{status}</span>
                   {m.venueName ? ` · ${m.venueName}` : ""}
-                  {!live ? ` · ${new Date(m.startAt).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}` : ""}
+                  {!live ? ` · ${new Date(m.startAt).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/London" })}` : ""}
                 </p>
               </li>
             );

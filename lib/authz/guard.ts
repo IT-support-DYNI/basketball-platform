@@ -114,3 +114,14 @@ export function canViewPlayerContactDetails(session: Session, player: PlayerRef)
 }
 
 export { rolesFor };
+
+/**
+ * Who may edit an event (and score a match): a club-wide event (no team) is
+ * admin-only; a team event follows the "update Event" ability for that team.
+ * Shared by PATCH /events/{id}, PATCH /events/{id}/score and the coach event
+ * page, so they can't drift apart.
+ */
+export function canEditEvent(session: Session, event: { teamId: number | null }): boolean {
+  if (event.teamId == null) return session.user.role === "ADMIN";
+  return authorize(session).can("update", "Event", { teamId: event.teamId });
+}

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import type { Session } from "next-auth";
 import type { UserRole } from "@prisma/client";
 
-import { authorize, requireTeamAccess, requirePlayerAccess, canViewPlayerContactDetails, requireRole, requireAuth } from "./guard";
+import { authorize, canEditEvent, requireTeamAccess, requirePlayerAccess, canViewPlayerContactDetails, requireRole, requireAuth } from "./guard";
 import { roleAssignmentsFor } from "./roles";
 
 /**
@@ -225,5 +225,27 @@ describe("back-compat guards preserve prior behaviour", () => {
     expect(canViewPlayerContactDetails(coach1, { id: 5, teamIds: [1] })).toBe(true);
     expect(canViewPlayerContactDetails(coach1, { id: 5, teamIds: [2] })).toBe(false);
     expect(canViewPlayerContactDetails(player1, { id: 30, teamIds: [1] })).toBe(false);
+  });
+});
+
+describe("canEditEvent (event edits and live scoring)", () => {
+  it("a coach can edit their own team's events only", () => {
+    expect(canEditEvent(coach1, { teamId: 1 })).toBe(true);
+    expect(canEditEvent(coach1, { teamId: 2 })).toBe(false);
+    expect(canEditEvent(coachNoTeam, { teamId: 1 })).toBe(false);
+  });
+
+  it("club-wide events (no team) are admin-only, even for a coach of every team", () => {
+    expect(canEditEvent(coach12, { teamId: null })).toBe(false);
+    expect(canEditEvent(admin, { teamId: null })).toBe(true);
+  });
+
+  it("an admin can edit any team's events", () => {
+    expect(canEditEvent(admin, { teamId: 2 })).toBe(true);
+  });
+
+  it("players and supporters can't edit events", () => {
+    expect(canEditEvent(player1, { teamId: 1 })).toBe(false);
+    expect(canEditEvent(supporter, { teamId: 1 })).toBe(false);
   });
 });

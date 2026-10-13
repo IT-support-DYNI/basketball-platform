@@ -53,7 +53,15 @@ export default function RegisterPage() {
         if (view) {
           setMode(view.mode);
           setD({ ...(view.data ?? {}), email: view.email });
-          setStep(Math.min(Math.max(view.currentStep, 1), 5));
+          const resumeAt = Math.min(Math.max(view.currentStep, 1), 5);
+          // Drafts saved before the club-history question existed are past
+          // step 3 without an answer: send them back to it, saying why.
+          if (resumeAt > 3 && !view.data?.hasPreviousClub) {
+            setStep(3);
+            setError("We've added a question since you saved this: have you played for another club before?");
+          } else {
+            setStep(resumeAt);
+          }
         }
       })
       .finally(() => setReady(true));

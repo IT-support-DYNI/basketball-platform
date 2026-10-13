@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { route, ok } from "@/lib/api";
 import { ForbiddenError, NotFoundError } from "@/lib/api/errors";
 import { requireAuth, requireRole } from "@/lib/authorization";
-import { authorize } from "@/lib/authz/guard";
+import { authorize, canEditEvent } from "@/lib/authz/guard";
 import { updateEventSchema } from "@/lib/contracts/event";
 import { eventDayLabel } from "@/lib/events";
 import { notifyUsers, teamPlayerUserIds } from "@/lib/notify";
@@ -41,19 +41,13 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params }) 
   const existing = await prisma.event.findUnique({ where: { id: Number(params.id) } });
   if (!existing) throw new NotFoundError("That event wasn't found.");
 
-  const a = authorize(session);
-  const canEdit =
-    existing.teamId == null
-      ? session.user.role === "ADMIN"
-      : a.can("update", "Event", { teamId: existing.teamId });
-  if (!canEdit) throw new ForbiddenError("You don't have access to this event.");
+  if (!canEditEvent(session, existing)) throw new ForbiddenError("You don't have access to this event.");
 
   const body = updateEventSchema.parse(await req.json());
   // Moving an event is an edit on the destination too: a coach can't push an
   // event onto a team they don't run, and only an admin makes it club-wide.
   if (body.teamId !== undefined && body.teamId !== existing.teamId) {
-    const canMove = body.teamId == null ? session.user.role === "ADMIN" : a.can("update", "Event", { teamId: body.teamId });
-    if (!canMove) throw new ForbiddenError("You can't move this event to that team.");
+    if (!canEditEvent(session, { teamId: body.teamId })) throw new ForbiddenError("You can't move this event to that team.");
   }
   // `?scope=series` applies the change to this and every later occurrence of the
   // same recurrence. Per-occurrence fields (start/end datetimes) are never bulk

@@ -55,6 +55,11 @@ describe("nextScoreState", () => {
     });
   });
 
+  it("jumping straight from not started to full time still sets null scores to 0", () => {
+    expect(patch(null, { liveStatus: "FINAL" })).toMatchObject({ liveStatus: "FINAL", zeroNullScores: true, completeEvent: true });
+    expect(patch("UPCOMING", { liveStatus: "UPCOMING" }).zeroNullScores).toBe(false);
+  });
+
   it("going back to UPCOMING clears the quarter", () => {
     expect(patch("LIVE", { liveStatus: "UPCOMING" }).period).toBeNull();
   });
@@ -101,7 +106,7 @@ describe("updateScoreSchema", () => {
     [{ period: 0 }, "quarter 0"],
     [{ period: 11 }, "quarter 11"],
     [{ liveStatus: "PAUSED" }, "an unknown status"],
-  ])("rejects %j (%s)", (body, what) => {
+  ] as [unknown, string][])("rejects %j (%s)", (body, what) => {
     expect(updateScoreSchema.safeParse(body).success, what).toBe(false);
   });
 

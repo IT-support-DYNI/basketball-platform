@@ -7,8 +7,9 @@ import type { UpdateScoreInput } from "@/lib/contracts/event";
  * is unit-tested (lib/live-score-state.test.ts). The score route applies the
  * result; it decides nothing itself.
  *
- *  - Any score change on an unstarted match starts it: LIVE, first quarter,
- *    both scores from 0.
+ *  - Any score change on an unstarted match starts it: LIVE, first quarter.
+ *  - Leaving "not started" for any status sets null scores to 0 (the database
+ *    requires both scores once a match is in play or finished).
  *  - A quarter is only kept while the match is LIVE or at HALF_TIME.
  *  - Full time clears the quarter and completes the event.
  *  - A finished match never goes back to live (it would reappear on the
@@ -19,7 +20,7 @@ import type { UpdateScoreInput } from "@/lib/contracts/event";
 export type ScoreStatePatch = {
   liveStatus?: MatchLiveStatus;
   period?: number | null;
-  /** Set both scores to 0 where they are still null (the match is starting). */
+  /** Set both scores to 0 where they are still null (the match is leaving "not started"). */
   zeroNullScores: boolean;
   completeEvent: boolean;
   audit: null | "STATUS_CHANGED" | "CORRECTED";
@@ -65,7 +66,7 @@ export function nextScoreState(current: MatchLiveStatus | null, body: UpdateScor
     patch: {
       ...(liveStatus !== undefined ? { liveStatus } : {}),
       ...(period !== undefined ? { period } : {}),
-      zeroNullScores: starting,
+      zeroNullScores: notStarted && liveStatus !== undefined && liveStatus !== "UPCOMING",
       completeEvent: liveStatus === "FINAL",
       audit,
     },
