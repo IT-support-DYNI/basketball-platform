@@ -42,15 +42,15 @@
    * own --accent-on-bg — darken for text, leave --flame/--flame-ink at full
    * saturation for buttons and borders, where page-background contrast isn't
    * the thing being measured. */
-  --flame-on-bg: 181 50 0; /* #B53200 — 4.7:1 even on a bg-flame/15..30 tint, not just plain white/cream */
+  --flame-on-bg: 174 48 0;     /* #AE3000. 4.7:1 on its bg-flame/15..30 badge tint over the softened light surfaces (CI axe sweep) */
   --ember: 255 107 61;     /* gradient partner for --flame (135deg flame → ember) */
   --gold: 217 119 6;       /* flame-tip highlight, live indicator */
   --on-flame: 23 19 16;    /* text on a flame-filled surface (dark ink, not white — matches /club's buttons) */
 
-  --success: 2 122 72;     /* #027A48 — court green */
-  --warning: 133 89 7;     /* #855907 — darkened from #B4790A; 4.7:1 even on a bg-warning/10..15 tint */
+  --success: 2 116 68;     /* #027444 court green, darkened from #027A48 so badge text clears 4.7:1 on the softened light surfaces */
+  --warning: 125 84 7;     /* #7D5407, darkened from #855907; 4.7:1 on a bg-warning/10..15 tint over the softened light surfaces */
   --danger: 180 35 24;     /* #B42318 */
-  --info: 42 100 188;      /* #2A64BC — darkened from #2F6FD0; 4.7:1 even on a bg-info/15 tint */
+  --info: 40 96 180;     /* #2860B4, darkened from #2A64BC; 4.7:1 on a bg-info/15 tint over the softened light surfaces */
 
   --radius-card: 6px;
   --radius-control: 4px;
@@ -98,13 +98,13 @@
   --line-strong: #8B857A;
   --flame: 254 68 11;
   --flame-ink: 255 107 61;
-  --flame-on-bg: 181 50 0;
+  --flame-on-bg: 174 48 0;
   --ember: 255 107 61;
   --gold: 217 119 6;
-  --success: 2 122 72;
-  --warning: 133 89 7;
+  --success: 2 116 68;
+  --warning: 125 84 7;
   --danger: 180 35 24;
-  --info: 42 100 188;
+  --info: 40 96 180;
   --shadow-card: none;
   --shadow-pop: 0 10px 28px -12px rgba(20, 16, 12, 0.22);
 }

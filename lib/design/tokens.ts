@@ -70,16 +70,16 @@ export const light = {
    *  flame/flameInk for buttons, borders and other non-text fills. Darkened
    *  enough to clear 4.5:1 even sitting on a bg-flame/15..30 tint, not just
    *  plain white/cream. */
-  flameOnBg: "#b53200",
+  flameOnBg: "#ae3000",
   ember: "#ff6b3d",
   gold: "#d97706",
   onFlame: "#171310",
-  success: "#027a48",
+  success: "#027444",
   /** Darkened from #b4790a; clears 4.5:1 even on a bg-warning/10..15 tint. */
-  warning: "#855907",
+  warning: "#7d5407",
   danger: "#b42318",
   /** Darkened from #2f6fd0; clears 4.5:1 even on a bg-info/15 tint. */
-  info: "#2a64bc",
+  info: "#2860b4",
 } as const;
 
 /** Player / event status colours — deliberately distinct from the semantic set
