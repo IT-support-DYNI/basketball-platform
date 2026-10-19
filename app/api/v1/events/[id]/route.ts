@@ -44,6 +44,15 @@ export const PATCH = route<{ id: string }>(async (req: NextRequest, { params }) 
   if (!canEditEvent(session, existing)) throw new ForbiddenError("You don't have access to this event.");
 
   const body = updateEventSchema.parse(await req.json());
+  // A Public event shows its team, time and venue to anyone on the club
+  // homepage, a safeguarding call for youth teams, so only an admin decides it.
+  const publicChange =
+    body.visibility !== undefined &&
+    body.visibility !== existing.visibility &&
+    (body.visibility === "PUBLIC" || existing.visibility === "PUBLIC");
+  if (publicChange && session.user.role !== "ADMIN") {
+    throw new ForbiddenError("Only an administrator can show an event on the public website.");
+  }
   // Moving an event is an edit on the destination too: a coach can't push an
   // event onto a team they don't run, and only an admin makes it club-wide.
   if (body.teamId !== undefined && body.teamId !== existing.teamId) {

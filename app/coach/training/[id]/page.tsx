@@ -116,6 +116,7 @@ export default async function CoachEventDetailPage({ params }: { params: { id: s
           eventId={event.id}
           teamName={event.team?.name ?? "DYNI Blazers"}
           isPublic={event.visibility === "PUBLIC"}
+          canPublish={session.user.role === "ADMIN"}
           initial={{
             opponentName: event.opponentName,
             ourScore: event.ourScore ?? 0,

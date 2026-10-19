@@ -26,16 +26,21 @@ type Score = {
 export default function LiveScorePanel({
   eventId,
   teamName,
-  isPublic,
+  isPublic: initialPublic,
+  canPublish,
   initial,
 }: {
   eventId: number;
   teamName: string;
   isPublic: boolean;
+  /** Admins only: show or hide this match on the public homepage. */
+  canPublish: boolean;
   initial: Score;
 }) {
   const router = useRouter();
   const [score, setScore] = useState<Score>(initial);
+  const [isPublic, setIsPublic] = useState(initialPublic);
+  const [publishing, setPublishing] = useState(false);
   const [opponent, setOpponent] = useState(initial.opponentName ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -104,6 +109,28 @@ export default function LiveScorePanel({
     );
   };
 
+  async function setPublic(next: boolean) {
+    setPublishing(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/v1/events/${eventId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visibility: next ? "PUBLIC" : "TEAM" }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) setError(body.error ?? "Couldn't change whether this match is public.");
+      else {
+        setIsPublic(next);
+        router.refresh();
+      }
+    } catch {
+      setError("Couldn't reach the server. Check your connection and try again.");
+    } finally {
+      setPublishing(false);
+    }
+  }
+
   const finished = score.liveStatus === "FINAL";
   const opponentLabel = score.opponentName || "Opponent";
 
@@ -126,8 +153,21 @@ export default function LiveScorePanel({
       <p className="mt-1 text-sm text-ink-dim">
         {isPublic
           ? "Shown on the public homepage while the match is live (up to 4 hours from tip-off), then as the latest result for up to 3 days from tip-off, until another public match replaces it."
-          : "Only coaches and admins see this score. Ask an admin to make this match public to show it on the homepage."}
+          : canPublish
+            ? "Only coaches and admins see this score. Show it on the homepage to put it on the public scoreboard."
+            : "Only coaches and admins see this score. Ask an admin to make this match public to show it on the homepage."}
       </p>
+      {canPublish && (
+        <Button
+          variant="secondary"
+          size="sm"
+          className="mt-3"
+          loading={publishing}
+          onClick={() => setPublic(!isPublic)}
+        >
+          {isPublic ? "Hide from homepage" : "Show on homepage"}
+        </Button>
+      )}
 
       <label className="mt-4 block max-w-sm text-xs text-ink-dim">
         Opponent

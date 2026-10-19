@@ -60,6 +60,9 @@ export const POST = route(async (req: NextRequest) => {
   if (body.teamId == null && session.user.role !== "ADMIN") {
     throw new ForbiddenError("Only an administrator can create a club-wide event.");
   }
+  if (body.visibility === "PUBLIC" && session.user.role !== "ADMIN") {
+    throw new ForbiddenError("Only an administrator can show an event on the public website.");
+  }
   if (body.teamId != null && authorize(session).cannot("create", "Event", { teamId: body.teamId })) {
     throw new ForbiddenError("You don't have access to that team.");
   }
