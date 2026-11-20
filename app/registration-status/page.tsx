@@ -40,7 +40,7 @@ export default async function RegistrationStatusPage() {
 
   return (
     <main className="mx-auto flex min-h-[calc(100vh-56px)] max-w-lg flex-col items-center justify-center px-6 py-12 text-center">
-      <Brandmark size="lg" wordmark={false} />
+      <Brandmark size="lg" />
 
       <h1 className="mt-5 font-display text-2xl font-extrabold uppercase tracking-tight text-ink">
         {heading}

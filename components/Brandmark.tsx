@@ -3,16 +3,16 @@ import Link from "next/link";
 
 type Size = "sm" | "md" | "lg";
 
-const CREST_PX: Record<Size, number> = { sm: 32, md: 44, lg: 88 };
-const WORDMARK: Record<Size, string> = {
-  sm: "text-base",
-  md: "text-lg",
-  lg: "text-3xl",
-};
+/** Height of the mark in px. */
+const HEIGHT_PX: Record<Size, number> = { sm: 32, md: 44, lg: 88 };
+/** public/brand/dyni-logo-480.png is 480 x 209. */
+const LOGO_RATIO = 480 / 209;
 
 /**
- * The DYNI Blazers lockup: club crest + wordmark. `href` makes the whole thing a
- * link (the app shell, and the auth screens back to the club site); omit it for a static mark.
+ * The DYNI Blazers mark. With `wordmark` (the default) it is the full club
+ * logo, ball and "DYNI BLAZERS" in one image; without it, just the ball
+ * emblem, for tight spaces. `href` makes it a link (the app shell, and the
+ * auth screens back to the club site); omit it for a static mark.
  */
 export default function Brandmark({
   size = "md",
@@ -25,23 +25,20 @@ export default function Brandmark({
   wordmark?: boolean;
   className?: string;
 }) {
-  const px = CREST_PX[size];
+  const h = HEIGHT_PX[size];
   const inner = (
-    <span className={`flex items-center gap-2.5 ${className}`}>
-      <Image
-        src="/brand/dyni-crest-256.png"
-        alt="DYNI Blazers"
-        width={px}
-        height={px}
-        priority
-        className="flex-none"
-      />
-      {wordmark && (
-        <span
-          className={`font-display font-extrabold uppercase leading-none tracking-tight text-ink ${WORDMARK[size]}`}
-        >
-          DYNI <span className="text-flame-on-bg">Blazers</span>
-        </span>
+    <span className={`flex items-center ${className}`}>
+      {wordmark ? (
+        <Image
+          src="/brand/dyni-logo-480.png"
+          alt="DYNI Blazers"
+          width={Math.round(h * LOGO_RATIO)}
+          height={h}
+          priority
+          className="flex-none"
+        />
+      ) : (
+        <Image src="/brand/dyni-crest-256.png" alt="DYNI Blazers" width={h} height={h} priority className="flex-none" />
       )}
     </span>
   );

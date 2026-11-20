@@ -42,10 +42,7 @@ export default function LandingNav() {
       <div className="nav-in">
         <Link className="brand" href="/club">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/dyni-crest-256.png" alt="DYNI Blazers" width={256} height={256} />
-          <span className="wordmark">
-            DYNI <span>Blazers</span>
-          </span>
+          <img src="/brand/dyni-logo-480.png" alt="DYNI Blazers" width={480} height={209} />
         </Link>
         <nav className="nav-links" aria-label="Site">
           {NAV_LINKS.map((l) => (
