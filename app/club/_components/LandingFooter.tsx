@@ -19,10 +19,7 @@ export default function LandingFooter() {
           <div>
             <Link className="brand" href="/club">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/dyni-crest-256.png" alt="DYNI Blazers" width={256} height={256} />
-              <span className="wordmark">
-                DYNI <span>Blazers</span>
-              </span>
+              <img src="/brand/dyni-logo-480.png" alt="DYNI Blazers" width={480} height={209} />
             </Link>
             <p>A basketball club run by Diverse Youth Northern Ireland. Junior to senior, one club.</p>
           </div>

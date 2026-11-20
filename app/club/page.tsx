@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     siteName: "DYNI Blazers",
     title: "DYNI Blazers | A club, not an academy",
     description: "A community basketball club run by Diverse Youth Northern Ireland. Junior to senior, one club.",
-    images: [{ url: `${SITE_URL}/brand/dyni-crest-512.png`, width: 512, height: 512, alt: "DYNI Blazers crest" }],
+    images: [{ url: `${SITE_URL}/brand/dyni-og.jpg`, width: 1200, height: 630, alt: "DYNI Blazers logo" }],
   },
 };
 

@@ -33,7 +33,7 @@ export default function AuthShell({
 
       <div className={`relative z-10 w-full ${width === "lg" ? "max-w-xl" : "max-w-md"}`}>
         <div className="mb-6 flex justify-center">
-          <Brandmark size="lg" wordmark={false} href={SITE_HOME} />
+          <Brandmark size="lg" href={SITE_HOME} />
         </div>
 
         <div className="rounded-card border border-line bg-surface/95 p-7 shadow-pop backdrop-blur">

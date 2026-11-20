@@ -60,15 +60,12 @@
 .nav{position:sticky;top:0;z-index:70;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);border-bottom:var(--border-hairline)}
 .nav-in{display:flex;align-items:center;gap:clamp(12px,2vw,28px);padding:10px var(--gutter);max-width:var(--page-max);margin:0 auto;transition:padding var(--dur-base) var(--ease-out)}
 .brand{display:flex;align-items:center;gap:10px;flex:none}
-.brand img{width:42px;height:auto;transition:width var(--dur-base) var(--ease-out)}
-.wordmark{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:1.375rem;text-transform:uppercase;letter-spacing:-.01em;color:var(--text-1);line-height:1;transition:font-size var(--dur-base) var(--ease-out)}
-.wordmark span{color:var(--accent)}
+.brand img{height:54px;width:auto;transition:height var(--dur-base) var(--ease-out)}
 /* Shrinks as you scroll — the same blend + shrink treatment already used on
    PublicHeader (components/public/PublicHeader.tsx) elsewhere on /club/*. */
 .nav.scrolled .nav-in{padding-top:6px;padding-bottom:6px}
-.nav.scrolled .brand img{width:30px}
-.nav.scrolled .wordmark{font-size:1.02rem}
-@media (prefers-reduced-motion:reduce){.nav-in,.brand img,.wordmark{transition:none}}
+.nav.scrolled .brand img{height:40px}
+@media (prefers-reduced-motion:reduce){.nav-in,.brand img{transition:none}}
 .nav-links{display:flex;gap:clamp(10px,1.6vw,22px);margin-left:auto;align-items:center}
 .nav-links a{font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.16em;color:var(--text-2);padding-bottom:2px;border-bottom:1px solid transparent;transition:color var(--dur-fast),border-color var(--dur-fast)}
 .nav-links a:hover,.nav-links a[aria-current]{color:var(--text-1);border-color:var(--accent)}
@@ -370,8 +367,7 @@ html[data-theme=dark] .toggle .sun{display:none}
 /* ---- footer ---- */
 .foot{background:var(--bg-deep);border-top:var(--border-hairline);padding:var(--section-y) 0 34px;color:var(--text-3)}
 .foot-in{display:flex;flex-wrap:wrap;gap:32px;justify-content:space-between;align-items:flex-start}
-.foot .brand img{width:56px}
-.foot .wordmark{font-size:1.375rem}
+.foot .brand img{height:80px}
 .foot p{margin-top:14px;font-size:var(--type-small);max-width:34ch;color:var(--text-2)}
 .foot nav{display:flex;flex-wrap:wrap;gap:10px 26px;max-width:340px}
 .foot nav a{font-family:var(--font-mono);font-size:var(--type-label-sm);text-transform:uppercase;letter-spacing:.18em;color:var(--text-2)}
