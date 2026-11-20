@@ -1,5 +1,8 @@
-const CACHE_NAME = "dyni-blazers-shell-v2";
-const PRECACHE_URLS = ["/icons/icon-192.png", "/manifest.webmanifest"];
+// Bump this whenever a precached file changes (the icon, the manifest): the
+// new name makes "activate" below delete the old cache, so installed apps
+// stop serving the stale copy. v3: the new club logo.
+const CACHE_NAME = "dyni-blazers-shell-v3";
+const PRECACHE_URLS = ["/icons/icon-192-v2.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -53,8 +56,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
+      icon: "/icons/icon-192-v2.png",
+      badge: "/icons/icon-192-v2.png",
       data: { url: data.url },
     })
   );
